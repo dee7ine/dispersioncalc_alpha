@@ -2,6 +2,7 @@ import wx
 import scipy.misc
 from new import show_image
 from new import test_function
+from Decorators import timeit
 
 # Define the tab content as classes:
 class TabOne(wx.Panel):
@@ -81,6 +82,10 @@ class MainFrame(wx.Frame):
 
     def makeMenuBar(self):
         """
+
+        :return:
+        """
+        """
         A menu bar is composed of menus, which are composed of menu items.
         This method builds a set of menus and binds handlers to be called
         when the menu item is selected.
@@ -142,11 +147,22 @@ class MainFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self.OnAbout, aboutItem)
 
     def OnExit(self, event):
+        """
+
+        :param event:
+        :return:
+        """
         """Close the frame, terminating the application."""
         self.Close(True)
 
 
     def OnHello(self, event):
+        """
+
+        :param event:
+        :return:
+        """
+
         """Say hello to the user."""
         wx.MessageBox("Hello again from wxPython")
 

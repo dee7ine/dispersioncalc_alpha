@@ -2,8 +2,11 @@ from scipy import misc
 from scipy import optimize
 import matplotlib.pyplot as plt
 from sympy import symbols
-from math import sqrt
+#from math import sqrt
+from Decorators import timeit, test_func
 
+
+@timeit
 def show_image() -> None:
 
     img = misc.face()
@@ -11,7 +14,7 @@ def show_image() -> None:
     plt.imshow(img)
     plt.show()
 
-
+#@timeit
 def test_function(x: float) -> float:
     return (x**2 - 1)
 
@@ -25,12 +28,12 @@ wavelength by the simple relation cp = (ω/2π)λ
 '''
 def calculate_p(w: float, cl: float, k: float) -> float:
 
-    return math.sqrt((w/cl)**2 - k**2)
+    return sqrt((w/cl)**2 - k**2)
 
 def calculate_q(w: float, ct: float, k: float) -> float:
 
-    return math.sqrt((w/ct)**2 - k**2)
-
+    return sqrt((w/ct)**2 - k**2)
+@timeit
 def main():
     '''
     recursive root finding function
