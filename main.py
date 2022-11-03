@@ -42,6 +42,7 @@ class TabEight(wx.Panel):
 
 
 class MainFrame(wx.Frame):
+    @timeit
     def __init__(self):
         wx.Frame.__init__(self, None, title="Tree Simulator 9000")
         #MainFrame.SetIcon(wx.Icon(r"C:\Users\deefi\Downloads\smilingwisetree.jpg"))
@@ -138,17 +139,17 @@ class MainFrame(wx.Frame):
 
         # Give the menu bar to the frame
         self.SetMenuBar(menuBar)
-
-        # Finally, associate a handler function with the EVT_MENU event for
-        # each of the menu items. That means that when that menu item is
-        # activated then the associated handler function will be called.
+        """
+        associate a handler function with the EVT_MENU event for
+        each of the menu items. That means that when that menu item is
+        activated then the associated handler function will be called.
+        """
         self.Bind(wx.EVT_MENU, self.OnHello, helloItem)
         self.Bind(wx.EVT_MENU, self.OnExit,  exitItem)
         self.Bind(wx.EVT_MENU, self.OnAbout, aboutItem)
 
     def OnExit(self, event):
         """
-
         :param event:
         :return:
         """
@@ -158,7 +159,6 @@ class MainFrame(wx.Frame):
 
     def OnHello(self, event):
         """
-
         :param event:
         :return:
         """
