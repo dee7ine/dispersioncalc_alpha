@@ -8,7 +8,7 @@ from Decorators import timeit
 class TabOne(wx.Panel):
     def __init__(self, parent):
         wx.Panel.__init__(self, parent)
-        #t = wx.StaticText(self, -1, "This is the first tab", (20,20))
+        wx.StaticText(self, -1, "hohohooho", (100, 100))
 
 class TabTwo(wx.Panel):
     def __init__(self, parent):
@@ -40,7 +40,6 @@ class TabEight(wx.Panel):
     def __init__(self, parent):
         wx.Panel.__init__(self, parent)
 
-
 class MainFrame(wx.Frame):
     @timeit
     def __init__(self):
@@ -61,7 +60,6 @@ class MainFrame(wx.Frame):
         tab7 = TabSeven(nb)
         tab8 = TabSeven(nb)
 
-
         # Add the windows to tabs and name them.
         nb.AddPage(tab1, "Isotropic")
         nb.AddPage(tab2, "Anisotropic")
@@ -81,7 +79,8 @@ class MainFrame(wx.Frame):
 
         self.Maximize(True)
 
-    def makeMenuBar(self):
+
+    def makeMenuBar(self) -> None:
         """
 
         :return:
@@ -124,11 +123,14 @@ class MainFrame(wx.Frame):
 
 
         #different menu
-
+        """
         # Make the menu bar and add the two menus to it. The '&' defines
         # that the next letter is the "mnemonic" for the menu item. On the
         # platforms that support it those letters are underlined and can be
         # triggered from the keyboard.
+        
+        """
+
         menuBar = wx.MenuBar()
         menuBar.Append(fileMenu, "&File")
         menuBar.Append(materialsMenu, "&Materials")
@@ -148,31 +150,34 @@ class MainFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self.OnExit,  exitItem)
         self.Bind(wx.EVT_MENU, self.OnAbout, aboutItem)
 
-    def OnExit(self, event):
+    def OnExit(self, event) -> None:
         """
         :param event:
         :return:
         """
-        """Close the frame, terminating the application."""
+        """
+        
+        Close the frame, terminating the application.
+        """
+
         self.Close(True)
 
 
-    def OnHello(self, event):
+    def OnHello(self, event) -> None:
         """
         :param event:
         :return:
         """
 
         """Say hello to the user."""
-        wx.MessageBox("Hello again from wxPython")
-
+        wx.MessageBox("Gruszczyk alert")
 
     def OnAbout(self, event):
         """Display an About Dialog"""
         wx.MessageBox("This is a wxPython Hello World sample",
                       "About Hello World 2",
                       wx.OK|wx.ICON_INFORMATION)
-
+        show_image()
 
 if __name__ == "__main__":
     app = wx.App()
@@ -182,4 +187,3 @@ if __name__ == "__main__":
     frm.Show()
     frm.SetIcon(wx.Icon(r"C:\Users\deefi\PycharmProjects\dispersioncalc_alpha\tree.ico"))
     app.MainLoop()
-    show_image()
