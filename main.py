@@ -44,9 +44,11 @@ class MainFrame(wx.Frame):
     @timeit
     def __init__(self):
         wx.Frame.__init__(self, None, title="Tree Simulator 9000")
-        #MainFrame.SetIcon(wx.Icon(r"C:\Users\deefi\Downloads\smilingwisetree.jpg"))
 
-        # Create a panel and notebook (tabs holder)
+        """
+         Create a panel and notebook (tabs holder)
+        """
+
         p = wx.Panel(self)
         nb = wx.Notebook(p)
 
@@ -59,6 +61,15 @@ class MainFrame(wx.Frame):
         tab6 = TabSix(nb)
         tab7 = TabSeven(nb)
         tab8 = TabSeven(nb)
+
+        cb1 = wx.CheckBox(tab1, label='Marcin', pos=(20, 20))
+        cb1.SetValue(False)
+
+        cb2 = wx.CheckBox(tab2, label='TIME', pos=(200, 40))
+        cb2.SetValue(True)
+
+        cb3 = wx.CheckBox(tab3, label='TIME', pos=(128, 128))
+        cb3.SetValue(True)
 
         # Add the windows to tabs and name them.
         nb.AddPage(tab1, "Isotropic")
@@ -78,7 +89,6 @@ class MainFrame(wx.Frame):
         self.makeMenuBar()
 
         self.Maximize(True)
-
 
     def makeMenuBar(self) -> None:
         """
@@ -121,8 +131,6 @@ class MainFrame(wx.Frame):
         #homepage menu
         homepageMenu = wx.Menu()
 
-
-        #different menu
         """
         # Make the menu bar and add the two menus to it. The '&' defines
         # that the next letter is the "mnemonic" for the menu item. On the
@@ -170,7 +178,7 @@ class MainFrame(wx.Frame):
         """
 
         """Say hello to the user."""
-        wx.MessageBox("Gruszczyk alert")
+        wx.MessageBox("Gruszczyk alert\n Run")
 
     def OnAbout(self, event):
         """Display an About Dialog"""
@@ -185,5 +193,5 @@ if __name__ == "__main__":
     frm = MainFrame()
     #frm.SetIcon(wx.IconFromLocation("C:/Users/xjlksd/Downloads/tree.ico")) #do wyjebania (?)
     frm.Show()
-    frm.SetIcon(wx.Icon(r"C:\Users\deefi\PycharmProjects\dispersioncalc_alpha\tree.ico"))
+    frm.SetIcon(wx.Icon(r"C:\Users\deefi\PycharmProjects\dispersioncalc_alpha\cropped3815.ico"))
     app.MainLoop()
