@@ -5,12 +5,12 @@ from new import test_function
 from Decorators import timeit
 
 # Define the tab content as classes:
-class TabOne(wx.Panel):
+class IsotropicMaterials(wx.Panel):
     def __init__(self, parent):
         wx.Panel.__init__(self, parent)
         wx.StaticText(self, -1, "hohohooho", (100, 100))
 
-class TabTwo(wx.Panel):
+class AnisotropicMaterials(wx.Panel):
     def __init__(self, parent):
         wx.Panel.__init__(self, parent)
 
@@ -53,8 +53,8 @@ class MainFrame(wx.Frame):
         nb = wx.Notebook(p)
 
         # Create the tab windows
-        tab1 = TabOne(nb)
-        tab2 = TabTwo(nb)
+        tab1 = IsotropicMaterials(nb)
+        tab2 = AnisotropicMaterials(nb)
         tab3 = TabThree(nb)
         tab4 = TabFour(nb)
         tab5 = TabFive(nb)
