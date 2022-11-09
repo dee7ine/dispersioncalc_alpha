@@ -1,7 +1,6 @@
 import wx
 import scipy.misc
-from new import show_image
-from new import test_function
+from isotropic_main import show_image, test_func
 from Decorators import timeit
 
 # Define the tab content as classes:

@@ -8,10 +8,6 @@ from numba import jit
 
 class IsotropicMain():
 
-    """
-    Class for isotropic calculations
-    """
-
     _w: float
     _cl: float
     _k: float
@@ -22,6 +18,7 @@ class IsotropicMain():
 
     _p: float
     _q: float
+
     def __init__(self,  w: float, cl: float, k: float):
         self._w = w
         self._cl = cl
@@ -81,12 +78,14 @@ class IsotropicMain():
         :return:
         '''
 
-        LHS1 = tan(q * h) / q + 4 * k ** 2 * p * tan(p * h) / (q ** 2 - k ** 2)
-        LHS2 = q * tan(q * h) / q + (q ** 2 - k ** 2) * tan(p * h) / 4 * k ** 2 * p
+        lhs_1 = tan(q * h) / q + 4 * k ** 2 * p * tan(p * h) / (q ** 2 - k ** 2)
+        lhs_2 = q * tan(q * h) / q + (q ** 2 - k ** 2) * tan(p * h) / 4 * k ** 2 * p
 
-        if (LHS1 and LHS2 != 0):
-            self.evaluate_sign(LHS1)
-            self.evaluate_sign(LHS2)
+        if (lhs_1 and lhs_2 != 0):
+            self._evaluate_sign(self, lhs_1)
+            self._evaluate_sign(self, lhs_2)
+        else:
+            pass
 
 @timeit
 def show_image() -> None:
