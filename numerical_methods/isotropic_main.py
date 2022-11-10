@@ -8,10 +8,6 @@ from numba import jit
 
 class IsotropicMain():
 
-    """
-    Class for isotropic calculations
-    """
-
     _w: float
     _cl: float
     _k: float
@@ -22,7 +18,14 @@ class IsotropicMain():
 
     _p: float
     _q: float
+
     def __init__(self,  w: float, cl: float, k: float):
+        """
+        :param w:
+        :param cl:
+        :param k:
+        """
+
         self._w = w
         self._cl = cl
         self._k = k
@@ -37,6 +40,12 @@ class IsotropicMain():
                      w: float,
                      cl: float,
                      k: float) -> float:
+        """
+        :param w:
+        :param cl:
+        :param k:
+        :return:
+        """
         return sqrt((w / cl) ** 2 - k ** 2)
 
     @timeit
@@ -45,6 +54,12 @@ class IsotropicMain():
                      w: float,
                      ct: float,
                      k: float)-> float:
+        """
+        :param w:
+        :param ct:
+        :param k:
+        :return:
+        """
         return sqrt((w / ct) ** 2 - k ** 2)
 
     @timeit
@@ -81,15 +96,20 @@ class IsotropicMain():
         :return:
         '''
 
-        LHS1 = tan(q * h) / q + 4 * k ** 2 * p * tan(p * h) / (q ** 2 - k ** 2)
-        LHS2 = q * tan(q * h) / q + (q ** 2 - k ** 2) * tan(p * h) / 4 * k ** 2 * p
+        lhs_1 = tan(q * h) / q + 4 * k ** 2 * p * tan(p * h) / (q ** 2 - k ** 2)
+        lhs_2 = q * tan(q * h) / q + (q ** 2 - k ** 2) * tan(p * h) / 4 * k ** 2 * p
 
-        if (LHS1 and LHS2 != 0):
-            self.evaluate_sign(LHS1)
-            self.evaluate_sign(LHS2)
+        if (lhs_1 and lhs_2 != 0):
+            self._evaluate_sign(self, lhs_1)
+            self._evaluate_sign(self, lhs_2)
+        else:
+            pass
 
 @timeit
 def show_image() -> None:
+    """
+    :return:
+    """
 
     img = misc.face()
 
@@ -98,6 +118,10 @@ def show_image() -> None:
 
 #@timeit
 def test_function(x: float) -> float:
+    """
+    :param x:
+    :return:
+    """
 
     return (x**2 - 1)
 

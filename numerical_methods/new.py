@@ -1,11 +1,34 @@
+"""
+window splitter version
+"""
+
 import wx
 from numerical_methods.isotropic_main import show_image
 from Decorators import timeit
-from dataclasses import dataclass
+
 
 class IsotropicMaterials(wx.Panel):
     def __init__(self, parent):
         wx.Panel.__init__(self, parent)
+
+
+        topSplitter = wx.SplitterWindow(self)
+        vSplitter = wx.SplitterWindow(topSplitter)
+
+        panelOne = PanelTemplate(vSplitter, "lightgrey", wx.SP_3D)
+        panelTwo = PanelTemplate(vSplitter, "white", wx.SP_BORDER)
+
+        vSplitter.SplitVertically(panelOne, panelTwo)
+        vSplitter.SetSashGravity(0.2)
+
+        panelThree = PanelTemplate(topSplitter, "white", wx.SP_BORDER)
+        topSplitter.SplitHorizontally(vSplitter, panelThree)
+        topSplitter.SetSashGravity(0.7)
+
+        sizer = wx.BoxSizer(wx.VERTICAL)
+        sizer.Add(topSplitter, 1, wx.EXPAND)
+        self.SetSizer(sizer)
+
 
 class PanelTemplate(wx.Panel):
     def __init__(self, parent, color, style):
@@ -20,6 +43,7 @@ class AnisotropicMaterials(wx.Panel):
 class TabThree(wx.Panel):
     def __init__(self, parent):
         wx.Panel.__init__(self, parent)
+
 
 class TabFour(wx.Panel):
     def __init__(self, parent):
@@ -40,11 +64,11 @@ class TabSeven(wx.Panel):
 class TabEight(wx.Panel):
     def __init__(self, parent):
         wx.Panel.__init__(self, parent)
-@dataclass
+
 class MainFrame(wx.Frame):
     @timeit
     def __init__(self):
-        wx.Frame.__init__(self, None, title="Racoon Simulator 9000", size = (1500, 750))
+        wx.Frame.__init__(self, None, title="disp calc")
 
         """
         tabs holder
@@ -77,7 +101,6 @@ class MainFrame(wx.Frame):
         cb3 = wx.CheckBox(tab3, label='checkmark', pos=(128, 128))
         cb3.SetValue(True)
 
-
         nb.AddPage(tab1, "Isotropic")
         nb.AddPage(tab2, "Anisotropic")
         nb.AddPage(tab3, "Signal simulator")
@@ -91,11 +114,12 @@ class MainFrame(wx.Frame):
         layout management
         """
         sizer = wx.BoxSizer()
-        sizer.Add(nb, 3, wx.EXPAND)
+        sizer.Add(nb, 1, wx.EXPAND)
         p.SetSizer(sizer)
 
         self.makeMenuBar()
-        self.Maximize(False)
+
+        self.Maximize(True)
 
     def makeMenuBar(self) -> None:
         """
@@ -166,7 +190,6 @@ class MainFrame(wx.Frame):
 if __name__ == "__main__":
     app = wx.App()
     frm = MainFrame()
-
     frm.Show()
-    frm.SetIcon(wx.Icon(r"C:\Users\deefi\PycharmProjects\dispersioncalc_alpha\graphics\cropped3815.ico"))
+
     app.MainLoop()
