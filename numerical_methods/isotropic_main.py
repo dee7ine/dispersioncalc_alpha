@@ -6,6 +6,10 @@ from math import sqrt, tan
 from Decorators import timeit, test_func
 from numba import jit
 
+"""
+testing the merge of 2 branches
+"""
+
 class IsotropicMain():
 
     _w: float
