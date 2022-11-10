@@ -95,7 +95,6 @@ class IsotropicMain():
                             p: float,
                             q: float,
                             k: float) -> None:
-
         '''
         :param wh0:
         :param cp0:
@@ -110,7 +109,6 @@ class IsotropicMain():
 
         current1 = self._evaluate_sign(self, lhs_1)
         current2 = self._evaluate_sign(self, lhs_2)
-
 
         while(self._sign_changed(self, prev1, current1) or self._sign_changed(prev2, current2)):
             """
