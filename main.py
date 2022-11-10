@@ -99,10 +99,8 @@ class MainFrame(wx.Frame):
 
     def makeMenuBar(self) -> None:
         """
-
         :return:
         """
-
         fileMenu = wx.Menu()
 
         helloItem = fileMenu.Append(-1, "&Hello...\tCtrl-H",
@@ -148,7 +146,6 @@ class MainFrame(wx.Frame):
         :return:
         """
         self.Close(True)
-
 
     def OnHello(self, event) -> None:
         """
