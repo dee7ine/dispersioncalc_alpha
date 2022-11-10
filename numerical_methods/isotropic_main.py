@@ -82,6 +82,11 @@ class IsotropicMain():
         else:
             return 2
 
+    def _sign_changed(self,
+                      p1: bool,
+                      c1: bool) -> bool:
+        return p1 == c1
+
     @timeit
     @jit(nopython=True)
     def _lamb_wave_numerical(self, wh0: float,
@@ -103,11 +108,24 @@ class IsotropicMain():
         lhs_1 = tan(q * h) / q + 4 * k ** 2 * p * tan(p * h) / (q ** 2 - k ** 2)
         lhs_2 = q * tan(q * h) / q + (q ** 2 - k ** 2) * tan(p * h) / 4 * k ** 2 * p
 
-        if (lhs_1 and lhs_2 != 0):
-            self._evaluate_sign(self, lhs_1)
-            self._evaluate_sign(self, lhs_2)
-        else:
-            pass
+        current1 = self._evaluate_sign(self, lhs_1)
+        current2 = self._evaluate_sign(self, lhs_2)
+
+
+        while(self._sign_changed(self, prev1, current1) or self._sign_changed(prev2, current2)):
+            """
+            
+            DO NOT DELETE THIS COMMENT
+            
+            loop until the sign of one of the
+            evaluated left hands sides changes sign
+            """
+            if (lhs_1 and lhs_2 != 0):
+                prev1 = self._evaluate_sign(self, lhs_1)
+                prev2 = self._evaluate_sign(self, lhs_2)
+            else:
+                raise ArithmeticError
+            self._sign_changed(prev1, prev2)
 
 @timeit
 def show_image() -> None:
@@ -137,7 +155,6 @@ def main():
     '''
     root  = optimize.bisect(test_function, 0, 2)
     print(root)
-
 
 if __name__ == "__main__":
     main()
