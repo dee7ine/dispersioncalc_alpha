@@ -1,23 +1,47 @@
+import os
 import wx
-from numerical_methods.isotropic_main import show_image
-from Decorators import timeit
 from dataclasses import dataclass
+from isotropic_main import show_image
+from Decorators import timeit
 
 class IsotropicMaterials(wx.Panel):
-    def __init__(self, parent):
+    def __init__(self, parent) -> None:
         wx.Panel.__init__(self, parent)
+
+    @classmethod
+    def InitializeWidgets(cls, panel) -> None:
+
+        specimen_annotation = wx.StaticText(panel, label = "Specimen",
+                                            style = wx.ALIGN_LEFT,
+                                            pos = (10, 15))
+
+        fluidCheckBox = wx.CheckBox(panel, label='Fluid-loading',
+                          style = wx.ALIGN_RIGHT,
+                          pos=(5, 60))
+        fluidCheckBox.SetValue(True)
+
+
+
+        fluidChoiceBox = wx.Choice(panel, 1,
+                                    pos = (85, 95),
+                                    choices= ["air", "water"],
+                                    style = wx.ALIGN_LEFT)
+
+        fluidChoiceBox_annotation = wx.StaticText(panel,
+                                         label = "Fluid",
+                                         pos = (10, 100),
+                                         style = wx.ALIGN_LEFT)
 
 class PanelTemplate(wx.Panel):
     def __init__(self, parent, color, style):
         wx.Panel.__init__(self, parent, style = wx.SP_BORDER)
         self.SetBackgroundColour(color)
 
-
 class AnisotropicMaterials(wx.Panel):
     def __init__(self, parent):
         wx.Panel.__init__(self, parent)
 
-class TabThree(wx.Panel):
+class MaterialEditor(wx.Panel):
     def __init__(self, parent):
         wx.Panel.__init__(self, parent)
 
@@ -47,29 +71,28 @@ class MainFrame(wx.Frame):
         wx.Frame.__init__(self, None, title="Racoon Simulator 9000", size = (1500, 750))
 
         """
-        tabs holder
+        tab management
         """
 
         p = wx.Panel(self)
         nb = wx.Notebook(p)
 
         """
-        tabs management
+        
+        initialize tabs
+        
         """
+
         tab1 = IsotropicMaterials(nb)
         tab2 = AnisotropicMaterials(nb)
-        tab3 = TabThree(nb)
+        tab3 = MaterialEditor(nb)
         tab4 = TabFour(nb)
         tab5 = TabFive(nb)
         tab6 = TabSix(nb)
         tab7 = TabSeven(nb)
         tab8 = TabSeven(nb)
 
-        #
-        cb1 = wx.CheckBox(tab1, label='checkmark', pos=(1000, 20))
-        cb1.SetValue(False)
-        cb1 = wx.CheckBox(tab1, label='checkmark', pos=(1000, 40))
-        cb1.SetValue(False)
+        IsotropicMaterials.InitializeWidgets(panel = tab1)
 
         cb2 = wx.CheckBox(tab2, label='checkmark', pos=(200, 40))
         cb2.SetValue(True)
@@ -162,8 +185,14 @@ class MainFrame(wx.Frame):
 
 if __name__ == "__main__":
     app = wx.App()
-    frm = MainFrame()
+    mainframe = MainFrame()
 
-    frm.Show()
-    frm.SetIcon(wx.Icon(r"C:\Users\deefi\PycharmProjects\dispersioncalc_alpha\graphics\cropped3815.ico"))
+    mainframe.Show()
+    icon_path = os.path.join("C:/Users",
+                             "deefi",
+                             "PycharmProjects",
+                             "dispersioncalc_alpha",
+                             "graphics",
+                             "bearicon.ico")
+    mainframe.SetIcon(wx.Icon(icon_path))
     app.MainLoop()
