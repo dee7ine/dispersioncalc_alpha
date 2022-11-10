@@ -3,7 +3,7 @@ window splitter version
 """
 
 import wx
-from numerical_methods.isotropic_main import show_image
+from isotropic_main import show_image
 from Decorators import timeit
 
 

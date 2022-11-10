@@ -1,15 +1,12 @@
 from scipy import misc
 from scipy import optimize
+from dataclasses import dataclass
 import matplotlib.pyplot as plt
-#from sympy import symbols
 from math import sqrt, tan
 from Decorators import timeit, test_func
 from numba import jit
 
-"""
-testing the merge of 2 branches
-"""
-
+@dataclass
 class IsotropicMain():
 
     _w: float
@@ -33,7 +30,6 @@ class IsotropicMain():
         self._w = w
         self._cl = cl
         self._k = k
-
         self._p = self._calculate_q(self, self._w, self._cl , self._k)
         self._q = self._calculate_q(self, self._w, self._cl, self._k)
         #self._lamb_wave_numerical(self)
@@ -44,12 +40,6 @@ class IsotropicMain():
                      w: float,
                      cl: float,
                      k: float) -> float:
-        """
-        :param w:
-        :param cl:
-        :param k:
-        :return:
-        """
         return sqrt((w / cl) ** 2 - k ** 2)
 
     @timeit
@@ -58,34 +48,21 @@ class IsotropicMain():
                      w: float,
                      ct: float,
                      k: float)-> float:
-        """
-        :param w:
-        :param ct:
-        :param k:
-        :return:
-        """
         return sqrt((w / ct) ** 2 - k ** 2)
 
     @timeit
     @jit(nopython = True)
     def _evaluate_sign(self,
                       expression: float) -> int:
-        '''
-        :param expression:
-        :return:
-        '''
-
         if (expression < 0):
-            return 1
+            return True
         elif (expression > 0):
-            return 0
-        else:
-            return 2
+            return False
 
     def _sign_changed(self,
                       p1: bool,
                       c1: bool) -> bool:
-        return p1 == c1
+        return p1 is c1
 
     @timeit
     @jit(nopython=True)
@@ -118,7 +95,7 @@ class IsotropicMain():
             loop until the sign of one of the
             evaluated left hands sides changes sign
             """
-            if (lhs_1 and lhs_2 != 0):
+            if ((lhs_1 and lhs_2) != 0):
                 prev1 = self._evaluate_sign(self, lhs_1)
                 prev2 = self._evaluate_sign(self, lhs_2)
             else:
