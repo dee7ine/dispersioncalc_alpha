@@ -3,7 +3,7 @@ import wx
 from dataclasses import dataclass
 from isotropic_main import show_image
 from Decorators import timeit
-
+@dataclass
 class IsotropicMaterials(wx.Panel):
     def __init__(self, parent) -> None:
         wx.Panel.__init__(self, parent)
@@ -11,18 +11,22 @@ class IsotropicMaterials(wx.Panel):
     @classmethod
     def InitializeWidgets(cls, panel) -> None:
 
-        specimen_annotation = wx.StaticText(panel, label = "Specimen",
+
+
+
+
+        specimen_annotation = wx.StaticText(panel, label="Specimen",
                                             style = wx.ALIGN_LEFT,
                                             pos = (10, 15))
 
-        fluidCheckBox = wx.CheckBox(panel, label='Fluid-loading',
-                          style = wx.ALIGN_RIGHT,
+        fluidCheckBox = wx.CheckBox(panel, label = 'Fluid-loading',
+                          style=wx.ALIGN_RIGHT,
                           pos=(5, 60))
         fluidCheckBox.SetValue(True)
 
 
 
-        fluidChoiceBox = wx.Choice(panel, 1,
+        fluidChoiceBox = wx.Choice(panel, -1,
                                     pos = (85, 95),
                                     choices= ["air", "water"],
                                     style = wx.ALIGN_LEFT)
