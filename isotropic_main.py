@@ -32,7 +32,6 @@ class IsotropicMain():
         self._k = k
         self._p = self._calculate_q(self, self._w, self._cl , self._k)
         self._q = self._calculate_q(self, self._w, self._cl, self._k)
-        #self._lamb_wave_numerical(self)
 
     @timeit
     @jit(nopython = True)
