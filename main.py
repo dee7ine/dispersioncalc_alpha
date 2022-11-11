@@ -2,7 +2,7 @@ import os
 import wx
 from dataclasses import dataclass
 from isotropic_main import show_image
-from Decorators import timeit
+from decorators import timeit
 @dataclass
 class IsotropicMaterials(wx.Panel):
     def __init__(self, parent) -> None:
@@ -10,10 +10,6 @@ class IsotropicMaterials(wx.Panel):
 
     @classmethod
     def InitializeWidgets(cls, panel) -> None:
-
-
-
-
 
         specimen_annotation = wx.StaticText(panel, label="Specimen",
                                             style = wx.ALIGN_LEFT,
@@ -72,7 +68,7 @@ class TabEight(wx.Panel):
 class MainFrame(wx.Frame):
     @timeit
     def __init__(self):
-        wx.Frame.__init__(self, None, title="Racoon Simulator 9000", size = (1500, 750))
+        wx.Frame.__init__(self, None, title="Racoon Simulator 9000", size = (1200, 750))
 
         """
         tab management
@@ -118,7 +114,7 @@ class MainFrame(wx.Frame):
         layout management
         """
         sizer = wx.BoxSizer()
-        sizer.Add(nb, 3, wx.EXPAND)
+        sizer.Add(nb, 4, wx.EXPAND)
         p.SetSizer(sizer)
 
         self.makeMenuBar()

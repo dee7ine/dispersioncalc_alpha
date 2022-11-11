@@ -31,8 +31,8 @@ def no_jit(a, b):
 stop3 = time.perf_counter()
 
 
-class MyTestCase(unittest.TestCase):
-    def test_something(self):
+class Test_JIT(unittest.TestCase):
+    def test_jit_basic(self):
         self.assertGreater(stop1 - start1, stop2 - start2,
                            f"Jit_python : {jit_python(5,4)} s, jit {jit_func(5,4)} s")  # add assertion here
         self.assertGreater(stop1 - start1, stop3 - start3, "test")

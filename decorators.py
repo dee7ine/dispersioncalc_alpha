@@ -12,16 +12,3 @@ def timeit(func):
         return results
     return timeit_wrapper
 
-@timeit
-def test_func(a : int, b : int) -> int:
-    """
-
-    :param a:
-    :param b:
-    :return:
-    """
-    return a+b
-
-test_func(1,2)
-test_func(58, 59)
-test_func(412, 0)
