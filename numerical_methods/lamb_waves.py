@@ -3,7 +3,7 @@ from math import sqrt, tan
 from numba import jit
 import matplotlib.pyplot as plt
 from scipy import optimize
-from Decorators import timeit
+from decorators import timeit
 
 @dataclass
 class IsotropicMain():

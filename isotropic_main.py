@@ -3,7 +3,7 @@ from scipy import optimize
 from dataclasses import dataclass
 import matplotlib.pyplot as plt
 from math import sqrt, tan
-from Decorators import timeit, test_func
+from decorators import timeit, test_func
 from numba import jit
 
 @dataclass
