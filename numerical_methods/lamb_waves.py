@@ -78,10 +78,10 @@ class IsotropicMain():
         lhs_1 = tan(q * thickness) / q + 4 * wave_number ** 2 * p * tan(p * thickness) / (q ** 2 - wave_number ** 2)
         lhs_2 = q * tan(q * thickness) / q + (q ** 2 - wave_number ** 2) * tan(p * thickness) / 4 * wave_number ** 2 * p
 
-        current1 = self._evaluate_sign(self, lhs_1)
-        current2 = self._evaluate_sign(self, lhs_2)
+        current1 = self._evaluate_sign(lhs_1)
+        current2 = self._evaluate_sign(lhs_2)
 
-        while (not self._sign_changed(self, prev1, current1) or not self._sign_changed(prev2, current2)):
+        while (not self._sign_changed(prev1, current1) or not self._sign_changed(prev2, current2)):
             """
 
             DO NOT DELETE THIS COMMENT
@@ -90,8 +90,8 @@ class IsotropicMain():
             evaluated left hands sides changes sign
             """
             if ((lhs_1 and lhs_2) != 0):
-                prev1 = self._evaluate_sign(self, lhs_1)
-                prev2 = self._evaluate_sign(self, lhs_2)
+                prev1 = self._evaluate_sign(lhs_1)
+                prev2 = self._evaluate_sign(lhs_2)
             else:
                 pass
             self._sign_changed(current1, prev1)
