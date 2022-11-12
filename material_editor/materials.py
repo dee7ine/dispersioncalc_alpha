@@ -2,6 +2,14 @@ from dataclasses import dataclass
 from decorators import timeit
 from imaginary_numbers import ImaginaryNumber
 
+class Material_File_Parser:
+    material_list : list
+    material_names_list : list
+
+    def __init__(self):
+        pass
+
+
 @dataclass
 class IsotropicMaterial:
     _name: str
@@ -31,6 +39,7 @@ class IsotropicMaterial:
 
     def __init__(self) -> None:
 
+        #self._new_material(name = "test", mass_density = "5", E = " 25", v = " 4", C11 = "5", C66 = "66")
         parsed_list, material_names_list = self._parse_materials()
 
         self._name = parsed_list[0][0]
@@ -59,6 +68,19 @@ class IsotropicMaterial:
 
             material_data.close()
             return parsed_material_data, material_names_list
+
+    def _new_material(self, name: str, mass_density: str, E: str, v: str, C11: str, C66: str):
+        with open("material_data.txt", 'a+') as material_data:
+
+            new_material_data = []
+            new_material_data.extend([name, mass_density, E, v, C11, C66])
+
+            print(new_material_data)
+
+            material_data.writelines("\n")
+            material_data.writelines(f"{name} {mass_density} {E} {v} {C11} {C66}")
+
+            material_data.close()
 
 @timeit
 def main():

@@ -81,7 +81,7 @@ class IsotropicMain():
         current1 = self._evaluate_sign(lhs_1)
         current2 = self._evaluate_sign(lhs_2)
 
-        while (not self._sign_changed(prev1, current1) or not self._sign_changed(prev2, current2)):
+        while not self._sign_changed(prev1, current1) or not self._sign_changed(prev2, current2):
             """
 
             DO NOT DELETE THIS COMMENT
