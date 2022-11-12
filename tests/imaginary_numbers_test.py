@@ -1,7 +1,7 @@
 import unittest
 from material_editor.imaginary_numbers import ImaginaryNumber
 
-im1 = ImaginaryNumber(real_part=5, imaginary_part=4, name = "Marcin")
+im1 = ImaginaryNumber(real_part=5, imaginary_part=4, name = "test_name")
 im2 = ImaginaryNumber(real_part=10, imaginary_part=15)
 im3 = ImaginaryNumber(real_part=10, imaginary_part=0)
 im4 = ImaginaryNumber(real_part=0, imaginary_part=10)
@@ -28,7 +28,7 @@ class TestStringMethodsForImaginaryNumbers(unittest.TestCase):
         self.assertEqual(diff1, '-5-11i')
 
     def test_attribute(self):
-        self.assertEqual(getattr(im1, 'name'), {'name': 'Marcin'})
+        self.assertEqual(getattr(im1, 'name'), {'name': 'test_name'})
 
 if __name__ == '__main__':
     unittest.main()
