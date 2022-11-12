@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from decorators import timeit
-from imaginary_numbers import ImaginaryNumber
+from material_editor.imaginary_numbers import ImaginaryNumber
 
 class Material_File_Parser:
     material_list : list
@@ -12,6 +12,9 @@ class Material_File_Parser:
 
 @dataclass
 class IsotropicMaterial:
+
+    _filename: str
+
     _name: str
     _mass_density: float
 
@@ -37,9 +40,10 @@ class IsotropicMaterial:
     stiffness coefficients
     """
 
-    def __init__(self) -> None:
+    def __init__(self, filename: str) -> None:
 
         #self._new_material(name = "test", mass_density = "5", E = " 25", v = " 4", C11 = "5", C66 = "66")
+        self._filename = filename
         parsed_list, material_names_list = self._parse_materials()
 
         self._name = parsed_list[0][0]
@@ -58,7 +62,7 @@ class IsotropicMaterial:
               f" C66: {self._C66}")
 
     def _parse_materials(self):
-        with open("material_data.txt") as material_data:
+        with open(self._filename, 'r') as material_data:
             material_data_list = material_data.readlines()
             parsed_material_data = [line.split(' ') for line in material_data_list]
 
@@ -70,7 +74,7 @@ class IsotropicMaterial:
             return parsed_material_data, material_names_list
 
     def _new_material(self, name: str, mass_density: str, E: str, v: str, C11: str, C66: str):
-        with open("material_data.txt", 'a+') as material_data:
+        with open(self._filename, 'a+') as material_data:
 
             new_material_data = []
             new_material_data.extend([name, mass_density, E, v, C11, C66])
