@@ -1,7 +1,8 @@
 import unittest
-from decorators import timeit
+from decorators import timeit, log
 
 @timeit
+@log
 def test_func(a : int, b : int, times: int) -> int:
     """
     :param a:

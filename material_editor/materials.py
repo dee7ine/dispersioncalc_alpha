@@ -30,7 +30,9 @@ class IsotropicMaterial:
     """
 
     def __init__(self) -> None:
+
         parsed_list, material_names_list = self._parse_materials()
+
         self._name = parsed_list[0][0]
         self._mass_density = float(parsed_list[0][1])
         self._E = float(parsed_list[0][2])
@@ -38,9 +40,13 @@ class IsotropicMaterial:
         self._C11 = float(parsed_list[0][4])
         self._C66 = float(parsed_list[0][5])
 
-        #print(type(self._v))
         print(material_names_list)
-        print(f"Name: {self._name}, mass-density: {self._mass_density}, E: {self._E}, v: {self._v}, C11: {self._C11}, C66: {self._C66}")
+        print(f"Name: {self._name},"
+              f" mass-density: {self._mass_density},"
+              f" E: {self._E},"
+              f" v: {self._v},"
+              f" C11: {self._C11},"
+              f" C66: {self._C66}")
 
     def _parse_materials(self):
         with open("material_data.txt") as material_data:
@@ -51,8 +57,6 @@ class IsotropicMaterial:
             for i in range(0, len(parsed_material_data)):
                 material_names_list.append(parsed_material_data[i][0])
 
-            #print(parsed_material_data)
-            #print(material_names_list)
             material_data.close()
             return parsed_material_data, material_names_list
 
