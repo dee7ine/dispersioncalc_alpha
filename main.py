@@ -3,6 +3,7 @@ import wx
 from dataclasses import dataclass
 from isotropic_main import show_image
 from decorators import timeit
+
 @dataclass
 class IsotropicMaterials(wx.Panel):
     def __init__(self, parent) -> None:
@@ -177,10 +178,9 @@ class MainFrame(wx.Frame):
         """
         wx.MessageBox("default")
 
-    def OnAbout(self, event):
+    def OnAbout(self, event) -> None:
 
-        wx.MessageBox("link to be generated",
-                      wx.OK|wx.ICON_INFORMATION)
+        wx.MessageBox("link to be generated")
         show_image()
 
 if __name__ == "__main__":

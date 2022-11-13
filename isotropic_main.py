@@ -3,7 +3,7 @@ from scipy import optimize
 from dataclasses import dataclass
 import matplotlib.pyplot as plt
 from math import sqrt, tan
-from decorators import timeit, test_func
+from decorators import timeit
 from numba import jit
 
 @dataclass
@@ -33,6 +33,12 @@ class IsotropicMain():
         self._p = self._calculate_q(self, self._w, self._cl , self._k)
         self._q = self._calculate_q(self, self._w, self._cl, self._k)
 
+    """
+    DO NOT DELETE THIS COMMENT
+            ISSUE
+    p and q should be vectors
+    """
+
     @timeit
     @jit(nopython = True)
     def _calculate_p(self,
@@ -52,10 +58,10 @@ class IsotropicMain():
     @timeit
     @jit(nopython = True)
     def _evaluate_sign(self,
-                      expression: float) -> int:
-        if (expression < 0):
+                      expression: float) -> bool:
+        if expression > 0:
             return True
-        elif (expression > 0):
+        elif expression <= 0:
             return False
 
     def _sign_changed(self,

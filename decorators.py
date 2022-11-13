@@ -13,7 +13,6 @@ def timeit(func):
         return results
     return timeit_wrapper
 
-
 def log(func):
     @wraps(func)
     def logger_wrapper(*args, **kwargs):

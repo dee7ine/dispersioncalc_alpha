@@ -9,7 +9,6 @@ class Material_File_Parser:
     def __init__(self):
         pass
 
-
 @dataclass
 class IsotropicMaterial:
 
@@ -88,7 +87,7 @@ class IsotropicMaterial:
 
 @timeit
 def main():
-    material = IsotropicMaterial()
+    material = IsotropicMaterial(filename = "material_data.txt")
 
 if __name__ == "__main__":
     main()
