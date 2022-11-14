@@ -125,7 +125,7 @@ def test_function(x: float) -> float:
     :return:
     """
 
-    return (x**2 - 1)
+    return (x**2 - 1/42815 + x**3)
 
 @timeit
 def main():
@@ -133,8 +133,10 @@ def main():
     recursive root finding function
     :return:
     '''
-    root  = optimize.bisect(test_function, 0, 2)
-    print(root)
+    root_list = []
+    for i in range(0, 200, 2):
+        root_list.append(optimize.bisect(test_function, 0, i+2))
+    print(root_list)
 
 if __name__ == "__main__":
     main()

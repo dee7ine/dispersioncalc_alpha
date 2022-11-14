@@ -53,6 +53,8 @@ class IsotropicMain():
                        expression: float) -> bool:
         return expression > 0
 
+    @timeit
+    @jit(nopython=True)
     def _sign_changed(self,
                       p1: bool,
                       c1: bool) -> bool:
@@ -93,9 +95,9 @@ class IsotropicMain():
                 prev1 = self._evaluate_sign(lhs_1)
                 prev2 = self._evaluate_sign(lhs_2)
             else:
-                pass
-            self._sign_changed(current1, prev1)
-            self._sign_changed(current2, prev2)
+                return
+            current1 = prev1
+            current2 = prev2
 @timeit
 def main():
     '''
