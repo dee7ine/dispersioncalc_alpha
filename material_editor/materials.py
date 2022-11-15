@@ -38,7 +38,7 @@ class IsotropicMaterial:
     Fix setting real and imaginary attributes of E, v and 
     stiffness coefficients
     """
-
+    @timeit
     def __init__(self, filename: str) -> None:
 
         #self._new_material(name = "test", mass_density = "5", E = " 25", v = " 4", C11 = "5", C66 = "66")

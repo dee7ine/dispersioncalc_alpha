@@ -1,6 +1,6 @@
 import unittest
 import dis
-from numerical_methods.lamb_waves import IsotropicMain
+from numerical_methods.lamb_waves import LambWave
 
 def add(a):
     for _ in range(0, 100):
@@ -10,8 +10,8 @@ def add(a):
 class MyTestCase(unittest.TestCase):
     def test_something(self):
         dis.dis(add)
-        dis.dis(IsotropicMain.__init__)
-        dis.dis(IsotropicMain._lamb_wave_numerical)
+        dis.dis(LambWave.__init__)
+        dis.dis(LambWave._lamb_wave_calculate)
 
 
 

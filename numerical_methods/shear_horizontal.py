@@ -6,8 +6,9 @@ import matplotlib.pyplot as plt
 from scipy import optimize
 from decorators import timeit
 
+
 @dataclass
-class LambWave():
+class ShearWave():
     _omega: float
     _longitudinal_velocity: float
     _wave_number: float
@@ -101,6 +102,8 @@ class LambWave():
                 return
             current1 = prev1
             current2 = prev2
+
+
 @timeit
 def main():
     '''
@@ -108,6 +111,7 @@ def main():
     :return:
     '''
     pass
+
 
 if __name__ == "__main__":
     main()
