@@ -1,3 +1,4 @@
+from decorators import timeit, log
 class ImaginaryNumber:
 
     name: str = "Default"
@@ -5,6 +6,8 @@ class ImaginaryNumber:
     imaginary_part: int
     rep_str: str
 
+    @timeit
+    @log
     def __init__(self, real_part: int, imaginary_part: int, **kwargs) -> None:
         """
 
