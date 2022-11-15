@@ -1,6 +1,6 @@
 import unittest
 import dis
-from numerical_methods.lamb_waves import LambWave
+from numerical_methods.lamb_wave import LambWave
 
 def add(a):
     for _ in range(0, 100):
@@ -11,7 +11,7 @@ class MyTestCase(unittest.TestCase):
     def test_something(self):
         dis.dis(add)
         dis.dis(LambWave.__init__)
-        dis.dis(LambWave._lamb_wave_calculate)
+        dis.dis(LambWave._findzeros)
 
 
 

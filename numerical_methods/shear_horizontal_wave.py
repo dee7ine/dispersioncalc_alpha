@@ -1,14 +1,13 @@
 from dataclasses import dataclass
-from dataclasses import dataclass
 from math import sqrt, tan
 from numba import jit
 import matplotlib.pyplot as plt
 from scipy import optimize
 from decorators import timeit
-
+from numerical_methods.wave_class import Wave
 
 @dataclass
-class ShearWave():
+class ShearWave(Wave):
     _omega: float
     _longitudinal_velocity: float
     _wave_number: float
@@ -64,12 +63,12 @@ class ShearWave():
 
     @timeit
     @jit(nopython=True)
-    def _lamb_wave_calculate(self, freq_thickness_product: float,
-                             phase_velocity: float,
-                             thickness: float,
-                             p: float,
-                             q: float,
-                             wave_number: float) -> None:
+    def _findzeros(self, freq_thickness_product: float,
+                   phase_velocity: float,
+                   thickness: float,
+                   p: float,
+                   q: float,
+                   wave_number: float) -> None:
 
         '''
         RETURNS PHASE VELOCITY IN GIVEN INTERVAL
@@ -81,27 +80,7 @@ class ShearWave():
         :return:
         '''
 
-        lhs_1 = tan(q * thickness) / q + 4 * wave_number ** 2 * p * tan(p * thickness) / (q ** 2 - wave_number ** 2)
-        lhs_2 = q * tan(q * thickness) / q + (q ** 2 - wave_number ** 2) * tan(p * thickness) / 4 * wave_number ** 2 * p
 
-        current1 = self._evaluate_sign(lhs_1)
-        current2 = self._evaluate_sign(lhs_2)
-
-        while not self._sign_changed(prev1, current1) or not self._sign_changed(prev2, current2):
-            """
-
-            DO NOT DELETE THIS COMMENT
-
-            loop until the sign of one of the
-            evaluated left hands sides changes sign
-            """
-            if ((lhs_1 and lhs_2) != 0):
-                prev1 = self._evaluate_sign(lhs_1)
-                prev2 = self._evaluate_sign(lhs_2)
-            else:
-                return
-            current1 = prev1
-            current2 = prev2
 
 
 @timeit
@@ -111,7 +90,6 @@ def main():
     :return:
     '''
     pass
-
 
 if __name__ == "__main__":
     main()
