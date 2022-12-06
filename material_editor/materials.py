@@ -11,24 +11,24 @@ class IsotropicMaterial:
     def __init__(self, material: str) -> None:
 
         """
-            Material handling class
+        Material handling class
 
-            --------------
+        --------------
 
-            Fixed attributes:
-            _filename -> default filepath for material data; can be chosen in UI file dialog
+        Fixed attributes:
+        _filename -> default filepath for material data; can be chosen in UI file dialog
 
-            Attributes:
-            _name: str -> name of the material on the list
-            _index: int -> index of the material on the list
-            _density: float or int -> mass density of the material
-            _E: float or int -> Young's Modulus of the material
-            _v: float or int -> Poisson's ratio of the material
-            _C11: float or int -> stiffness component C11
-            _C66: float or int -> stiffness component C66
+        Attributes:
+        _name: str -> name of the material on the list
+        _index: int -> index of the material on the list
+        _density: float or int -> mass density of the material
+        _E: float or int -> Young's Modulus of the material
+        _v: float or int -> Poisson's ratio of the material
+        _C11: float or int -> stiffness component C11
+        _C66: float or int -> stiffness component C66
 
 
-            """
+        """
 
         self._name = material
 
