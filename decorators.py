@@ -13,7 +13,7 @@ def timeit(func):
         return results
     return timeit_wrapper
 
-def log(func):
+def log_to_console(func):
     @wraps(func)
     def logger_wrapper(*args, **kwargs):
         called_time = datetime.now()
