@@ -1,137 +1,21 @@
-"""A module with tools to calculate and plot Lamb wave dispersion
-curves.
-
-Usage:
-
-First, you need to create an instance of the Lamb class:
-
-    mat = Lamb(thickness, nmodes_sym, nmodes_antisym, fd_max, vp_max,
-               c_L, c_S [, c_R=None][, fd_points=100][, vp_step=100]
-               [, material=''])
-
-Then, you can use this instance with the following methods:
-
-    plot_phase_velocity(modes, cutoff_frequencies, material_velocities,
-                        save_img, sym_style, antisym_style):
-        Plot phase velocity as a function of frequency × thickness.
-    plot_group_velocity(modes, cutoff_frequencies, save_img, sym_style,
-                        antisym_style):
-        Plot group velocity as a function of frequency × thickness.
-    plot_wave_number(modes, save_img, sym_style, antisym_style):
-        Plot wavenumber as a function of frequency × thickness.
-    plot_wave_structure(mode, nrows, ncols, fd, save_img, inplane_style,
-                        outofplane_style):
-        Plot particle displacement across the thickness of the plate.
-    animate_displacement(mode, fd, speed, save_gif, save_video):
-        Generate an animation of the displacement vector field.
-    save_results()
-        Save all results to a txt file.
-
-You can also use the following attributes:
-
-    vp_sym:
-        Phase velocity interpolators for symmetric modes.
-    vg_sym:
-        Group velocity interpolators for symmetric modes.
-    k_sym:
-        Wavenumber interpolators for symmetric modes.
-    vp_antisym:
-        Phase velocity interpolators for antisymmetric modes.
-    vg_antisym:
-        Group velocity interpolators for antisymmetric modes.
-    k_antisym:
-       Wavenumber interpolators for antisymmetric modes.
-
-For example, if you need the phase velocity for the S0 mode at 1000
-kHz × mm, you can do:
-
-    mat.vp_sym['S0'](1000)
-
-You can also use a `np.array` instead of a single fd value. Always make
-sure that the fd values are within the valid range for the corresponding
-mode (i. e., above the cutoff frequency and below the fd_max you chose).
-Also, make sure the mode selected is within the selected `nmodes`. For
-example, if you chose `nmodes_sym = 4`, you can use 'S0', 'S1', 'S2' or
-'S3'.
-
-For information about the equations implemented, please refer to:
-
-Rose, J. L., Ultrasonic Guided Waves in Solid Media, Chapter 6: Waves in
-Plates, Cambridge University Press, 2014.
-
-Graff, K. F., Wave Motion in Elastic Solids, Chapter 8: Wave Propagation
-in Plates and Rods, Dover Publications, 1975.
-
-Author:         Francisco Rotea
-                (Buenos Aires, Argentina)
-Repository:     https://github.com/franciscorotea
-Email:          francisco.rotea@gmail.com
-
-"""
-
-import numpy as np
-
+from dataclasses import dataclass
+from math import tan
+#from numba import jit
 import matplotlib.pyplot as plt
-import matplotlib.animation
-
-import scipy.optimize
-
+import scipy
+from scipy import optimize
+from decorators import timeit
+#from numerical_methods.wave_class import Wave
+import numpy as np
 from plot_utilities import add_plot, add_cutoff_freqs, add_velocities
-from utilities import interpolate, correct_instability, write_txt, find_max
-from material_editor.materials import IsotropicMaterial
-from Exceptions import IncorrectMode
-#from rich import print
+from utilities import find_max
 
-
-class Lamb:
-    """A class used to calculate and plot Lamb wave dispersion curves
-    for traction-free, homogeneous and isotropic plates. It also allows
-    to generate an animation of the displacement vector field.
-
-    Methods
-    -------
-    plot_phase_velocity(modes, cutoff_frequencies, material_velocities,
-                        save_img, sym_style, antisym_style):
-        Plot phase velocity as a function of frequency × thickness.
-    plot_group_velocity(modes, cutoff_frequencies, save_img, sym_style,
-                        antisym_style):
-        Plot group velocity as a function of frequency × thickness.
-    plot_wave_number(modes, save_img, sym_style, antisym_style):
-        Plot wavenumber as a function of frequency × thickness.
-    plot_wave_structure(mode, nrows, ncols, fd, save_img, inplane_style,
-                        outofplane_style):
-        Plot particle displacement across the thickness of the plate.
-    animate_displacement(mode, fd, speed, save_gif, save_video):
-        Generate an animation of the displacement vector field.
-    save_results()
-        Save all results to a txt file.
-
-    Attributes
-    ----------
-    vp_sym:
-        Dictionary with phase velocity interpolators for symmetric
-        modes.
-    vg_sym:
-        Dictionary with group velocity interpolators for symmetric
-        modes.
-    k_sym:
-        Dictionary with wavenumber interpolators for symmetric
-        modes.
-    vp_antisym:
-        Dictionary with phase velocity interpolators for antisymmetric
-        modes.
-    vg_antisym:
-        Dictionary with group velocity interpolators for antisymmetric
-        modes.
-    k_antisym:
-       Dictionary with wavenumber interpolators for antisymmetric
-       modes.
-
-    """
+@dataclass
+class LambWave:
 
     def __init__(self, thickness, nmodes_sym, nmodes_antisym, fd_max, vp_max,
                  c_L, c_S, c_R=None, fd_points=100, vp_step=100,
-                 material=''):
+                 material='default'):
         """"
         Parameters
         ----------
@@ -160,132 +44,266 @@ class Lamb:
 
         """
 
-        self.d = thickness / 1e3
-        self.h = (thickness / 2) / 1e3
+        self._d = thickness / 1e3
+        self._h = (thickness / 2) / 1e3
         self.nmodes_sym = nmodes_sym
         self.nmodes_antisym = nmodes_antisym
         self.fd_max = fd_max
         self.vp_max = vp_max
-        self.c_L = c_L #* (10e-3/10e-6)
-        self.c_S = c_S #* (10e-3/10e-6)
-        self.c_R = c_R
+        self._c_L = c_L
+        self._c_S = c_S
+        self._c_R = c_R
         self.fd_points = fd_points
         self.vp_step = vp_step
         self.material = material
 
-        #print(f"c_L = {self.c_L}, c_S = {self.c_S}, c_r = {self.c_R}")
-
         # Solve the dispersion equations.
 
-        sym = self._solve_disp_eqn(function=self._symmetric,
-                                   nmodes=nmodes_sym,
-                                   c=c_S,
-                                   label='S')
+        symmetric = self._solve_equation(function=self._calculate_symmetric,
+                                         nmodes=nmodes_sym,
+                                         c=self._c_S,
+                                         label='S')
 
-        antisym = self._solve_disp_eqn(function=self._antisymmetric,
-                                       nmodes=nmodes_antisym,
-                                       c=c_L,
-                                       label='A')
+        antisymmetric = self._solve_equation(function=self._calculate_antisymmetric,
+                                             nmodes=nmodes_antisym,
+                                             c=self._c_L,
+                                             label='A')
 
         # Calculate group velocity (vg) and wavenumber (k) from phase
         # velocity (vp) and interpolate all results.
 
-        self.vp_sym, self.vg_sym, self.k_sym = interpolate(sym, self.d)
+        self.vp_sym, self.vg_sym, self.k_sym = self._interpolate(symmetric, self._d)
+        self.vp_antisym, self.vg_antisym, self.k_antisym = self._interpolate(antisymmetric,
+                                                                       self._d)
 
-        #print(self.vp_sym)
-        #print(self.vg_sym)
-        #print(self.k_sym)
-
-        self.vp_antisym, self.vg_antisym, self.k_antisym = interpolate(antisym,
-                                                                       self.d)
-
-    def _calc_constants(self, vp: float, fd: float) -> float:
-        """Calculate the constants p and q (defined to simplify the
-        dispersion equations) and wavenumber from a pair of phase
-        velocity and frequency × thickness product.
-
-        Parameters
-        ----------
-        vp : float or int
-            Phase velocity.
-        fd : float or int
-            Frequency × thickness product.
-
-        Returns
-        -------
-        k : float
-            Wavenumber.
-        p, q : float
-            A pair of constants introduced to simplify the dispersion
-            relations.
-
+    @timeit
+    def _calculate_constants(self, vp: float, fd: float) -> float:
         """
 
-        omega = 2 * np.pi * (fd / self.d)
+        :param vp: phase velocity
+        :param fd: frequency-thickness product
+        :return:
+        """
+
+        omega = 2 * np.pi * (fd / self._d)
 
         k = omega / vp
 
-        p = np.sqrt((omega / self.c_L) ** 2 - k ** 2, dtype=np.complex128)
-        q = np.sqrt((omega / self.c_S) ** 2 - k ** 2, dtype=np.complex128)
+        p = np.sqrt(((omega / self._c_L) ** 2 - k ** 2), dtype = np.complex128)
+        q = np.sqrt(((omega / self._c_S) ** 2 - k ** 2), dtype = np.complex128)
 
         return k, p, q
-        print(f"{k}\n{p}\n{q}")
-
-    def _symmetric(self, vp: float, fd: float) -> float:
-        """Rayleigh-Lamb frequency relation for symmetric modes, used to
-        determine the velocity at which a wave of a particular frequency
-        will propagate within the plate. The roots of this equation are
-        used to generate the dispersion curves.
-
-        Parameters
-        ----------
-        vp : float or int
-            Phase velocity.
-        fd : float or int
-            Frequency × thickness product.
-
-        Returns
-        -------
-        symmetric : float
-            Dispersion relation for symmetric modes.
+    @timeit
+    def _calculate_symmetric(self,
+                   vd: float,
+                   fd: float) -> float:
 
         """
+        :param self:
+        :param vd:
+        :param fd:
+        :return:
+        """
 
-        k, p, q = self._calc_constants(vp, fd)
+        k, p, q = self._calculate_constants(vd, fd)
 
-        symmetric = (np.tan(q * self.h) / q
-                     + (4 * (k ** 2) * p * np.tan(p * self.h)) / (q ** 2 - k ** 2) ** 2)
+        symmetric = (np.tan(q * self._h) / q + 4 * k**2 * p * tan(p * self._h) / (q ** 2 - k** 2))
 
+
+        print(np.real(symmetric))
         return np.real(symmetric)
 
-    def _antisymmetric(self, vp: float, fd: float) -> float:
-        """Rayleigh-Lamb frequency relation for antisymmetric modes,
-        used to determine the velocity at which a wave of a particular
-        frequency will propagate within the plate. The roots of this
-        equation are used to generate the dispersion curves.
+    def _calculate_antisymmetric(self,
+                                 vp: float,
+                                 fd: float) -> list:
+        """
+
+        :param self:
+        :param vp:
+        :param fd:
+        :return:
+        """
+
+        k, p, q = self._calculate_constants(vp, fd)
+        antisymmetric = (q * np.tan(q * self._h) / q + (q ** 2 - k ** 2) * np.tan(p * self._h) / 4 * k ** 2 * p)
+        print(np.real(antisymmetric))
+        return np.real(antisymmetric)
+
+    def _interpolate(self, result, d, type='cubic'):
+        """
+
+        :param d:
+        :param type:
+        :return:
+
+        Interpolate the results for phase velocity, group velocity and
+        wave number.
 
         Parameters
         ----------
-        vp : float or int
-            Phase velocity.
-        fd : float or int
-            Frequency × thickness product.
+        result : dict
+            Dictionary with the phase velocity values obtained by solving
+            the dispersion equations.
+        kind : str, optional
+            Specifies the kind of interpolation as a string. Can be
+            ‘linear’, ‘nearest’, ‘zero’, ‘slinear’, ‘quadratic’, ‘cubic’,
+            ‘previous’, ‘next’. Defaults to 'cubic'.
 
         Returns
         -------
-        antisymmetric : float
-            Dispersion relation for antisymmetric modes.
+        interp_vp : dict
+            Dictionary with phase velocity interpolator at each mode.
+        interp_vg : dict
+            Dictionary with group velocity interpolator at each mode.
+        interp_k : dict
+            Dictionary with wave number interpolator at each mode.
 
         """
 
-        k, p, q = self._calc_constants(vp, fd)
+        interp_vp = {}
+        interp_vg = {}
+        interp_k = {}
 
-        antisymmetric = (q * np.tan(q * self.h)
-                         + (((q ** 2 - k ** 2) ** 2) * np.tan(p * self.h)) / (4 * (k ** 2) * p))
+        for mode, arr in result.items():
 
-        return np.real(antisymmetric)
+            if arr[1].size > 3:
+                fd = arr[0]
+                vp = arr[1]
 
-    def _solve_disp_eqn(self, function, nmodes, c, label):
+                interp_vp[mode] = scipy.interpolate.interp1d(fd, vp, kind = type)
+
+                k = (fd * 2 * np.pi / d) / vp
+
+                interp_k[mode] = scipy.interpolate.interp1d(fd, k, kind = type)
+
+                """
+                Find the derivative of phase velocity using a
+                interpolating spline.
+                """
+
+                univ_s = scipy.interpolate.InterpolatedUnivariateSpline(fd, vp)
+                vp_prime = univ_s.derivative()
+
+                vg = np.square(vp) * (1 / (vp - vp_prime(fd) * fd))
+
+                interp_vg[mode] = scipy.interpolate.interp1d(fd, vg, kind = type)
+
+        return interp_vp, interp_vg, interp_k
+
+    def correct_instability(self, result, function):
+        """
+
+        :param result:
+        :param function:
+        :return:
+        """
+
+        """A function to correct the instability produced when two roots are
+        in close proximity, making the function change sign twice or more in
+        the phase velocity interval under analysis. Since these values of
+        phase velocity are not computed, it ultimately produces a wrong mode
+        assignation, e.g., a phase velocity value corresponding to the S1
+        mode is wrongly assigned to S0.
+
+        Since phase velocity is strictly decreasing for each mode order
+        (except for A0), the function works by looping through each mode,
+        detecting if a phase velocity value is not decreasing. If this is
+        the case, the value is appended to the next mode, and replaced by 0.
+
+        Parameters
+        ----------
+        result : array
+            An array of shape (fd_points, nmodes+1), where the first column
+            contains the fd values and the following columns are the phase
+            velocity values for the requested modes (S0, S1, S2, etc., or
+            A0, A1, A2, etc.)
+        function : object
+            Family of modes to solve (symmetric or antisymmetric).
+
+        Returns
+        -------
+        corrected_result : array
+            The corrected result array.
+
+        """
+
+        # Compensate for antisymmetric mode (A0 is strictly increasing).
+
+        n = 1 if function.__name__ == '_symmetric' else 2
+        nmodes = result.shape[1] - 1
+
+        corrected_result = np.copy(result)
+
+        for idx, col in enumerate(corrected_result.T[n:, :]):
+            if np.any(col):
+                i = 0
+                while col[i] == 0 and i < len(col) - 1:
+                    i += 1
+                if idx < nmodes - n:
+                    corrected_result[i][idx + n + 1] = 0
+
+        for idx, col in enumerate(corrected_result.T[n:, :]):
+            for i in range(len(col) - 1):
+                if i == len(col) - 2:
+                    corrected_result[i + 1][idx + n] = 0
+                if col[i] != 0:
+                    j = i + 1
+                    if col[j] == 0:
+                        while col[j] == 0 and j < len(col) - 1:
+                            j += 1
+                    if j < len(col) - 1:
+                        if col[i] < col[j] or col[j] == 0:
+                            while (col[i] < col[j] or col[j] == 0) and j < len(col) - 1:
+                                if col[j] == 0:
+                                    j += 1
+                                else:
+                                    for idx2 in range(nmodes):
+                                        if idx == idx2:
+                                            corrected_result[j][idx + n] = 0
+                                            p = n + 1
+                                            while p <= nmodes - idx2:
+                                                corrected_result[j][idx + p] = result[j][idx + p - 1]
+                                                p += 1
+                                    j += 1
+
+        return corrected_result
+
+    def _solve_equation(self, function, nmodes, c, label):
+        """Function to calculate the numerical solution to the
+        dispersion equations.
+
+        The algorithm works as follows:
+
+            1) Fix a value of frequency × thickness product.
+            2) Evaluate the function at two values of phase velocity
+               (vp and vp+step) and check their signs.
+            3) Since the function is continuous, if the sign changes
+               in the interval under analysis, a root exists in this
+               interval. Use the bisection method to locate it
+               precisely.
+            4) Continue searching for other roots at this value of
+               frequency × thickness.
+            5) Change the value of frequency × thickness and repeat
+               steps 2 to 4.
+
+        Parameters
+        ----------
+        function : {self._symmetric, self._antisymmetric}
+            Family of modes to solve. Can be `self._symmetric` (to solve
+            symmetric modes) or `self._antisymmetric` (to solve
+            antisymmetric modes).
+
+        Returns
+        -------
+        result_dict : dict
+            A dictionary, where the keys are the corresponding mode
+            (e.g., 'A0', 'A1', 'A2', ..., 'An' for antisymmetric modes
+             or 'S0', 'S1', 'S2', ..., 'Sn' for symmetric modes) and the
+            values are numpy arrays of dimensions (2, fd_points), where
+            the first row has the fd values and the second row has the
+            phase velocity values calculated.
+
+        """
 
         fd_arr = np.linspace(0, self.fd_max, self.fd_points)
         result = np.zeros((len(fd_arr), nmodes + 1))
@@ -335,7 +353,7 @@ class Lamb:
         # Correct some instabilities and replace zeros with NaN, so it
         # is easier to filter.
 
-        result = correct_instability(result, function)
+        result = self.correct_instability(result, function)
         result[result == 0] = np.nan
 
         result_dict = {}
@@ -350,7 +368,6 @@ class Lamb:
 
             result_dict[label + str(nmode)] = mode_result
 
-        print(result_dict)
         return result_dict
 
     def plot(self, ax, result, y_max, cutoff_frequencies=False,
@@ -391,10 +408,10 @@ class Lamb:
 
             if cutoff_frequencies:
                 add_cutoff_freqs(ax, mode, arrow_dir, y_max,
-                                 self.c_L, self.c_S)
+                                 self._c_L, self._c_S)
 
         if material_velocities:
-            add_velocities(ax, self.c_L, self.c_S, self.c_R, self.fd_max)
+            add_velocities(ax, self._c_L, self._c_S, self._c_R, self.fd_max)
 
         ax.set_xlim([0, self.fd_max])
         ax.set_ylim([0, y_max])
@@ -436,7 +453,7 @@ class Lamb:
         """
 
         fig, ax = plt.subplots(figsize=(7, 4))
-        fig.canvas.set_window_title(f'Phase Velocity for {self.d * 10**3} mm thick {self.material}')
+        fig.canvas.set_window_title('Phase Velocity')
 
         # Calculate the maximum value to scale the ylim of the axes.
 
@@ -459,10 +476,10 @@ class Lamb:
                             'or "both".')
 
         ax.legend(loc='lower right')
-        ax.set_ylabel('Phase Velocity [m/s] ')
+        ax.set_ylabel('Phase Velocity [m/s]')
 
         if save_img:
-            fig.savefig(f'results/Phase Velocity - {self.d * 1e3} mm '
+            fig.savefig(f'results/Phase Velocity - {self._d * 1e3} mm '
                         f'{self.material} plate.png',
                         bbox_inches='tight')
 
@@ -499,7 +516,7 @@ class Lamb:
         """
 
         fig, ax = plt.subplots(figsize=(7, 4))
-        fig.canvas.set_window_title(f'Group Velocity for {self.d * 10**3} mm thick {self.material}')
+        fig.canvas.set_window_title('Group Velocity')
 
         # Calculate the maximum value to scale the ylim of the axes.
 
@@ -518,14 +535,14 @@ class Lamb:
             self.plot(ax, self.vg_antisym, max_, cutoff_frequencies,
                       'up', plt_kwargs=antisym_style)
         else:
-            raise IncorrectMode('modes must be "symmetric", "antisymmetric"'
+            raise Exception('modes must be "symmetric", "antisymmetric"'
                             'or "both".')
 
         ax.legend(loc='lower right')
         ax.set_ylabel('Group Velocity [m/s]')
 
         if save_img:
-            fig.savefig(f'results/Group Velocity - {self.d * 1e3} mm '
+            fig.savefig(f'results/Group Velocity - {self._d * 1e3} mm '
                         f'{self.material} plate.png',
                         bbox_inches='tight')
 
@@ -560,7 +577,7 @@ class Lamb:
         """
 
         fig, ax = plt.subplots(figsize=(7, 4))
-        fig.canvas.set_window_title(f'Wave Number for {self.d * 10**3} mm thick {self.material}')
+        fig.canvas.set_window_title('Wave Number')
 
         # Calculate the maximum value to scale the ylim of the axes.
 
@@ -587,44 +604,24 @@ class Lamb:
                         bbox_inches='tight')
 
         return fig, ax
-
-    def save_results(self):
-        """Save all results to a txt file."""
-
-        if self.material:
-            filename = f'{self.material} plate - {self.d * 1e3} mm.txt'
-        else:
-            filename = f'{self.d * 1e3} mm plate.txt'
-
-        header = (f'Material: {self.material}\n'
-                  f'Thickness: {str(self.d * 1e3)} mm\n'
-                  f'Longitudinal wave velocity: {str(self.c_L)} m/s\n'
-                  f'Shear wave velocity: {str(self.c_S)} m/s\n\n')
-
-        write_txt(self.vp_sym, self.vp_antisym, 'Phase Velocity',
-                  filename, header)
-        write_txt(self.vg_sym, self.vg_antisym, 'Group Velocity',
-                  filename, header)
-        write_txt(self.k_sym, self.k_antisym, 'Wavenumber',
-                  filename, header)
-
+@timeit
 def main():
-    # You can obtain the values of c_L and c_S and an approximate value for
-    # c_R (if v > 0.3) from the material's mechanical properties by using
-    # the following equations:
+    E = 68.9e9  # E = Young's modulus, in Pa.
+    p = 2700  # p = Density (rho), in kg/m3.
+    v = 0.33  # v = Poisson's ratio (nu).
 
-    new_material = IsotropicMaterial(material = "Ice")
-    E = new_material._E  # E = Young's modulus, in Pa.
-    p = new_material._density  # p = Density (rho), in kg/m3.
-    v = new_material._v  # v = Poisson's ratio (nu).
-
+    """
+    c_L: longitudinal wave velocity of the material
+    c_S: shear wave velocity of the material
+    c_R: Rayleigh weave velocity of the material
+    """
     c_L = np.sqrt(E * (1 - v) / (p * (1 + v) * (1 - 2 * v)))
     c_S = np.sqrt(E / (2 * p * (1 + v)))
     c_R = c_S * ((0.862 + 1.14 * v) / (1 + v))
 
     # Example: A 10 mm aluminum plate.
 
-    alum = Lamb(thickness=10,
+    alum = LambWave(thickness=10,
                 nmodes_sym=5,
                 nmodes_antisym=5,
                 fd_max=10000,
@@ -632,7 +629,7 @@ def main():
                 c_L=c_L,
                 c_S=c_S,
                 c_R=c_R,
-                material='Ice')
+                material='Default')
 
     # Plot phase velocity, group velocity and wavenumber.
 

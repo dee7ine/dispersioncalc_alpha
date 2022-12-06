@@ -6,6 +6,9 @@ from math import sqrt, tan
 from decorators import timeit
 from numba import jit
 
+"""
+DEPRECIATED
+
 @dataclass
 class IsotropicMain():
 
@@ -140,3 +143,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+    
+"""

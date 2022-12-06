@@ -10,5 +10,6 @@ class Test_Material_Editor(unittest.TestCase):
         isotropic1._new_material(name="test3", mass_density="5", E=" 25", v=" 4", C11="5", C66="662424")
         marcinek._new_material(name="test4", mass_density="10000", E=" 25", v=" 4", C11="5", C66="662424")
 
+
 if __name__ == '__main__':
     unittest.main()
