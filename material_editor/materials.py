@@ -1,67 +1,63 @@
+from Exceptions import NoMaterialFound
 from dataclasses import dataclass
-from decorators import timeit
-from material_editor.imaginary_numbers import ImaginaryNumber
-
-class Material_File_Parser:
-    material_list : list
-    material_names_list : list
-
-    def __init__(self):
-        pass
 
 @dataclass
 class IsotropicMaterial:
 
-    _filename: str
+    #_frequency = 1000.00
 
-    _name: str
-    _mass_density: float
+    _filename: str = r"C:\Users\deefi\PycharmProjects\dispersioncalc_alpha\material_editor\material_data.txt"
 
-    _longitudinal_velocity = 6142.03
-    _shear_velocity = 3093.85
-    _frequency = 1000
+    def __init__(self, material: str) -> None:
 
-    """
-    Engineering constants and
-    stiffness components
-    """
+        """
+            Material handling class
 
-    _E = ImaginaryNumber(0, 0)
-    _v = ImaginaryNumber(0, 0)
+            --------------
 
-    _C11 = ImaginaryNumber(0, 0)
-    _C66 = ImaginaryNumber(0, 0)
+            Fixed attributes:
+            _filename -> default filepath for material data; can be chosen in UI file dialog
 
-    """
-    DO NOT DELETE THIS COMMENT
-    
-    Fix setting real and imaginary attributes of E, v and 
-    stiffness coefficients
-    """
-    @timeit
-    def __init__(self, filename: str) -> None:
+            Attributes:
+            _name: str -> name of the material on the list
+            _index: int -> index of the material on the list
+            _density: float or int -> mass density of the material
+            _E: float or int -> Young's Modulus of the material
+            _v: float or int -> Poisson's ratio of the material
+            _C11: float or int -> stiffness component C11
+            _C66: float or int -> stiffness component C66
 
-        #self._new_material(name = "test", mass_density = "5", E = " 25", v = " 4", C11 = "5", C66 = "66")
-        self._filename = filename
+
+            """
+
+        self._name = material
+
+
         parsed_list, material_names_list = self._parse_materials()
 
-        self._name = parsed_list[0][0]
-        self._mass_density = float(parsed_list[0][1])
-        self._E = float(parsed_list[0][2])
-        self._v = float(parsed_list[0][3])
-        self._C11 = float(parsed_list[0][4])
-        self._C66 = float(parsed_list[0][5])
+        self._material_names_list = material_names_list
+        self._index = self._find_material(mat = self._name)
 
-        print(material_names_list)
+        self._name: str = parsed_list[self._index][0]
+        self._density = float(parsed_list[self._index][1])
+        self._E = float(parsed_list[self._index][2])
+        self._v = float(parsed_list[self._index][3])
+        self._C11 = float(parsed_list[self._index][4])
+        self._C66 = float(parsed_list[self._index][5])
+
         print(f"Name: {self._name},"
-              f" mass-density: {self._mass_density},"
+              f" mass-density: {self._density},"
               f" E: {self._E},"
               f" v: {self._v},"
               f" C11: {self._C11},"
               f" C66: {self._C66}")
+    @classmethod
+    def fix_file_path(cls, filepath: str) -> str:
+        cls._filename = filepath
 
-    def _parse_materials(self):
-        with open(self._filename, 'r') as material_data:
+    @classmethod
+    def _parse_materials(cls):
+        with open(cls._filename, 'r') as material_data:
             material_data_list = material_data.readlines()
             parsed_material_data = [line.split(' ') for line in material_data_list]
 
@@ -71,9 +67,9 @@ class IsotropicMaterial:
 
             material_data.close()
             return parsed_material_data, material_names_list
-
-    def _new_material(self, name: str, mass_density: str, E: str, v: str, C11: str, C66: str):
-        with open(self._filename, 'a+') as material_data:
+    @classmethod
+    def _new_material(cls, name: str, mass_density: str, E: str, v: str, C11: str, C66: str):
+        with open(cls._filename, 'a+') as material_data:
 
             new_material_data = []
             new_material_data.extend([name, mass_density, E, v, C11, C66])
@@ -85,9 +81,25 @@ class IsotropicMaterial:
 
             material_data.close()
 
-@timeit
+    def _find_material(self, mat: str):
+        parsed_list, material_names_list = self._parse_materials()
+
+        for index, name in enumerate(material_names_list):
+            print(name)
+            if mat in name:
+                return index
+                print(index)
+        raise NoMaterialFound("No material found. You can create your own material in material editor")
+
 def main():
-    material = IsotropicMaterial(filename = "material_data.txt")
+    """
+    don't run
+    only for testing purposes
+    :return:
+    """
+    Lead = IsotropicMaterial(material = 'Platinum')
+    #print(getattr(material._name))
+    print(Lead._name)
 
 if __name__ == "__main__":
     main()

@@ -2,6 +2,7 @@ from math import sqrt
 from numba import jit
 from decorators import timeit
 from abc import ABC, abstractmethod
+import numpy as np
 
 class Wave(ABC):
     _omega: float
@@ -15,13 +16,20 @@ class Wave(ABC):
     _p: float
     _q: float
 
-    def __init__(self, omega: float, longitudinal_velocity: float, wave_number: float):
+    def __init__(self, omega: float, longitudinal_velocity: float, wave_number: float, thickness: float, material):
         """
+
         :param omega:
         :param longitudinal_velocity:
         :param wave_number:
+        :param thickness:
         """
 
+        self._material = material
+
+
+        self._d = thickness/1e3
+        self._h = (thickness / 2) / 1e3
         self._omega = omega
         self._longitudinal_velocity = longitudinal_velocity
         self._wave_number = wave_number
@@ -30,35 +38,26 @@ class Wave(ABC):
 
     @timeit
     @jit(nopython=True)
-    def _calculate_p(self,
-                     omega: float,
-                     longitudinal_velocity: float,
-                     wave_number: float) -> float:
-        return sqrt((omega / longitudinal_velocity) ** 2 - wave_number ** 2)
+    def _calculate_constants(self, vp: float, fd: float) -> float:
+        """
 
-    @timeit
-    @jit(nopython=True)
-    def _calculate_q(self,
-                     omega: float,
-                     ct: float,
-                     k: float) -> float:
-        return sqrt((omega / ct) ** 2 - k ** 2)
+        :param vp: phase velocity
+        :param fd: frequency-thickness product
+        :return:
+        """
 
-    @timeit
-    @jit(nopython=True)
-    def _evaluate_sign(self,
-                       expression: float) -> bool:
-        return expression > 0
+        omega = 2 * np.pi * (fd/self._d)
 
-    @timeit
-    @jit(nopython=True)
-    def _sign_changed(self,
-                      p1: bool,
-                      c1: bool) -> bool:
-        return p1 is c1
+        k = omega/vp
+
+        p = sqrt((omega / longitudinal_velocity) ** 2 - wave_number ** 2)
+        q = sqrt((omega / ct) ** 2 - k ** 2)
+
+        return k, p, q
+
 
     @abstractmethod
-    def _findzeros(self, freq_thickness_product: float,
+    def _calculate(self, freq_thickness_product: float,
                    phase_velocity: float,
                    thickness: float,
                    p: float,

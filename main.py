@@ -5,7 +5,7 @@ from isotropic_main import show_image
 from decorators import timeit
 
 @dataclass
-class IsotropicMaterials(wx.Panel):
+class IsotropicMaterialsWindow(wx.Panel):
     def __init__(self, parent) -> None:
         wx.Panel.__init__(self, parent)
 
