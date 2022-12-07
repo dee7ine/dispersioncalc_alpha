@@ -85,11 +85,11 @@ class IsotropicMaterial:
         parsed_list, material_names_list = self._parse_materials()
 
         for index, name in enumerate(material_names_list):
-            print(name)
+            #print(name)
             if mat in name:
                 return index
-                print(index)
-        raise NoMaterialFound("No material found. You can create your own material in material editor")
+                #print(index)
+        raise NoMaterialFound("No material found. You can create your own material in material editor!")
 
 def main():
     """
