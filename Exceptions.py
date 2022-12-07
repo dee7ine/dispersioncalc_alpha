@@ -3,3 +3,6 @@ class NoMaterialFound(Exception):
 
 class IncorrectMode(Exception):
     pass
+
+class ErrorParsingMaterial(Exception):
+    pass

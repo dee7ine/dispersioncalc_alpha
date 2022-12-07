@@ -8,7 +8,10 @@ import PySimpleGUI as sg; use('qt5agg')
 from material_editor.materials import IsotropicMaterial
 from numerical_methods.lamb_wave import Lamb
 
+#sg.set_options(font=("Inter", 10))
+
 def main():
+
     data, choices = IsotropicMaterial._parse_materials()
     modes = ['Symmetric', 'Antisymmetric', 'Both']
 
@@ -23,10 +26,17 @@ def main():
         plt.plot([0.1, 0.2, 0.5, 0.7])
         plt.show(block=False)
 
+    console_frame_layout = [[sg.Multiline(f"Beginning session {datetime.now().isoformat(' ', 'seconds')}", size=(100, 10), autoscroll=True,
+                                  reroute_stdout=True, reroute_stderr=True, key='-OUTPUT-', background_color = 'lightgrey')]]
 
+    material_frame_layout = [[sg.Text("E [MPa]"), sg.Input('68.9', enable_events = True, key = 'young_modulus', size = (6,5))],
+                             [sg.Text("v [no unit]"), sg.Input('0.33', enable_events=True, key='poisson_ratio', size=(6, 5))],
+                             [sg.Text("Density [kg/m3]"), sg.Input('2700', enable_events=True, key='density', size=(6, 5))],
+                            [sg.Text('Material data path'),
+                              sg.InputText('"C:/Users\deefi\PycharmProjects\dispersioncalc_alpha\material_editor\material_data.txt"', key = '-data_path-', size=(75, 22))],
+                             [sg.FileBrowse(file_types=(("TXT Files", "*.txt"), ("ALL Files", "*.*")), enable_events = True, target = '-data_path-'),
+                              sg.Button('Load', tooltip = "Load data file")]]
 
-    console_frame_layout = [[sg.Multiline("", size=(100, 10), autoscroll=True,
-                                  reroute_stdout=True, reroute_stderr=True, key='-OUTPUT-')]]
 
     layout = [[sg.Frame('Lamb waves', layout = [
               [sg.Text('Material'), sg.InputCombo(values = choices,
@@ -35,10 +45,11 @@ def main():
                              enable_events = True,
                              size=(33, 20)),
                              sg.Stretch()], [sg.Text('Symmetry modes'), sg.InputCombo(values = modes, default_value = 'Symmetric', key = 'mode', enable_events = True, size = (25,20))],
-        [sg.Text('Thickness [mm]             '), sg.Input('10', enable_events=True, key='thickness', size = (4,5), justification = 'center')],
-        [sg.Text('Frequency [Hz]              '), sg.Input('1000', enable_events=True, key='frequency', size=(4, 5), justification = 'center')],
-        [sg.Text('Maximum velocity [m/s]  '), sg.Input('1000', enable_events=True, key='velocity', size=(4, 5), justification='center')],
-              [sg.Button('Calculate and plot'), sg.Cancel(), sg.Button('Help')]])],
+        [sg.Text('Thickness [mm]             '), sg.Input('10', enable_events=True, key='thickness', size = (6,5), justification = 'left')],
+        [sg.Text('Frequency [Hz]              '), sg.Input('1000', enable_events=True, key='frequency', size=(6, 5), justification = 'left')],
+        [sg.Text('Maximum velocity [m/s]  '), sg.Input('15000', enable_events=True, key='velocity', size=(6, 5), justification='left')],
+              [sg.Button('Calculate and plot', tooltip = "Calculate and plot dispersion curves \n for given material data"),
+               sg.Cancel(), sg.Button('Help', tooltip = "Helpful tips")]]), sg.Frame('Material editor', layout = material_frame_layout, tooltip = "Material editing module")],
               [sg.Frame("Output", layout = console_frame_layout)]]
 
 
@@ -58,6 +69,12 @@ def main():
             break
         elif event == 'Help':
             sg.popup('Click plot in order to calculate and plot dispersion curves for the chosen material', title = "Help")
+
+        if event in ('Load'):
+            #IsotropicMaterial.fix_file_path(values['-data_path-'])
+            #data, choices = IsotropicMaterial._parse_materials()
+
+            main_window.refresh()
         elif event == 'Calculate and plot':
 
             print(datetime.now())
@@ -65,6 +82,13 @@ def main():
             new_material = IsotropicMaterial(values['material_name'])
             fd_max = float(values['thickness'])*float(values['frequency'])  #maximum frequency-thickness product
 
+            """
+            Engineering constants and material object instance
+            
+            -------------------------------------------------------
+            
+            
+            """
 
             E = new_material._E  # E = Young's modulus, in Pa.
             p = new_material._density  # p = Density (rho), in kg/m3.
@@ -73,8 +97,6 @@ def main():
             c_L = np.sqrt(E * (1 - v) / (p * (1 + v) * (1 - 2 * v)))
             c_S = np.sqrt(E / (2 * p * (1 + v)))
             c_R = c_S * ((0.862 + 1.14 * v) / (1 + v))
-
-            # Example: A 10 mm aluminum plate.
 
             alum = Lamb(thickness = float(values['thickness']),
                         nmodes_sym=10,
@@ -116,7 +138,7 @@ def main():
 
             # alum.save_results()
 
-            plt.show()
+            plt.show(block = False)
 
     main_window.close()
 
