@@ -53,31 +53,35 @@ def add_plot(ax, result, mode, fd, **plt_kwargs):
                 va='top', ha='right')
 
 def add_cutoff_freqs(ax, mode, arrow_dir, y_max, c_L, c_S,
-                     plt_kwargs={'color': 'k', 'ls': '--', 'lw': 0.5}):
-    """Add vertical lines indicating cutoff frequencies to a matplotlib 
+                     plt_kwargs={'color': 'k', 'ls': '--', 'lw': 0.5}) -> None:
+    """
+    Add vertical lines indicating cutoff frequencies to a matplotlib
     axes object.
     
     Parameters
+
     ----------
-    ax : axes
-        Matplotlib axes in which the plot will be added.
-    mode : str
-        Mode to plot. Can be "A0", "A1", "A2", ..., "An" or "S0", "S1", 
-        "S2", ..., "Sn", with 'n' being the order of the corresponding 
+    :param ax: Matplotlib axes in which the plot will be added.
+    :type ax:   (Any)
+    :param mode: Mode to plot. Can be "A0", "A1", "A2", ..., "An" or "S0", "S1",
+        "S2", ..., "Sn", with 'n' being the order of the corresponding
         mode.
-    arrow_dir : str
-        Set arrows' direction in the plot. Can be 'up' (for group 
+    :type: mode:    (str)
+    :param arrow_dir: Set arrows' direction in the plot. Can be 'up' (for group
         velocity plots) or 'down' (for phase velocity plots).
-    y_max : float
-        Maximum y value in the plot. Used to position arrows in phase 
+    :type arrow_dir:    (str)
+    :param y_max: Maximum y value in the plot. Used to position arrows in phase
         velocity plots.
-    c_L : float
-        Longitudinal wave velocity of the material, in m/s.
-    c_S: float
-        Shear wave velocity of the material, in m/s.
-    plt_kwargs : dict, optional
-        Matplotlib kwargs (to change color, linewidth, linestyle, etc.).
-        
+    :type y_max:    (float)
+    :param c_L: Longitudinal wave velocity of the material, in m/s.
+    :type c_L:  (float)
+    :param c_S: Shear wave velocity of the material, in m/s.
+    :type c_S:  (float)
+    :param plt_kwargs: (optional argument) Matplotlib kwargs (to change color, linewidth, linestyle, etc.).
+
+    :type plt_kwargs:   (dict)
+
+    :return
     """
     
     if arrow_dir == 'down':
