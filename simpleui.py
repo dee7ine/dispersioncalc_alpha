@@ -15,16 +15,6 @@ def main():
     data, choices = IsotropicMaterial._parse_materials()
     modes = ['Symmetric', 'Antisymmetric', 'Both']
 
-    """
-        Simultaneous PySimpleGUI Window AND a Matplotlib Interactive Window
-        A number of people have requested the ability to run a normal PySimpleGUI window that
-        launches a MatplotLib window that is interactive with the usual Matplotlib controls.
-        It turns out to be a rather simple thing to do.  The secret is to add parameter block=False to plt.show()
-    """
-
-    def draw_plot():
-        plt.plot([0.1, 0.2, 0.5, 0.7])
-        plt.show(block=False)
 
     console_frame_layout = [[sg.Multiline(f"Beginning session {datetime.now().isoformat(' ', 'seconds')}", size=(100, 10), autoscroll=True,
                                   reroute_stdout=True, reroute_stderr=True, key='-OUTPUT-', background_color = 'lightgrey')]]
@@ -38,7 +28,7 @@ def main():
                               sg.Button('Load', tooltip = "Load data file")]]
 
 
-    layout = [[sg.Frame('Lamb waves', layout = [
+    main_layout = [[sg.Frame('Lamb waves', layout = [
               [sg.Text('Material'), sg.InputCombo(values = choices,
                              default_value = "AluminumDisperse",
                              key = "material_name",
@@ -54,7 +44,7 @@ def main():
 
 
 
-    main_window = sg.Window('Counter Strike Global Offensive', layout, size = (1250, 750))
+    main_window = sg.Window('Counter Strike Global Offensive', main_layout, size = (1250, 750))
 
     while True:
         """
