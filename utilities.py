@@ -3,28 +3,33 @@ import itertools
 import numpy as np
 import scipy.interpolate
 
-def interpolate(result, d, kind='cubic'):
+def interpolate(result, d, kind='cubic') -> dict:
     """Interpolate the results for phase velocity, group velocity and
     wave number.
     
     Parameters
     ----------
-    result : dict
+    :param result :
         Dictionary with the phase velocity values obtained by solving
         the dispersion equations.
-    kind : str, optional
+    :type result : dict
+    :param kind :
         Specifies the kind of interpolation as a string. Can be
         ‘linear’, ‘nearest’, ‘zero’, ‘slinear’, ‘quadratic’, ‘cubic’, 
         ‘previous’, ‘next’. Defaults to 'cubic'.
+    :type kind : str, optional
         
-    Returns
-    -------
-    interp_vp : dict
+    --------------------
+
+    :return interp_vp :
         Dictionary with phase velocity interpolator at each mode.
-    interp_vg : dict
+    :type interp_vp : dict
+    :return interp_vg :
         Dictionary with group velocity interpolator at each mode.
-    interp_k : dict
+    :type interp_vg : dict
+    :return interp_k :
         Dictionary with wave number interpolator at each mode.
+    :type interp_k : dict
         
     """
     
@@ -128,12 +133,12 @@ def correct_instability(result, function):
     
     return corr
 
-def write_txt(data_sym, data_antisym, kind, filename, header):
+def write_txt(data_sym: dict, data_antisym: dict, kind, filename, header):
     """Function to write the results to a txt file.
     
     Parameters
     ----------
-    data_sym : dict
+    paramdata_sym : dict
         A dictionary consisting of interpolators for the specified 
         symmetric modes.
     data_antisym : dict

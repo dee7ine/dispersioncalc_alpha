@@ -10,11 +10,11 @@ from numerical_methods.lamb_wave import Lamb
 
 #sg.set_options(font=("Inter", 10))
 
+
 def main():
 
     data, choices = IsotropicMaterial._parse_materials()
     modes = ['Symmetric', 'Antisymmetric', 'Both']
-
 
     console_frame_layout = [[sg.Multiline(f"Beginning session {datetime.now().isoformat(' ', 'seconds')}", size=(100, 10), autoscroll=True,
                                   reroute_stdout=True, reroute_stderr=True, key='-OUTPUT-', background_color = 'lightgrey')]]
@@ -27,7 +27,6 @@ def main():
                              [sg.FileBrowse(file_types=(("TXT Files", "*.txt"), ("ALL Files", "*.*")), enable_events = True, target = '-data_path-'),
                               sg.Button('Load', tooltip = "Load data file")]]
 
-
     main_layout = [[sg.Frame('Lamb waves', layout = [
               [sg.Text('Material'), sg.InputCombo(values = choices,
                              default_value = "AluminumDisperse",
@@ -35,16 +34,14 @@ def main():
                              enable_events = True,
                              size=(33, 20)),
                              sg.Stretch()], [sg.Text('Symmetry modes'), sg.InputCombo(values = modes, default_value = 'Symmetric', key = 'mode', enable_events = True, size = (25,20))],
-        [sg.Text('Thickness [mm]             '), sg.Input('10', enable_events=True, key='thickness', size = (6,5), justification = 'left')],
-        [sg.Text('Frequency [Hz]              '), sg.Input('1000', enable_events=True, key='frequency', size=(6, 5), justification = 'left')],
-        [sg.Text('Maximum velocity [m/s]  '), sg.Input('15000', enable_events=True, key='velocity', size=(6, 5), justification='left')],
-              [sg.Button('Calculate and plot', tooltip = "Calculate and plot dispersion curves \n for given material data"),
-               sg.Cancel(), sg.Button('Help', tooltip = "Helpful tips")]]), sg.Frame('Material editor', layout = material_frame_layout, tooltip = "Material editing module")],
-              [sg.Frame("Output", layout = console_frame_layout)]]
+                            [sg.Text('Thickness [mm]             '), sg.Input('10', enable_events=True, key='thickness', size = (6,5), justification = 'left')],
+                            [sg.Text('Frequency [Hz]              '), sg.Input('1000', enable_events=True, key='frequency', size=(6, 5), justification = 'left')],
+                            [sg.Text('Maximum velocity [m/s]  '), sg.Input('15000', enable_events=True, key='velocity', size=(6, 5), justification='left')],
+                            [sg.Button('Calculate and plot', tooltip = "Calculate and plot dispersion curves \n for given material data"), sg.Button('Close', tooltip = 'Close all already open plots'),
+                            sg.Cancel(), sg.Button('Help', tooltip = "Helpful tips")]]), sg.Frame('Material editor', layout = material_frame_layout, tooltip = "Material editing module")],
+                            [sg.Frame("Output", layout = console_frame_layout)]]
 
-
-
-    main_window = sg.Window('Counter Strike Global Offensive', main_layout, size = (1250, 750))
+    main_window = sg.Window('Dispersion Analysis', main_layout, size = (1250, 750))
 
     while True:
         """
@@ -70,7 +67,7 @@ def main():
             print(datetime.now())
 
             new_material = IsotropicMaterial(values['material_name'])
-            fd_max = float(values['thickness'])*float(values['frequency'])  #maximum frequency-thickness product
+            fd_max :float = float(values['thickness'])*float(values['frequency'])  #maximum frequency-thickness product
 
             """
             Engineering constants and material object instance
@@ -80,9 +77,9 @@ def main():
             
             """
 
-            E = new_material._E  # E = Young's modulus, in Pa.
-            p = new_material._density  # p = Density (rho), in kg/m3.
-            v = new_material._v  # v = Poisson's ratio (nu).
+            E : float = new_material._E  # E = Young's modulus, in Pa.
+            p : float = new_material._density  # p = Density (rho), in kg/m3.
+            v : float = new_material._v  # v = Poisson's ratio (nu).
 
             c_L = np.sqrt(E * (1 - v) / (p * (1 + v) * (1 - 2 * v)))
             c_S = np.sqrt(E / (2 * p * (1 + v)))
@@ -107,9 +104,6 @@ def main():
             print(f"{datetime.now().isoformat(' ', 'seconds')} : Calculating wave number for modes: {values['mode'].lower()}")
             alum.plot_wave_number(modes = values['mode'].lower())
 
-
-
-
             # Plot wave structure (displacement profiles across thickness) for A0
             # and S0 modes at different fd values.
 
@@ -129,6 +123,10 @@ def main():
             # alum.save_results()
 
             plt.show(block = False)
+
+        elif event == 'Close':
+            plt.close(fig = 'all')
+
 
     main_window.close()
 
