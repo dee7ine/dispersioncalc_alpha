@@ -60,8 +60,11 @@ def main():
         if event in ('Load'):
             #IsotropicMaterial.fix_file_path(values['-data_path-'])
             #data, choices = IsotropicMaterial._parse_materials()
+            IsotropicMaterial.fix_file_path(filepath = values['-data_path-'])
 
-            main_window.refresh()
+            data, choices = IsotropicMaterial._parse_materials()
+            main_window.find_element('material_name').Update(values = choices)
+
         elif event == 'Calculate and plot':
 
             print(datetime.now())
