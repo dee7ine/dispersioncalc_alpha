@@ -70,17 +70,17 @@ Email:          francisco.rotea@gmail.com
 """
 
 import numpy as np
-
 import matplotlib.pyplot as plt
-import matplotlib.animation
-
 import scipy.optimize
+import logging
 
 from plot_utilities import add_plot, add_cutoff_freqs, add_velocities
 from utilities import interpolate, correct_instability, write_txt, find_max
 from material_editor.materials import IsotropicMaterial
 from Exceptions import IncorrectMode
-#from rich import print
+
+
+logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
 
 
 class Lamb:
@@ -131,32 +131,33 @@ class Lamb:
 
     def __init__(self, thickness, nmodes_sym, nmodes_antisym, fd_max, vp_max,
                  c_L, c_S, c_R=None, fd_points=100, vp_step=100,
-                 material=''):
+                 material='') -> None:
         """"
         Parameters
         ----------
-        thickness : float or int
-            Thickness of the plate, in mm.
-        nmodes_sym : int
-            Number of symmetric modes to calculate.
-        nmodes_antisym : int
-            Number of antisymmetric modes to calculate.
-        fd_max : float or int
-            Maximum value of frequency × thickness to calculate.
-        vp_max : float or int
-            Maximum value of phase velocity to calculate, in m/s.
-        c_L : float or int
-            Longitudinal wave velocity of the material, in m/s.
-        c_S: float or int
-            Shear wave velocity of the material, in m/s.
-        c_R: float or int, optional
-            Rayleigh wave velocity of the material, in m/s.
-        fd_points : int, optional
-            Number of frequency × thickness points.
-        vp_step : int, optional
-            Increment between phase velocity intervals.
-        material : str, optional
-            Name of the material being analyzed.
+        :param thickness : thickness of the plate, in mm.
+        :type  thickness : float/int
+        :param nmodes_sym : number of symmetric modes to calculate.
+        :type nmodes_sym : int
+        :param nmodes_antisym : number of antisymmetric modes to calculate.
+        :type nmodes_antisym : int
+        :param fd_max : maximum value of frequency × thickness to calculate.
+        :type fd_max : float/int
+        :param vp_max : maximum value of phase velocity to calculate, in m/s.
+        :type vp_max : float/int
+        :param c_L : Longitudinal wave velocity of the material, in m/s.
+        :type : float/int
+        :param c_S : shear wave velocity of the material, in m/s.
+        :type c_S : float/int
+        :param c_R : rayleigh wave velocity of the material, in m/s.
+        :type c_R : float or int, optional
+        :param fd_points : number of frequency × thickness points.
+        :type fd_points : int, optional
+        :param vp_step : increment between phase velocity intervals.
+        :type vp_step : int, optional
+        :param material : name of the material being analyzed.
+        :type material : str, optional
+
 
         """
 
