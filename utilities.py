@@ -3,33 +3,33 @@ import itertools
 import numpy as np
 import scipy.interpolate
 
-def interpolate(result, d, kind='cubic') -> dict:
+def interpolate(result: dict, d, kind='cubic') -> dict:
     """Interpolate the results for phase velocity, group velocity and
     wave number.
     
     Parameters
     ----------
-    :param result :
+    :param result:
         Dictionary with the phase velocity values obtained by solving
         the dispersion equations.
-    :type result : dict
-    :param kind :
+    :type result: dict
+    :param kind:
         Specifies the kind of interpolation as a string. Can be
         ‘linear’, ‘nearest’, ‘zero’, ‘slinear’, ‘quadratic’, ‘cubic’, 
         ‘previous’, ‘next’. Defaults to 'cubic'.
-    :type kind : str, optional
+    :type kind: str, optional
         
     --------------------
 
-    :return interp_vp :
+    :return interp_vp:
         Dictionary with phase velocity interpolator at each mode.
-    :type interp_vp : dict
-    :return interp_vg :
+    :type interp_vp: dict
+    :return interp_vg:
         Dictionary with group velocity interpolator at each mode.
-    :type interp_vg : dict
-    :return interp_k :
+    :type interp_vg: dict
+    :return interp_k:
         Dictionary with wave number interpolator at each mode.
-    :type interp_k : dict
+    :type interp_k: dict
         
     """
     
@@ -138,18 +138,18 @@ def write_txt(data_sym: dict, data_antisym: dict, kind, filename, header):
     
     Parameters
     ----------
-    paramdata_sym : dict
+    paramdata_sym: dict
         A dictionary consisting of interpolators for the specified 
         symmetric modes.
-    data_antisym : dict
+    data_antisym: dict
         A dictionary consisting of interpolators for the specified 
         antisymmetric modes.
-    kind : {'Phase Velocity', 'Group Velocity', 'Wavenumber'}
+    kind: {'Phase Velocity', 'Group Velocity', 'Wavenumber'}
         The type of results to write. Can be 'Phase Velocity', 'Group
         Velocity' or 'Wavenumber'.
-    filename : str
+    filename: str
         The filename of the txt file.
-    header : str
+    header: str
         The header of the txt file (to include material information for 
         example)
 
@@ -200,7 +200,7 @@ def find_max(result):
     
     Parameters
     ---------- 
-    result : dict
+    result: dict
         A dictionary with a result (vp, vg or k) interpolator at each 
         mode.
         
