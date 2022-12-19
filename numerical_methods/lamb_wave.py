@@ -135,28 +135,28 @@ class Lamb:
         """"
         Parameters
         ----------
-        :param thickness : thickness of the plate, in mm.
-        :type  thickness : float/int
-        :param nmodes_sym : number of symmetric modes to calculate.
-        :type nmodes_sym : int
-        :param nmodes_antisym : number of antisymmetric modes to calculate.
-        :type nmodes_antisym : int
-        :param fd_max : maximum value of frequency × thickness to calculate.
-        :type fd_max : float/int
-        :param vp_max : maximum value of phase velocity to calculate, in m/s.
-        :type vp_max : float/int
-        :param c_L : Longitudinal wave velocity of the material, in m/s.
-        :type : float/int
-        :param c_S : shear wave velocity of the material, in m/s.
-        :type c_S : float/int
-        :param c_R : rayleigh wave velocity of the material, in m/s.
-        :type c_R : float or int, optional
-        :param fd_points : number of frequency × thickness points.
-        :type fd_points : int, optional
-        :param vp_step : increment between phase velocity intervals.
-        :type vp_step : int, optional
-        :param material : name of the material being analyzed.
-        :type material : str, optional
+        :param thickness:               thickness of the plate, in mm.
+        :type  thickness:               float/int
+        :param nmodes_sym:              number of symmetric modes to calculate.
+        :type nmodes_sym:               int
+        :param nmodes_antisym:          number of antisymmetric modes to calculate.
+        :type nmodes_antisym:           int
+        :param fd_max:                  maximum value of frequency × thickness to calculate.
+        :type fd_max:                   float/int
+        :param vp_max:                  maximum value of phase velocity to calculate, in m/s.
+        :type vp_max:                   float/int
+        :param c_L:                     Longitudinal wave velocity of the material, in m/s.
+        :type:                          float/int
+        :param c_S:                     shear wave velocity of the material, in m/s.
+        :type c_S:                      float/int
+        :param c_R:                     rayleigh wave velocity of the material, in m/s.
+        :type c_R:                      float or int, optional
+        :param fd_points:               number of frequency × thickness points.
+        :type fd_points:                int, optional
+        :param vp_step:                 increment between phase velocity intervals.
+        :type vp_step:                  int, optional
+        :param material:                name of the material being analyzed.
+        :type material:                 str, optional
 
 
         """
