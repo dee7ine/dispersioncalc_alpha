@@ -230,7 +230,6 @@ class Lamb:
         q = np.sqrt((omega / self.c_S) ** 2 - k ** 2, dtype=np.complex128)
 
         return k, p, q
-        print(f"{k}\n{p}\n{q}")
 
     def _symmetric(self, vp: float, fd: float) -> float:
         """Rayleigh-Lamb frequency relation for symmetric modes, used to
@@ -437,7 +436,7 @@ class Lamb:
         """
 
         fig, ax = plt.subplots(figsize=(7, 4))
-        fig.canvas.set_window_title(f'Phase Velocity for {self.d * 10**3} mm thick {self.material}')
+        fig.canvas.setWindowTitle(f'Phase Velocity for {self.d * 10**3} mm thick {self.material}')
 
         # Calculate the maximum value to scale the ylim of the axes.
 
@@ -500,7 +499,7 @@ class Lamb:
         """
 
         fig, ax = plt.subplots(figsize=(7, 4))
-        fig.canvas.set_window_title(f'Group Velocity for {self.d * 10**3} mm thick {self.material}')
+        fig.canvas.setWindowTitle(f'Group Velocity for {self.d * 10**3} mm thick {self.material}')
 
         # Calculate the maximum value to scale the ylim of the axes.
 
@@ -561,7 +560,7 @@ class Lamb:
         """
 
         fig, ax = plt.subplots(figsize=(7, 4))
-        fig.canvas.set_window_title(f'Wave Number for {self.d * 10**3} mm thick {self.material}')
+        fig.canvas.setWindowTitle(f'Wave Number for {self.d * 10**3} mm thick {self.material}')
 
         # Calculate the maximum value to scale the ylim of the axes.
 
