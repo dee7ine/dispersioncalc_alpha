@@ -1,29 +1,37 @@
 import os
 import sys
-from matplotlib import use
 import matplotlib.pyplot as plt
 import numpy as np
 from datetime import datetime
 
-import PySimpleGUI as sg; use('qt5agg')
+import PySimpleGUI as sg #use('qt5agg')
 
 from material_editor.materials import IsotropicMaterial
 from numerical_methods.lamb_wave import Lamb
 
+import logging
+
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
+console_handler = logging.StreamHandler()
+console_handler.setLevel(logging.DEBUG)
+logger.addHandler(console_handler)
+
 def main():
     sg.theme('SystemDefaultForReal')
 
+    default_data_path = f'{os.getcwd()}\material_editor\material_data.txt'
     data, choices = IsotropicMaterial._parse_materials()
     modes = ['Symmetric', 'Antisymmetric', 'Both']
 
     console_frame_layout = [[sg.Multiline(f"Beginning session {datetime.now().isoformat(' ', 'seconds')}", size=(100, 10), autoscroll=True,
-                                  reroute_stdout=True, reroute_stderr=True, key='-OUTPUT-', background_color='lightgrey')]]
+                                  reroute_stdout=True, reroute_stderr=True, key='-OUTPUT-', background_color='white')]]
 
     material_frame_layout = [[sg.Text("E [MPa]"), sg.Input('68.9', enable_events=True, key='young_modulus', size=(6,5))],
                              [sg.Text("v [no unit]"), sg.Input('0.33', enable_events=True, key='poisson_ratio', size=(6, 5))],
                              [sg.Text("Density [kg/m3]"), sg.Input('2700', enable_events=True, key='density', size=(6, 5))],
                             [sg.Text('Material data path'),
-                              sg.InputText(f'{os.getcwd()}\material_editor\material_data.txt', key='-data_path-', size=(75, 22))],
+                              sg.InputText(default_text=default_data_path, key='-data_path-', size=(75, 22))],
                              [sg.FileBrowse(file_types=(("TXT Files", "*.txt"), ("ALL Files", "*.*")), enable_events=True, target='-data_path-'),
                               sg.Button('Load', tooltip="Load data file")]]
 
@@ -62,6 +70,7 @@ def main():
 
             data, choices = IsotropicMaterial._parse_materials()
             main_window.find_element('material_name').Update(values=choices)
+            logger.info('Calculating phase velocity')
             print(f"{datetime.now().isoformat(' ', 'seconds')}: Data file updated")
 
         elif event == 'Calculate and plot':
@@ -102,6 +111,7 @@ def main():
             """Plot phase velocity, group velocity and wavenumber."""
 
             #print(f"{datetime.now().isoformat(' ', 'seconds')} : Calculating phase velocity for modes: {values['mode'].lower()}")
+            logging.debug('Calculating phase velocity')
             alum.plot_phase_velocity(modes = values['mode'].lower())
             #print(f"{datetime.now().isoformat(' ', 'seconds')} : Calculating group velocity for modes: {values['mode'].lower()}")
             alum.plot_group_velocity(modes = values['mode'].lower())
