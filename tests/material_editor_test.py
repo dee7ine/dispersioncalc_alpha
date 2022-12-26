@@ -1,5 +1,5 @@
 import unittest
-from material_editor.materials import IsotropicMaterial
+from material_editor.Materials import IsotropicMaterial
 
 class Test_Material_Editor(unittest.TestCase):
     def test_create_new_material(self):

@@ -74,9 +74,9 @@ import matplotlib.pyplot as plt
 import scipy.optimize
 import logging
 
-from plot_utilities import add_plot, add_cutoff_freqs, add_velocities
-from utilities import interpolate, correct_instability, write_txt, find_max
-from material_editor.materials import IsotropicMaterial
+from Plot_utilities import add_plot, add_cutoff_freqs, add_velocities
+from Utilities import interpolate, correct_instability, write_txt, find_max
+from material_editor.Materials import IsotropicMaterial
 from Exceptions import IncorrectMode
 
 

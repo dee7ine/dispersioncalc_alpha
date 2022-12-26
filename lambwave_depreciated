@@ -7,8 +7,8 @@ from scipy import optimize
 from decorators import timeit
 #from numerical_methods.wave_class import Wave
 import numpy as np
-from plot_utilities import add_plot, add_cutoff_freqs, add_velocities
-from utilities import find_max
+from Plot_utilities import add_plot, add_cutoff_freqs, add_velocities
+from Utilities import find_max
 
 @dataclass
 class LambWave:

@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import PySimpleGUI as sg  # use('qt5agg')
 
-from material_editor.materials import IsotropicMaterial
+from material_editor.Materials import IsotropicMaterial
 from numerical_methods.lamb_wave import Lamb
 
 
@@ -27,18 +27,19 @@ class UI:
     _data: list
     _choices: list
 
-
     def __init__(self) -> None:
 
         sg.theme('SystemDefaultForReal')
         self._data, self._choices = IsotropicMaterial._parse_materials()
+
         self._menu_layout = self._menu_layout()
         self._console_frame_layout = self._console_frame_layout()
         self._material_frame_layout = self._material_frame_layout()
         self._main_frame_layout = self._main_frame_layout()
 
         self.main_window = sg.Window(title='Counter Strike: Global Offensive',
-                                     layout=self._main_frame_layout, size=(1250, 750))
+                                     layout=self._main_frame_layout,
+                                     size=(1250, 750))
         self._app_main_loop()
 
     def _menu_layout(self) -> list:
@@ -60,43 +61,41 @@ class UI:
     def _material_frame_layout(self) -> list:
 
         return [[sg.Frame('', layout=[[sg.Text("E [MPa]"), sg.Input('68.9', enable_events=True, key='young_modulus', size=(6, 5))],
-            [sg.Text(text="v [no unit]"), sg.Input('0.33', enable_events=True, key='poisson_ratio', size=(6, 5))],
-            [sg.Text(text="Density [kg/m3]"), sg.Input('2700', enable_events=True, key='density', size=(6, 5))],
-            [sg.Text("C11"), sg.Input('0', enable_events=True, key='C11', size=(6, 5))],
-            [sg.Text("C66"), sg.Input('0', enable_events=True, key='C66', size=(6, 5))],
-            [sg.Text("Material name"), sg.Input('default', enable_events=True, key='new_material_name', size=(6, 5))],
-            [sg.Button('Create', key='Create', tooltip='Add material to data file')]], size=(250, 200))],  #size=(200,140)
-            [sg.Frame('', layout=[[sg.Text('Material data path'),
-            sg.InputText(default_text=self._default_data_path, key='-data_path-', size=(75, 22))],
-            [sg.FileBrowse(file_types=(("TXT Files", "*.txt"), ("ALL Files", "*.*")), enable_events=True,
-            target='-data_path-', tooltip="Choose file containing material data"),
-            sg.Button('Load', tooltip="Load data file"), sg.Button('Help', key='Material_Help', tooltip='Helpful tips')]])]]
+                [sg.Text(text="v [no unit]"), sg.Input('0.33', enable_events=True, key='poisson_ratio', size=(6, 5))],
+                [sg.Text(text="Density [kg/m3]"), sg.Input('2700', enable_events=True, key='density', size=(6, 5))],
+                [sg.Text("C11"), sg.Input('0', enable_events=True, key='C11', size=(6, 5))],
+                [sg.Text("C66"), sg.Input('0', enable_events=True, key='C66', size=(6, 5))],
+                [sg.Text("Material name"), sg.Input('default', enable_events=True, key='new_material_name', size=(6, 5))],
+                [sg.Button('Create', key='Create', tooltip='Add material to data file')]], size=(250, 200))],
+                [sg.Frame('', layout=[[sg.Text('Material data path'),
+                sg.InputText(default_text=self._default_data_path, key='-data_path-', size=(75, 22))],
+                [sg.FileBrowse(file_types=(("TXT Files", "*.txt"), ("ALL Files", "*.*")), enable_events=True,
+                target='-data_path-', tooltip="Choose file containing material data"),
+                sg.Button('Load', tooltip="Load data file"), sg.Button('Help', key='Material_Help', tooltip='Helpful tips')]])]]
 
 
     def _main_frame_layout(self) -> list:
 
         return [[sg.Menu(self._menu_layout, tearoff=False)],
-            [sg.Frame('Lamb waves', layout=[[sg.Frame('Parameters', layout=[[sg.Text('Material'),
-         sg.InputCombo(values=self._choices, default_value="AluminumDisperse", key="material_name", enable_events=True,
-                       size=(33, 20)), sg.Stretch()], [sg.Text('Symmetry modes'),
-         sg.InputCombo(values=self._modes, default_value='Symmetric', key='mode', enable_events=True, size=(25, 20))],
-         [sg.Text('Thickness [mm]             '),
-         sg.Input('10', enable_events=True, key='thickness', size=(6, 5), justification='left')],
-         [sg.Text('Frequency [Hz]              '),
-         sg.Input('1000', enable_events=True, key='frequency', size=(6, 5), justification='left')],
-         [sg.Text('Maximum velocity [m/s]  '),
-         sg.Input('15000', enable_events=True, key='velocity', size=(6, 5), justification='left')],
-         [sg.Frame('', layout=[[sg.Text('Number of modes')], [sg.Text('Symmetric     '), sg.Input('10', enable_events=True, key='symmetric', size=(5, 5))],
-         [sg.Text('Antisymmetric'), sg.Input('10', enable_events=True, key='antisymmetric', size=(5, 5))]])]])],
-         [sg.Button('Calculate and plot', tooltip="Calculate and plot dispersion curves \n for given material data"),
-         sg.Button('Close', tooltip='Close all already open plots'),
-         sg.Cancel(), sg.Button('Help', key="Lamb_Help", tooltip="Helpful tips")]]),
-         sg.Frame('Material editor', layout=self._material_frame_layout, tooltip="Material editing module")],
-         [sg.Frame("Output", layout=self._console_frame_layout)]]
-
+                [sg.Frame('Lamb waves', layout=[[sg.Frame('Parameters', layout=[[sg.Text('Material'),
+                sg.InputCombo(values=self._choices, default_value="AluminumDisperse", key="material_name", enable_events=True, readonly=True,
+                background_color='white', size=(33, 20)), sg.Stretch()], [sg.Text('Symmetry modes'),
+                sg.InputCombo(values=self._modes, default_value='Symmetric', key='mode', enable_events=True, readonly=True, background_color='white', size=(25, 20))],
+                [sg.Text('Thickness [mm]             '),
+                sg.Input('10', enable_events=True, key='thickness', size=(6, 5), justification='left')],
+                [sg.Text('Frequency [Hz]              '),
+                sg.Input('1000', enable_events=True, key='frequency', size=(6, 5), justification='left')],
+                [sg.Text('Maximum velocity [m/s]  '),
+                sg.Input('15000', enable_events=True, key='velocity', size=(6, 5), justification='left')],
+                [sg.Frame('', layout=[[sg.Text('Number of modes')], [sg.Text('Symmetric     '), sg.Input('10', enable_events=True, key='symmetric', size=(5, 5))],
+                [sg.Text('Antisymmetric'), sg.Input('10', enable_events=True, key='antisymmetric', size=(5, 5))]])]])],
+                [sg.Button('Calculate and plot', tooltip="Calculate and plot dispersion curves \n for given material data"),
+                sg.Button('Close', tooltip='Close all already open plots'),
+                sg.Cancel(), sg.Button('Help', key="Lamb_Help", tooltip="Helpful tips")]]),
+                sg.Frame('Material editor', layout=self._material_frame_layout, tooltip="Material editing module")],
+                [sg.Frame("Output", layout=self._console_frame_layout)]]
 
     def _app_main_loop(self) -> None:
-
 
         try:
 
