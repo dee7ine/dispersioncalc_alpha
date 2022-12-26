@@ -533,7 +533,9 @@ class Lamb:
 
     def plot_wave_number(self, modes='both', save_img=False,
                          sym_style={'color': 'blue'},
-                         antisym_style={'color': 'red', 'linestyle': '--'}):
+                         antisym_style={'color': 'red', 'linestyle': '--'},
+                         size=(7,4)):
+
         """Generate a plot of wavenumber as a function of frequency ×
         thickness.
 
@@ -559,7 +561,7 @@ class Lamb:
 
         """
 
-        fig, ax = plt.subplots(figsize=(7, 4))
+        fig, ax = plt.subplots(figsize=size)
         fig.canvas.setWindowTitle(f'Wave Number for {self.d * 10**3} mm thick {self.material}')
 
         # Calculate the maximum value to scale the ylim of the axes.
