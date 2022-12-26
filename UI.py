@@ -1,9 +1,11 @@
 import os
 import logging
 from datetime import datetime
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import matplotlib.pyplot as plt
 import numpy as np
 import PySimpleGUI as sg  # use('qt5agg')
+
 
 from material_editor.Materials import IsotropicMaterial
 from numerical_methods.lamb_wave import Lamb
@@ -71,7 +73,7 @@ class UI:
                 sg.InputText(default_text=self._default_data_path, key='-data_path-', size=(75, 22))],
                 [sg.FileBrowse(file_types=(("TXT Files", "*.txt"), ("ALL Files", "*.*")), enable_events=True,
                 target='-data_path-', tooltip="Choose file containing material data"),
-                sg.Button('Load', tooltip="Load data file"), sg.Button('Help', key='Material_Help', tooltip='Helpful tips')]])]]
+                sg.Button('Load', tooltip="Load data file"), sg.Button('Help', key='Material_Help', tooltip='Helpful tips')]], size=(370,60))]]
 
 
     def _main_frame_layout(self) -> list:
@@ -92,8 +94,14 @@ class UI:
                 [sg.Button('Calculate and plot', tooltip="Calculate and plot dispersion curves \n for given material data"),
                 sg.Button('Close', tooltip='Close all already open plots'),
                 sg.Cancel(), sg.Button('Help', key="Lamb_Help", tooltip="Helpful tips")]]),
-                sg.Frame('Material editor', layout=self._material_frame_layout, tooltip="Material editing module")],
+                sg.Frame('Material editor', layout=self._material_frame_layout, tooltip="Material editing module"), sg.Frame('Plot', layout=[[sg.Canvas(size=(500,300), key = '-canvas-')]])],
                 [sg.Frame("Output", layout=self._console_frame_layout)]]
+
+    def _draw_figure(self, canvas, figure):
+        figure_canvas_agg = FigureCanvasTkAgg(figure, canvas)
+        figure_canvas_agg.draw()
+        figure_canvas_agg.get_tk_widget().pack(side='top', fill='both', expand=1)
+        return figure_canvas_agg
 
     def _app_main_loop(self) -> None:
 
@@ -102,6 +110,7 @@ class UI:
             while True:
 
                 event, values = self.main_window.read()
+
 
                 if event in (None, 'Cancel'):
 
@@ -176,6 +185,8 @@ class UI:
                     alum.plot_group_velocity(modes=values['mode'].lower())
                     # print(f"{datetime.now().isoformat(' ', 'seconds')} : Calculating wave number for modes: {values['mode'].lower()}")
                     alum.plot_wave_number(modes=values['mode'].lower())
+
+                    #fig_canvas_agg = self._draw_figure(self.main_window['-canvas-'].TKCanvas, alum.plot_wave_number(modes=values['mode'].lower(), size=(5,5))[0])
 
                     """Plot wave structure (displacement profiles across thickness) for A0
                                 and S0 modes at different fd values."""
