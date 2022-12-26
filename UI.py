@@ -41,7 +41,7 @@ class UI:
 
         self.main_window = sg.Window(title='Counter Strike: Global Offensive',
                                      layout=self._main_frame_layout,
-                                     size=(1250, 750))
+                                     size=(1250, 650))
         self._app_main_loop()
 
     def _menu_layout(self) -> list:
@@ -73,7 +73,7 @@ class UI:
                 sg.InputText(default_text=self._default_data_path, key='-data_path-', size=(75, 22))],
                 [sg.FileBrowse(file_types=(("TXT Files", "*.txt"), ("ALL Files", "*.*")), enable_events=True,
                 target='-data_path-', tooltip="Choose file containing material data"),
-                sg.Button('Load', tooltip="Load data file"), sg.Button('Help', key='Material_Help', tooltip='Helpful tips')]], size=(370,60))]]
+                sg.Button('Load', tooltip="Load data file"), sg.Button('Help', key='Material_Help', tooltip='Helpful tips')]], size=(500,60))]]
 
 
     def _main_frame_layout(self) -> list:
@@ -90,18 +90,37 @@ class UI:
                 [sg.Text('Maximum velocity [m/s]  '),
                 sg.Input('15000', enable_events=True, key='velocity', size=(6, 5), justification='left')],
                 [sg.Frame('', layout=[[sg.Text('Number of modes')], [sg.Text('Symmetric     '), sg.Input('10', enable_events=True, key='symmetric', size=(5, 5))],
-                [sg.Text('Antisymmetric'), sg.Input('10', enable_events=True, key='antisymmetric', size=(5, 5))]])]])],
+                [sg.Text('Antisymmetric'), sg.Input('10', enable_events=True, key='antisymmetric', size=(5, 5))],
+                [sg.Text('Trace SH modes'), sg.Checkbox('',size=(5,5))]])]])],
                 [sg.Button('Calculate and plot', tooltip="Calculate and plot dispersion curves \n for given material data"),
                 sg.Button('Close', tooltip='Close all already open plots'),
                 sg.Cancel(), sg.Button('Help', key="Lamb_Help", tooltip="Helpful tips")]]),
-                sg.Frame('Material editor', layout=self._material_frame_layout, tooltip="Material editing module"), sg.Frame('Plot', layout=[[sg.Canvas(size=(500,300), key = '-canvas-')]])],
+                sg.Frame('Material editor', layout=self._material_frame_layout, tooltip="Material editing module"), sg.Frame('Plot', layout=[[sg.Canvas(size=(300,300), key = '-canvas-')]])],
                 [sg.Frame("Output", layout=self._console_frame_layout)]]
 
     def _draw_figure(self, canvas, figure):
+
         figure_canvas_agg = FigureCanvasTkAgg(figure, canvas)
         figure_canvas_agg.draw()
         figure_canvas_agg.get_tk_widget().pack(side='top', fill='both', expand=1)
         return figure_canvas_agg
+
+    def _model(self):
+
+        axes = [2, 2, 5]
+
+        data = np.ones(axes, dtype=np.bool_)
+
+        alpha = 0.9
+
+        colors = np.empty(axes + [4], dtype=np.float32)
+        colors[:] = [1, 1, 1, alpha]
+
+        fig = plt.figure(figsize=(3, 3))
+        ax = fig.add_subplot(111, projection='3d')
+
+        ax.voxels(data, facecolors=colors)
+        return fig, ax
 
     def _app_main_loop(self) -> None:
 
@@ -110,7 +129,6 @@ class UI:
             while True:
 
                 event, values = self.main_window.read()
-
 
                 if event in (None, 'Cancel'):
 
@@ -136,6 +154,7 @@ class UI:
                     data, choices = IsotropicMaterial._parse_materials()
                     self.main_window.find_element('material_name').Update(values=choices)
                     logger.info('Calculating phase velocity')
+                    fig_canvas_agg = self._draw_figure(self.main_window['-canvas-'].TKCanvas, self._model()[0])
                     print(f"{datetime.now().isoformat(' ', 'seconds')}: Data file updated")
 
                 elif event == 'Calculate and plot':
@@ -178,33 +197,13 @@ class UI:
                     Plot phase velocity, group velocity and wavenumber.
                     """
 
-                    # print(f"{datetime.now().isoformat(' ', 'seconds')} : Calculating phase velocity for modes: {values['mode'].lower()}")
+                    print(f"{datetime.now().isoformat(' ', 'seconds')}: Calculating phase velocity for modes: {values['mode'].lower()}")
                     logging.debug('Calculating phase velocity')
                     alum.plot_phase_velocity(modes=values['mode'].lower())
-                    # print(f"{datetime.now().isoformat(' ', 'seconds')} : Calculating group velocity for modes: {values['mode'].lower()}")
+                    print(f"{datetime.now().isoformat(' ', 'seconds')}: Calculating group velocity for modes: {values['mode'].lower()}")
                     alum.plot_group_velocity(modes=values['mode'].lower())
-                    # print(f"{datetime.now().isoformat(' ', 'seconds')} : Calculating wave number for modes: {values['mode'].lower()}")
+                    print(f"{datetime.now().isoformat(' ', 'seconds')}: Calculating wave number for modes: {values['mode'].lower()}")
                     alum.plot_wave_number(modes=values['mode'].lower())
-
-                    #fig_canvas_agg = self._draw_figure(self.main_window['-canvas-'].TKCanvas, alum.plot_wave_number(modes=values['mode'].lower(), size=(5,5))[0])
-
-                    """Plot wave structure (displacement profiles across thickness) for A0
-                                and S0 modes at different fd values."""
-
-                    # alum.plot_wave_structure(mode='A0', nrows=3, ncols=2,
-                    # fd=[500,1000,1500,2000,2500,3000])
-
-                    # alum.plot_wave_structure(mode='S0', nrows=4, ncols=2,
-                    # fd=[500,1000,1500,2000,2500,3000,3500,4000])
-
-                    # Generate animations for A0 and S0 modes at 1000 kHz mm.
-
-                    # alum.animate_displacement(mode='S0', fd=1000)
-                    # alum.animate_displacement(mode='A0', fd=1000)
-
-                    # Save all results to a txt file.
-
-                    # alum.save_results()
 
                     plt.show(block=False)
 

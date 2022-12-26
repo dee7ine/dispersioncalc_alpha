@@ -1,78 +1,8 @@
-"""A module with tools to calculate and plot Lamb wave dispersion
-curves.
-
-Usage:
-
-First, you need to create an instance of the Lamb class:
-
-    mat = Lamb(thickness, nmodes_sym, nmodes_antisym, fd_max, vp_max,
-               c_L, c_S [, c_R=None][, fd_points=100][, vp_step=100]
-               [, material=''])
-
-Then, you can use this instance with the following methods:
-
-    plot_phase_velocity(modes, cutoff_frequencies, material_velocities,
-                        save_img, sym_style, antisym_style):
-        Plot phase velocity as a function of frequency × thickness.
-    plot_group_velocity(modes, cutoff_frequencies, save_img, sym_style,
-                        antisym_style):
-        Plot group velocity as a function of frequency × thickness.
-    plot_wave_number(modes, save_img, sym_style, antisym_style):
-        Plot wavenumber as a function of frequency × thickness.
-    plot_wave_structure(mode, nrows, ncols, fd, save_img, inplane_style,
-                        outofplane_style):
-        Plot particle displacement across the thickness of the plate.
-    animate_displacement(mode, fd, speed, save_gif, save_video):
-        Generate an animation of the displacement vector field.
-    save_results()
-        Save all results to a txt file.
-
-You can also use the following attributes:
-
-    vp_sym:
-        Phase velocity interpolators for symmetric modes.
-    vg_sym:
-        Group velocity interpolators for symmetric modes.
-    k_sym:
-        Wavenumber interpolators for symmetric modes.
-    vp_antisym:
-        Phase velocity interpolators for antisymmetric modes.
-    vg_antisym:
-        Group velocity interpolators for antisymmetric modes.
-    k_antisym:
-       Wavenumber interpolators for antisymmetric modes.
-
-For example, if you need the phase velocity for the S0 mode at 1000
-kHz × mm, you can do:
-
-    mat.vp_sym['S0'](1000)
-
-You can also use a `np.array` instead of a single fd value. Always make
-sure that the fd values are within the valid range for the corresponding
-mode (i. e., above the cutoff frequency and below the fd_max you chose).
-Also, make sure the mode selected is within the selected `nmodes`. For
-example, if you chose `nmodes_sym = 4`, you can use 'S0', 'S1', 'S2' or
-'S3'.
-
-For information about the equations implemented, please refer to:
-
-Rose, J. L., Ultrasonic Guided Waves in Solid Media, Chapter 6: Waves in
-Plates, Cambridge University Press, 2014.
-
-Graff, K. F., Wave Motion in Elastic Solids, Chapter 8: Wave Propagation
-in Plates and Rods, Dover Publications, 1975.
-
-Author:         Francisco Rotea
-                (Buenos Aires, Argentina)
-Repository:     https://github.com/franciscorotea
-Email:          francisco.rotea@gmail.com
-
-"""
-
 import numpy as np
 import matplotlib.pyplot as plt
 import scipy.optimize
 import logging
+from typing import Any
 
 from Plot_utilities import add_plot, add_cutoff_freqs, add_velocities
 from Utilities import interpolate, correct_instability, write_txt, find_max
@@ -84,50 +14,6 @@ logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S
 
 
 class Lamb:
-    """A class used to calculate and plot Lamb wave dispersion curves
-    for traction-free, homogeneous and isotropic plates. It also allows
-    to generate an animation of the displacement vector field.
-
-    Methods
-    -------
-    plot_phase_velocity(modes, cutoff_frequencies, material_velocities,
-                        save_img, sym_style, antisym_style):
-        Plot phase velocity as a function of frequency × thickness.
-    plot_group_velocity(modes, cutoff_frequencies, save_img, sym_style,
-                        antisym_style):
-        Plot group velocity as a function of frequency × thickness.
-    plot_wave_number(modes, save_img, sym_style, antisym_style):
-        Plot wavenumber as a function of frequency × thickness.
-    plot_wave_structure(mode, nrows, ncols, fd, save_img, inplane_style,
-                        outofplane_style):
-        Plot particle displacement across the thickness of the plate.
-    animate_displacement(mode, fd, speed, save_gif, save_video):
-        Generate an animation of the displacement vector field.
-    save_results()
-        Save all results to a txt file.
-
-    Attributes
-    ----------
-    vp_sym:
-        Dictionary with phase velocity interpolators for symmetric
-        modes.
-    vg_sym:
-        Dictionary with group velocity interpolators for symmetric
-        modes.
-    k_sym:
-        Dictionary with wavenumber interpolators for symmetric
-        modes.
-    vp_antisym:
-        Dictionary with phase velocity interpolators for antisymmetric
-        modes.
-    vg_antisym:
-        Dictionary with group velocity interpolators for antisymmetric
-        modes.
-    k_antisym:
-       Dictionary with wavenumber interpolators for antisymmetric
-       modes.
-
-    """
 
     def __init__(self, thickness, nmodes_sym, nmodes_antisym, fd_max, vp_max,
                  c_L, c_S, c_R=None, fd_points=100, vp_step=100,
@@ -167,14 +53,14 @@ class Lamb:
         self.nmodes_antisym = nmodes_antisym
         self.fd_max = fd_max
         self.vp_max = vp_max
-        self.c_L = c_L #* (10e-3/10e-6)
-        self.c_S = c_S #* (10e-3/10e-6)
+        self.c_L = c_L  # *(10e-3/10e-6)
+        self.c_S = c_S  # *(10e-3/10e-6)
         self.c_R = c_R
         self.fd_points = fd_points
         self.vp_step = vp_step
         self.material = material
 
-        #print(f"c_L = {self.c_L}, c_S = {self.c_S}, c_r = {self.c_R}")
+        # print(f"c_L = {self.c_L}, c_S = {self.c_S}, c_r = {self.c_R}")
 
         # Solve the dispersion equations.
 
@@ -200,7 +86,7 @@ class Lamb:
         self.vp_antisym, self.vg_antisym, self.k_antisym = interpolate(antisym,
                                                                        self.d)
 
-    def _calc_constants(self, vp: float, fd: float) -> float:
+    def _calc_constants(self, vp: float, fd: float) -> tuple[float | Any, Any, Any]:
         """Calculate the constants p and q (defined to simplify the
         dispersion equations) and wavenumber from a pair of phase
         velocity and frequency × thickness product.
@@ -294,7 +180,7 @@ class Lamb:
 
         for i, fd in enumerate(fd_arr):
 
-            print(f'{i}/{self.fd_points} - {np.around(fd, 1)} kHz × mm')
+            #print(f'{i}/{self.fd_points} - {np.around(fd, 1)} kHz × mm')
 
             result[i][0] = fd
 
@@ -324,8 +210,8 @@ class Lamb:
                             # take into account those values that
                             # evaluate to 0.01 or less).
 
-                            if (np.abs(function(bisection, fd)) < 1e-2 and not
-                            np.isclose(bisection, c)):
+                            if np.abs(function(bisection, fd)) < 1e-2 and not np.isclose(bisection, c):
+
                                 result[i][j] = bisection
                                 j += 1
 
@@ -350,7 +236,7 @@ class Lamb:
 
             result_dict[label + str(nmode)] = mode_result
 
-        print(result_dict)
+        #print(result_dict)
         return result_dict
 
     def plot(self, ax, result, y_max, cutoff_frequencies=False,
@@ -534,7 +420,7 @@ class Lamb:
     def plot_wave_number(self, modes='both', save_img=False,
                          sym_style={'color': 'blue'},
                          antisym_style={'color': 'red', 'linestyle': '--'},
-                         size=(7,4)):
+                         size=(7, 4)):
 
         """Generate a plot of wavenumber as a function of frequency ×
         thickness.
@@ -553,6 +439,7 @@ class Lamb:
             A dictionary with matplotlib kwargs to modify the
             antisymmetric curves (to change color, linewidth, linestyle,
             etc.).
+        size: list
 
         Returns
         -------
@@ -590,7 +477,7 @@ class Lamb:
 
         return fig, ax
 
-    def save_results(self):
+    def save_results(self) -> None:
         """Save all results to a txt file."""
 
         if self.material:
@@ -610,10 +497,11 @@ class Lamb:
         write_txt(self.k_sym, self.k_antisym, 'Wavenumber',
                   filename, header)
 
-def main():
+def main() -> None:
     # You can obtain the values of c_L and c_S and an approximate value for
     # c_R (if v > 0.3) from the material's mechanical properties by using
     # the following equations:
+
 
     new_material = IsotropicMaterial(material = "Ice")
     E = new_material._E  # E = Young's modulus, in Pa.
