@@ -1,17 +1,12 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import scipy.optimize
-import logging
 from typing import Any
 
-from Plot_utilities import add_plot, add_cutoff_freqs, add_velocities
-from Utilities import interpolate, correct_instability, write_txt, find_max
-from material_editor.Materials import IsotropicMaterial
+from numerical_methods.Plot_utilities import add_plot, add_cutoff_freqs, add_velocities
+from numerical_methods.Utilities import interpolate, correct_instability, write_txt, find_max
+from materials.Materials import IsotropicMaterial
 from Exceptions import IncorrectMode
-
-
-logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
-
 
 class Lamb:
 
@@ -498,12 +493,12 @@ class Lamb:
                   filename, header)
 
 def main() -> None:
+
     # You can obtain the values of c_L and c_S and an approximate value for
     # c_R (if v > 0.3) from the material's mechanical properties by using
     # the following equations:
 
-
-    new_material = IsotropicMaterial(material = "Ice")
+    new_material = IsotropicMaterial(material="Ice")
     E = new_material._E  # E = Young's modulus, in Pa.
     p = new_material._density  # p = Density (rho), in kg/m3.
     v = new_material._v  # v = Poisson's ratio (nu).

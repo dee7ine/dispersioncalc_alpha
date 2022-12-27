@@ -6,7 +6,7 @@ class IsotropicMaterial:
 
     #_frequency = 1000.00
 
-    _filename: str = r"C:\Users\deefi\PycharmProjects\dispersioncalc_alpha\material_editor\material_data.txt"
+    _filename: str = r"C:\Users\deefi\PycharmProjects\dispersioncalc_alpha\materials\material_data.txt"
 
     def __init__(self, material: str) -> None:
 
@@ -32,8 +32,7 @@ class IsotropicMaterial:
 
         self._name = material
 
-
-        parsed_list, material_names_list = self._parse_materials()
+        parsed_list, material_names_list = self.parse_materials()
 
         self._material_names_list = material_names_list
         self._index = self._find_material(mat = self._name)
@@ -56,7 +55,7 @@ class IsotropicMaterial:
         cls._filename = filepath
 
     @classmethod
-    def _parse_materials(cls):
+    def parse_materials(cls):
         with open(cls._filename, 'r') as material_data:
             material_data_list = material_data.readlines()
             parsed_material_data = [line.split(' ') for line in material_data_list]
@@ -68,7 +67,7 @@ class IsotropicMaterial:
             material_data.close()
             return parsed_material_data, material_names_list
     @classmethod
-    def _new_material(cls, name: str, mass_density: str, E: str, v: str, C11: str, C66: str):
+    def new_material(cls, name: str, mass_density: str, E: str, v: str, C11: str, C66: str):
         with open(cls._filename, 'a+') as material_data:
 
             new_material_data = []
@@ -82,7 +81,7 @@ class IsotropicMaterial:
             material_data.close()
 
     def _find_material(self, mat: str):
-        parsed_list, material_names_list = self._parse_materials()
+        parsed_list, material_names_list = self.parse_materials()
 
         for index, name in enumerate(material_names_list):
             #print(name)
@@ -102,4 +101,4 @@ def main():
     print(Lead._name)
 
 if __name__ == "__main__":
-    main()
+    ...

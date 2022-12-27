@@ -6,8 +6,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import PySimpleGUI as sg  # use('qt5agg')
 
-
-from material_editor.Materials import IsotropicMaterial
+from materials.Materials import IsotropicMaterial
 from numerical_methods.lamb_wave import Lamb
 
 
@@ -24,7 +23,7 @@ class UI:
     _console_frame_layout: list
     _material_frame_layout: list
     _main_frame_layout: list
-    _default_data_path: str = f'{os.getcwd()}\\material_editor\\material_data.txt'
+    _default_data_path: str = f'{os.getcwd()}\\materials\\material_data.txt'
     _modes = ['Symmetric', 'Antisymmetric', 'Both']
     _data: list
     _choices: list
@@ -32,7 +31,7 @@ class UI:
     def __init__(self) -> None:
 
         sg.theme('SystemDefaultForReal')
-        self._data, self._choices = IsotropicMaterial._parse_materials()
+        self._data, self._choices = IsotropicMaterial.parse_materials()
 
         self._menu_layout = self._menu_layout()
         self._console_frame_layout = self._console_frame_layout()
@@ -47,8 +46,8 @@ class UI:
     def _menu_layout(self) -> list:
 
         return [['File', ['Open', 'Save']],
-                    ['Edit', ['Paste', ['Special', 'Normal'], 'Undo']],
-                    ['Help', 'About...'], ]
+                ['Edit', ['Paste', ['Special', 'Normal'], 'Undo']],
+                ['Help', 'About...'], ]
 
     def _console_frame_layout(self) -> list:
 
@@ -75,7 +74,6 @@ class UI:
                 target='-data_path-', tooltip="Choose file containing material data"),
                 sg.Button('Load', tooltip="Load data file"), sg.Button('Help', key='Material_Help', tooltip='Helpful tips')]], size=(500,60))]]
 
-
     def _main_frame_layout(self) -> list:
 
         return [[sg.Menu(self._menu_layout, tearoff=False)],
@@ -91,11 +89,11 @@ class UI:
                 sg.Input('15000', enable_events=True, key='velocity', size=(6, 5), justification='left')],
                 [sg.Frame('', layout=[[sg.Text('Number of modes')], [sg.Text('Symmetric     '), sg.Input('10', enable_events=True, key='symmetric', size=(5, 5))],
                 [sg.Text('Antisymmetric'), sg.Input('10', enable_events=True, key='antisymmetric', size=(5, 5))],
-                [sg.Text('Trace SH modes'), sg.Checkbox('',size=(5,5))]])]])],
+                [sg.Text('Trace SH modes'), sg.Checkbox('', size=(5, 5))]])]])],
                 [sg.Button('Calculate and plot', tooltip="Calculate and plot dispersion curves \n for given material data"),
                 sg.Button('Close', tooltip='Close all already open plots'),
                 sg.Cancel(), sg.Button('Help', key="Lamb_Help", tooltip="Helpful tips")]]),
-                sg.Frame('Material editor', layout=self._material_frame_layout, tooltip="Material editing module"), sg.Frame('Plot', layout=[[sg.Canvas(size=(300,300), key = '-canvas-')]])],
+                sg.Frame('Material editor', layout=self._material_frame_layout, tooltip="Material editing module"), sg.Frame('Plot', layout=[[sg.Canvas(size=(300, 300), key='-canvas-')]])],
                 [sg.Frame("Output", layout=self._console_frame_layout)]]
 
     def _draw_figure(self, canvas, figure):
@@ -151,10 +149,10 @@ class UI:
                     print(f"{datetime.now().isoformat(' ', 'seconds')} : Loading material data...")
                     IsotropicMaterial.fix_file_path(filepath=values['-data_path-'])
 
-                    data, choices = IsotropicMaterial._parse_materials()
+                    data, choices = IsotropicMaterial.parse_materials()
                     self.main_window.find_element('material_name').Update(values=choices)
                     logger.info('Calculating phase velocity')
-                    fig_canvas_agg = self._draw_figure(self.main_window['-canvas-'].TKCanvas, self._model()[0])
+                    self._draw_figure(self.main_window['-canvas-'].TKCanvas, self._model()[0])
                     print(f"{datetime.now().isoformat(' ', 'seconds')}: Data file updated")
 
                 elif event == 'Calculate and plot':
@@ -209,12 +207,12 @@ class UI:
 
                 elif event == 'Create':
 
-                    IsotropicMaterial._new_material(name=values['new_material_name'],
-                                                    mass_density=values['density'],
-                                                    E=values['young_modulus'],
-                                                    v=values['poisson_ratio'],
-                                                    C11=values['C11'],
-                                                    C66=values['C66'])
+                    IsotropicMaterial.new_material(name=values['new_material_name'],
+                                                   mass_density=values['density'],
+                                                   E=values['young_modulus'],
+                                                   v=values['poisson_ratio'],
+                                                   C11=values['C11'],
+                                                   C66=values['C66'])
 
                 elif event == 'Close':
 
@@ -227,6 +225,5 @@ class UI:
 
 
 if __name__ == "__main__":
-
 
     ui = UI()
