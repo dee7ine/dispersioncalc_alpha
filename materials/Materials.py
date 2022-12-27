@@ -1,7 +1,7 @@
+from __future__ import annotations
 import os
-
 from dataclasses import dataclass
-from Exceptions import NoMaterialFound
+from Exceptions import NoMaterialFound, ErrorParsingMaterial
 
 
 @dataclass
@@ -9,7 +9,7 @@ class IsotropicMaterial:
 
     # _frequency = 1000.00
 
-    _filename: str = f'{os.getcwd()}\\materials\\material_data.txt'
+    _filename: str = f'{os.getcwd()}\\material_data.txt'
 
     def __init__(self, material: str) -> None:
 
@@ -38,7 +38,7 @@ class IsotropicMaterial:
         parsed_list, material_names_list = self.parse_materials()
 
         self._material_names_list = material_names_list
-        self._index = self._find_material(mat=self._name)
+        self._index = self._find_material(material=self._name)
 
         self._name: str = parsed_list[self._index][0]
         self._density = float(parsed_list[self._index][1])
@@ -59,68 +59,79 @@ class IsotropicMaterial:
         cls._filename = filepath
 
     @classmethod
-    def parse_materials(cls):
+    def parse_materials(cls) -> tuple[list[list[str]], list[str]]:
         with open(cls._filename, 'r') as material_data:
-            material_data_list = material_data.readlines()
-            parsed_material_data = [line.split(' ') for line in material_data_list]
+            try:
+                material_data_list = material_data.readlines()
+                parsed_material_data = [line.split(' ') for line in material_data_list]
 
-            material_names_list = []
-            for i in range(0, len(parsed_material_data)):
-                material_names_list.append(parsed_material_data[i][0])
+                material_names_list = []
+                for i in range(0, len(parsed_material_data)):
+                    material_names_list.append(parsed_material_data[i][0])
 
-            material_data.close()
-            return parsed_material_data, material_names_list
+                material_data.close()
+
+                return parsed_material_data, material_names_list
+
+            except Exception:
+                raise ErrorParsingMaterial
 
     @classmethod
-    def new_material(cls, name: str, mass_density: str, e: str, v: str, c11: str, c66: str):
+    def new_material(cls, name: str, density: str, e: str, v: str, c11: str, c66: str):
         with open(cls._filename, 'a+') as material_data:
 
             new_material_data = []
-            new_material_data.extend([name, mass_density, e, v, c11, c66])
+            new_material_data.extend([name, density, e, v, c11, c66])
 
             print(new_material_data)
 
             material_data.writelines("\n")
-            material_data.writelines(f"{name} {mass_density} {e} {v} {c11} {c66}")
+            if '.' in e:
+                material_data.writelines(f"{name} {density} {e.replace('.', '', 1)}00000000 {v} {c11} {c66}")
+            else:
+                material_data.writelines(f"{name} {density} {e}000000000 {v} {c11} {c66}")
 
             material_data.close()
 
-    def _find_material(self, mat: str):
+    def _find_material(self, material: str) -> int:
         parsed_list, material_names_list = self.parse_materials()
 
         for index, name in enumerate(material_names_list):
             # print(name)
-            if mat in name:
+            if material in name:
                 return index
                 # print(index)
         raise NoMaterialFound("No material found. You can create your own material in material editor!")
 
+    def _validate_data_file(self) -> bool:
+        ...
+
     @property
-    def name(self):
+    def name(self) -> str:
         return self._name
 
     @property
-    def density(self):
+    def density(self) -> float:
         return self._density
 
     @property
-    def e(self):
+    def e(self) -> float:
         return self._E
 
     @property
-    def v(self):
+    def v(self) -> float:
         return self._v
 
     @property
-    def c11(self):
+    def c11(self) -> float:
         return self._C11
 
     @property
-    def c66(self):
+    def c66(self) -> float:
         return self._C66
 
 
-def main():
+def main() -> None:
 
     """
     don't run
@@ -130,9 +141,9 @@ def main():
 
     Lead = IsotropicMaterial(material='Platinum')
     # print(getattr(material._name))
-    print(Lead.__getattribute__(Lead._name))
+    print(Lead.__getattribute__(Lead.name))
 
 
 if __name__ == "__main__":
 
-    ...
+    main()
