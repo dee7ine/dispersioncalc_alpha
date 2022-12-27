@@ -31,6 +31,7 @@ class UI:
     def __init__(self) -> None:
 
         sg.theme('SystemDefaultForReal')
+        IsotropicMaterial.fix_file_path(filepath=self._default_data_path)
         self._data, self._choices = IsotropicMaterial.parse_materials()
 
         self._menu_layout = self._menu_layout()
@@ -41,7 +42,7 @@ class UI:
         self.main_window = sg.Window(title='Counter Strike: Global Offensive',
                                      layout=self._main_frame_layout,
                                      size=(1250, 650))
-        self._app_main_loop()
+        # self._app_main_loop()
 
     def _menu_layout(self) -> list:
 
@@ -72,7 +73,7 @@ class UI:
                 sg.InputText(default_text=self._default_data_path, key='-data_path-', size=(75, 22))],
                 [sg.FileBrowse(file_types=(("TXT Files", "*.txt"), ("ALL Files", "*.*")), enable_events=True,
                 target='-data_path-', tooltip="Choose file containing material data"),
-                sg.Button('Load', tooltip="Load data file"), sg.Button('Help', key='Material_Help', tooltip='Helpful tips')]], size=(500,60))]]
+                sg.Button('Load', tooltip="Load data file"), sg.Button('Help', key='Material_Help', tooltip='Helpful tips')]], size=(500, 60))]]
 
     def _main_frame_layout(self) -> list:
 
@@ -96,14 +97,14 @@ class UI:
                 sg.Frame('Material editor', layout=self._material_frame_layout, tooltip="Material editing module"), sg.Frame('Plot', layout=[[sg.Canvas(size=(300, 300), key='-canvas-')]])],
                 [sg.Frame("Output", layout=self._console_frame_layout)]]
 
-    def _draw_figure(self, canvas, figure):
+    def __draw_figure(self, canvas, figure):
 
         figure_canvas_agg = FigureCanvasTkAgg(figure, canvas)
         figure_canvas_agg.draw()
         figure_canvas_agg.get_tk_widget().pack(side='top', fill='both', expand=1)
         return figure_canvas_agg
 
-    def _model(self):
+    def __model(self):
 
         axes = [2, 2, 5]
 
@@ -120,7 +121,7 @@ class UI:
         ax.voxels(data, facecolors=colors)
         return fig, ax
 
-    def _app_main_loop(self) -> None:
+    def app_main_loop(self) -> None:
 
         try:
 
@@ -151,8 +152,7 @@ class UI:
 
                     data, choices = IsotropicMaterial.parse_materials()
                     self.main_window.find_element('material_name').Update(values=choices)
-                    logger.info('Calculating phase velocity')
-                    self._draw_figure(self.main_window['-canvas-'].TKCanvas, self._model()[0])
+                    self.__draw_figure(self.main_window['-canvas-'].TKCanvas, self.__model()[0])
                     print(f"{datetime.now().isoformat(' ', 'seconds')}: Data file updated")
 
                 elif event == 'Calculate and plot':
@@ -173,9 +173,9 @@ class UI:
     
                     """
 
-                    E: float = new_material._E
-                    p: float = new_material._density
-                    v: float = new_material._v
+                    E: float = new_material.e
+                    p: float = new_material.density
+                    v: float = new_material.v
 
                     c_L = np.sqrt(E * (1 - v) / (p * (1 + v) * (1 - 2 * v)))
                     c_S = np.sqrt(E / (2 * p * (1 + v)))
@@ -209,10 +209,10 @@ class UI:
 
                     IsotropicMaterial.new_material(name=values['new_material_name'],
                                                    mass_density=values['density'],
-                                                   E=values['young_modulus'],
+                                                   e=values['young_modulus'],
                                                    v=values['poisson_ratio'],
-                                                   C11=values['C11'],
-                                                   C66=values['C66'])
+                                                   c11=values['C11'],
+                                                   c66=values['C66'])
 
                 elif event == 'Close':
 
