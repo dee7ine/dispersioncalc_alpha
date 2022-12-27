@@ -1,12 +1,11 @@
 import numpy as np
 
 import matplotlib.pyplot as plt
-import matplotlib.animation
 
 import scipy.optimize
 
-from Plot_utilities import add_plot, add_cutoff_freqs, add_velocities
-from Utilities import interpolate, correct_instability, write_txt, find_max
+from numerical_methods.Plot_utilities import add_plot, add_cutoff_freqs, add_velocities
+from numerical_methods.Utilities import interpolate, correct_instability, write_txt, find_max
 
 class Lamb:
     """A class used to calculate and plot Lamb wave dispersion curves 

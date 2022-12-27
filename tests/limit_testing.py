@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from tests.lambwaves import Lamb
-from material_editor.Materials import IsotropicMaterial
+from materials.Materials import IsotropicMaterial
 
 """
 In order to set up the Lamb class, you will need the following 

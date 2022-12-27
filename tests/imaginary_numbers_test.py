@@ -1,5 +1,5 @@
 import unittest
-from material_editor.imaginary_numbers import ImaginaryNumber
+from materials.imaginary_numbers import ImaginaryNumber
 
 im1 = ImaginaryNumber(real_part=5, imaginary_part=4, name = "test_name")
 im2 = ImaginaryNumber(real_part=10, imaginary_part=15)
