@@ -42,7 +42,6 @@ class UI:
         self.main_window = sg.Window(title='Counter Strike: Global Offensive',
                                      layout=self._main_frame_layout,
                                      size=(1250, 650))
-        # self._app_main_loop()
 
     def _menu_layout(self) -> list:
 
@@ -52,7 +51,7 @@ class UI:
 
     def _console_frame_layout(self) -> list:
 
-        return [[sg.Multiline(f"Beginning session {datetime.now().isoformat(' ', 'seconds')}",
+        return [[sg.Multiline(f"Beginning session {datetime.now().isoformat(' ', 'seconds')}\n",
                               size=(100, 10),
                               autoscroll=True,
                               reroute_stdout=True,
@@ -94,7 +93,7 @@ class UI:
                 [sg.Button('Calculate and plot', tooltip="Calculate and plot dispersion curves \n for given material data"),
                 sg.Button('Close', tooltip='Close all already open plots'),
                 sg.Cancel(), sg.Button('Help', key="Lamb_Help", tooltip="Helpful tips")]]),
-                sg.Frame('Material editor', layout=self._material_frame_layout, tooltip="Material editing module"), sg.Frame('Plot', layout=[[sg.Canvas(size=(300, 300), key='-canvas-')]])],
+                sg.Frame('Material editor', layout=self._material_frame_layout, tooltip="Material editing module"), sg.Frame('Geometry', layout=[[sg.Canvas(size=(300, 300), key='-canvas-')]])],
                 [sg.Frame("Output", layout=self._console_frame_layout)]]
 
     def __draw_figure(self, canvas, figure):
@@ -103,6 +102,10 @@ class UI:
         figure_canvas_agg.draw()
         figure_canvas_agg.get_tk_widget().pack(side='top', fill='both', expand=1)
         return figure_canvas_agg
+
+    def __delete_figure_agg(self, figure):
+        figure.get_tk_widget().forget()
+        plt.close('all')
 
     def __model(self):
 
@@ -128,6 +131,7 @@ class UI:
             while True:
 
                 event, values = self.main_window.read()
+                # self.__draw_figure(self.main_window['-canvas-'].TKCanvas, self.__model()[0])
 
                 if event in (None, 'Cancel'):
 
@@ -152,7 +156,7 @@ class UI:
 
                     data, choices = IsotropicMaterial.parse_materials()
                     self.main_window.find_element('material_name').Update(values=choices)
-                    self.__draw_figure(self.main_window['-canvas-'].TKCanvas, self.__model()[0])
+                    # self.__draw_figure(self.main_window['-canvas-'].TKCanvas, self.__model()[0])
                     print(f"{datetime.now().isoformat(' ', 'seconds')}: Data file updated")
 
                 elif event == 'Calculate and plot':
@@ -208,11 +212,14 @@ class UI:
                 elif event == 'Create':
 
                     IsotropicMaterial.new_material(name=values['new_material_name'],
-                                                   mass_density=values['density'],
+                                                   density=values['density'],
                                                    e=values['young_modulus'],
                                                    v=values['poisson_ratio'],
                                                    c11=values['C11'],
                                                    c66=values['C66'])
+
+                    data, choices = IsotropicMaterial.parse_materials()
+                    self.main_window.find_element('material_name').Update(values=choices)
 
                 elif event == 'Close':
 
@@ -227,3 +234,4 @@ class UI:
 if __name__ == "__main__":
 
     ui = UI()
+    ui.app_main_loop()
