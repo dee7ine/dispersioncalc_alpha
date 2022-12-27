@@ -1,6 +1,7 @@
 import os
 import logging
 from datetime import datetime
+from typing import Tuple
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import matplotlib.pyplot as plt
 import numpy as np
@@ -107,7 +108,7 @@ class UI:
         figure.get_tk_widget().forget()
         plt.close('all')
 
-    def __model(self):
+    def __model(self) -> Tuple[plt.figure, plt.axes]:
 
         axes = [2, 2, 5]
 
@@ -190,9 +191,9 @@ class UI:
                                 nmodes_antisym=int(values['antisymmetric']),
                                 fd_max=fd_max,
                                 vp_max=15000,
-                                c_L=c_L,
-                                c_S=c_S,
-                                c_R=c_R,
+                                c_l=c_L,
+                                c_s=c_S,
+                                c_r=c_R,
                                 material=values['material_name'])
 
                     """
