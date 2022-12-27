@@ -1,12 +1,15 @@
-from Exceptions import NoMaterialFound
+import os
+
 from dataclasses import dataclass
+from Exceptions import NoMaterialFound
+
 
 @dataclass
 class IsotropicMaterial:
 
-    #_frequency = 1000.00
+    # _frequency = 1000.00
 
-    _filename: str = r"C:\Users\deefi\PycharmProjects\dispersioncalc_alpha\materials\material_data.txt"
+    _filename: str = f'{os.getcwd()}\\materials\\material_data.txt'
 
     def __init__(self, material: str) -> None:
 
@@ -35,7 +38,7 @@ class IsotropicMaterial:
         parsed_list, material_names_list = self.parse_materials()
 
         self._material_names_list = material_names_list
-        self._index = self._find_material(mat = self._name)
+        self._index = self._find_material(mat=self._name)
 
         self._name: str = parsed_list[self._index][0]
         self._density = float(parsed_list[self._index][1])
@@ -50,8 +53,9 @@ class IsotropicMaterial:
               f" v: {self._v},"
               f" C11: {self._C11},"
               f" C66: {self._C66}")
+
     @classmethod
-    def fix_file_path(cls, filepath: str) -> str:
+    def fix_file_path(cls, filepath: str) -> None:
         cls._filename = filepath
 
     @classmethod
@@ -66,17 +70,18 @@ class IsotropicMaterial:
 
             material_data.close()
             return parsed_material_data, material_names_list
+
     @classmethod
-    def new_material(cls, name: str, mass_density: str, E: str, v: str, C11: str, C66: str):
+    def new_material(cls, name: str, mass_density: str, e: str, v: str, c11: str, c66: str):
         with open(cls._filename, 'a+') as material_data:
 
             new_material_data = []
-            new_material_data.extend([name, mass_density, E, v, C11, C66])
+            new_material_data.extend([name, mass_density, e, v, c11, c66])
 
             print(new_material_data)
 
             material_data.writelines("\n")
-            material_data.writelines(f"{name} {mass_density} {E} {v} {C11} {C66}")
+            material_data.writelines(f"{name} {mass_density} {e} {v} {c11} {c66}")
 
             material_data.close()
 
@@ -84,21 +89,50 @@ class IsotropicMaterial:
         parsed_list, material_names_list = self.parse_materials()
 
         for index, name in enumerate(material_names_list):
-            #print(name)
+            # print(name)
             if mat in name:
                 return index
-                #print(index)
+                # print(index)
         raise NoMaterialFound("No material found. You can create your own material in material editor!")
 
+    @property
+    def name(self):
+        return self._name
+
+    @property
+    def density(self):
+        return self._density
+
+    @property
+    def e(self):
+        return self._E
+
+    @property
+    def v(self):
+        return self._v
+
+    @property
+    def c11(self):
+        return self._C11
+
+    @property
+    def c66(self):
+        return self._C66
+
+
 def main():
+
     """
     don't run
     only for testing purposes
     :return:
     """
-    Lead = IsotropicMaterial(material = 'Platinum')
-    #print(getattr(material._name))
-    print(Lead._name)
+
+    Lead = IsotropicMaterial(material='Platinum')
+    # print(getattr(material._name))
+    print(Lead.__getattribute__(Lead._name))
+
 
 if __name__ == "__main__":
+
     ...
