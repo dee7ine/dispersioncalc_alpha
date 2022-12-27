@@ -1,4 +1,8 @@
-def add_plot(ax, result, mode, fd, **plt_kwargs):
+import matplotlib.pyplot as plt
+import numpy as np
+
+
+def add_plot(ax: plt.Axes, result: dict, mode: str, fd: np.array, **plt_kwargs):
     """Add a dispersion plot for a specific mode to a matplotlib axes
     object.
     
@@ -38,7 +42,7 @@ def add_plot(ax, result, mode, fd, **plt_kwargs):
         
         plot_color = mode_plot[0].get_color()
         ax.text(x=fd[0], y=var[0], color=plot_color, 
-                s='$\mathregular{' + mode[0] + '_' + mode[1:] + '}$', 
+                s='$\mathregular{' + mode[0] + '_' + mode[1:] + '}$',
                 va='bottom' if mode[0] == 'A' else 'bottom')
     else:
         mode_plot = ax.plot(fd, var, **plt_kwargs)
@@ -52,6 +56,7 @@ def add_plot(ax, result, mode, fd, **plt_kwargs):
                   '}$',
                 va='top', ha='right')
 
+
 def add_cutoff_freqs(ax, mode, arrow_dir, y_max, c_L, c_S,
                      plt_kwargs={'color': 'k', 'ls': '--', 'lw': 0.5}) -> None:
     """
@@ -62,24 +67,24 @@ def add_cutoff_freqs(ax, mode, arrow_dir, y_max, c_L, c_S,
 
     ----------
     :param ax: Matplotlib axes in which the plot will be added.
-    :type ax:   (Any)
+    :type ax:           Matplotlib axes
     :param mode: Mode to plot. Can be "A0", "A1", "A2", ..., "An" or "S0", "S1",
         "S2", ..., "Sn", with 'n' being the order of the corresponding
         mode.
-    :type: mode:    (str)
+    :type: mode:        str
     :param arrow_dir: Set arrows' direction in the plot. Can be 'up' (for group
         velocity plots) or 'down' (for phase velocity plots).
-    :type arrow_dir:    (str)
+    :type arrow_dir:    str
     :param y_max: Maximum y value in the plot. Used to position arrows in phase
         velocity plots.
-    :type y_max:    (float)
+    :type y_max:        float
     :param c_L: Longitudinal wave velocity of the material, in m/s.
-    :type c_L:  (float)
+    :type c_L:          float
     :param c_S: Shear wave velocity of the material, in m/s.
-    :type c_S:  (float)
+    :type c_S:          float
     :param plt_kwargs: (optional argument) Matplotlib kwargs (to change color, linewidth, linestyle, etc.).
 
-    :type plt_kwargs:   (dict)
+    :type plt_kwargs:   dict
 
     :return
     """
@@ -95,21 +100,22 @@ def add_cutoff_freqs(ax, mode, arrow_dir, y_max, c_L, c_S,
         
     n = int(mode[1:]) + 1
 
-    ax.axvline(x = n*c_S if mode[0] == 'S' else n*c_L, 
+    ax.axvline(x=n*c_S if mode[0] == 'S' else n*c_L,
                **plt_kwargs)
     
-    ax.text(x = n*c_S if mode[0] == 'S' else n*c_L, 
+    ax.text(x=n*c_S if mode[0] == 'S' else n*c_L,
             y=arrow_y_pos, s=arrow_str, va=arrow_va, ha='center', 
             clip_on=True)
 
     if n % 2 != 0:
-        ax.axvline(x = n*c_L/2 if mode[0] == 'S' else n*c_S/2,
+        ax.axvline(x=n*c_L/2 if mode[0] == 'S' else n*c_S/2,
                    **plt_kwargs)
         
-        ax.text(x = n*c_L/2 if mode[0] == 'S' else n*c_S/2, 
+        ax.text(x=n*c_L/2 if mode[0] == 'S' else n*c_S/2,
                 y=arrow_y_pos, s=arrow_str, va=arrow_va, ha='center', 
                 clip_on=True)   
-        
+
+
 def add_velocities(ax, c_L, c_S, c_R, x_max, 
                    plt_kwargs={'color': 'k', 'ls': ':', 'lw': 0.5}):
     """Add horizontal lines indicating material velocities to a 

@@ -3,7 +3,8 @@ import itertools
 import numpy as np
 import scipy.interpolate
 
-def interpolate(result: dict, d, kind='cubic') -> dict:
+def interpolate(result: dict, d, kind: str = 'cubic') -> tuple[dict, dict, dict]:
+
     """Interpolate the results for phase velocity, group velocity and
     wave number.
     
@@ -62,7 +63,9 @@ def interpolate(result: dict, d, kind='cubic') -> dict:
     
     return interp_vp, interp_vg, interp_k
 
-def correct_instability(result, function):
+
+def correct_instability(result, function: str):
+
     """A function to correct the instability produced when two roots are 
     in close proximity, making the function change sign twice or more in 
     the phase velocity interval under analysis. Since these values of 
@@ -99,7 +102,7 @@ def correct_instability(result, function):
 
     corr = np.copy(result)
     
-    for idx, col in enumerate(corr.T[n:,:]):
+    for idx, col in enumerate(corr.T[n:, :]):
         if np.any(col):
             i = 0
             while col[i] == 0 and i < len(col)-1:
@@ -107,7 +110,7 @@ def correct_instability(result, function):
             if idx < nmodes-n:
                 corr[i][idx+n+1] = 0
             
-    for idx, col in enumerate(corr.T[n:,:]):
+    for idx, col in enumerate(corr.T[n:, :]):
         for i in range(len(col)-1):
             if i == len(col)-2:
                 corr[i+1][idx+n] = 0
@@ -132,6 +135,7 @@ def correct_instability(result, function):
                                 j += 1
     
     return corr
+
 
 def write_txt(data_sym: dict, data_antisym: dict, kind, filename, header):
     """Function to write the results to a txt file.
@@ -192,9 +196,10 @@ def write_txt(data_sym: dict, data_antisym: dict, kind, filename, header):
         f.write('\n')
         
         for k in itertools.zip_longest(*results, fillvalue=''):
-             f.write('\t\t'.join(map(str, k)) + '\n')
-        
-def find_max(result):
+            f.write('\t\t'.join(map(str, k)) + '\n')
+
+
+def find_max(result: dict):
     """Find the maximum value in all modes analyzed. Used to limit the 
     scale of the dispersion plots.
     

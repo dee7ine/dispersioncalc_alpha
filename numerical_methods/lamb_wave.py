@@ -1,18 +1,19 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import scipy.optimize
-from typing import Any
+from typing import Any, Callable
 
 from numerical_methods.Plot_utilities import add_plot, add_cutoff_freqs, add_velocities
 from numerical_methods.Utilities import interpolate, correct_instability, write_txt, find_max
 from materials.Materials import IsotropicMaterial
 from Exceptions import IncorrectMode
 
+
 class Lamb:
 
-    def __init__(self, thickness, nmodes_sym, nmodes_antisym, fd_max, vp_max,
-                 c_L, c_S, c_R=None, fd_points=100, vp_step=100,
-                 material='') -> None:
+    def __init__(self, thickness: float, nmodes_sym: int, nmodes_antisym: int, fd_max: float, vp_max: float,
+                 c_l: float, c_s: float, c_r: float = None, fd_points: int = 100, vp_step: int = 100,
+                 material: str = '') -> None:
         """"
         Parameters
         ----------
@@ -26,12 +27,12 @@ class Lamb:
         :type fd_max:                   float/int
         :param vp_max:                  maximum value of phase velocity to calculate, in m/s.
         :type vp_max:                   float/int
-        :param c_L:                     Longitudinal wave velocity of the material, in m/s.
+        :param c_l:                     Longitudinal wave velocity of the material, in m/s.
         :type:                          float/int
-        :param c_S:                     shear wave velocity of the material, in m/s.
-        :type c_S:                      float/int
-        :param c_R:                     rayleigh wave velocity of the material, in m/s.
-        :type c_R:                      float or int, optional
+        :param c_s:                     shear wave velocity of the material, in m/s.
+        :type c_s:                      float/int
+        :param c_r:                     rayleigh wave velocity of the material, in m/s.
+        :type c_r:                      float or int, optional
         :param fd_points:               number of frequency × thickness points.
         :type fd_points:                int, optional
         :param vp_step:                 increment between phase velocity intervals.
@@ -48,9 +49,9 @@ class Lamb:
         self.nmodes_antisym = nmodes_antisym
         self.fd_max = fd_max
         self.vp_max = vp_max
-        self.c_L = c_L  # *(10e-3/10e-6)
-        self.c_S = c_S  # *(10e-3/10e-6)
-        self.c_R = c_R
+        self.c_L = c_l  # *(10e-3/10e-6)
+        self.c_S = c_s  # *(10e-3/10e-6)
+        self.c_R = c_r
         self.fd_points = fd_points
         self.vp_step = vp_step
         self.material = material
@@ -61,12 +62,12 @@ class Lamb:
 
         sym = self._solve_disp_eqn(function=self._symmetric,
                                    nmodes=nmodes_sym,
-                                   c=c_S,
+                                   c=c_s,
                                    label='S')
 
         antisym = self._solve_disp_eqn(function=self._antisymmetric,
                                        nmodes=nmodes_antisym,
-                                       c=c_L,
+                                       c=c_l,
                                        label='A')
 
         # Calculate group velocity (vg) and wavenumber (k) from phase
@@ -74,9 +75,9 @@ class Lamb:
 
         self.vp_sym, self.vg_sym, self.k_sym = interpolate(sym, self.d)
 
-        #print(self.vp_sym)
-        #print(self.vg_sym)
-        #print(self.k_sym)
+        # print(self.vp_sym)
+        # print(self.vg_sym)
+        # print(self.k_sym)
 
         self.vp_antisym, self.vg_antisym, self.k_antisym = interpolate(antisym,
                                                                        self.d)
@@ -175,7 +176,7 @@ class Lamb:
 
         for i, fd in enumerate(fd_arr):
 
-            #print(f'{i}/{self.fd_points} - {np.around(fd, 1)} kHz × mm')
+            # print(f'{i}/{self.fd_points} - {np.around(fd, 1)} kHz × mm')
 
             result[i][0] = fd
 
@@ -231,10 +232,10 @@ class Lamb:
 
             result_dict[label + str(nmode)] = mode_result
 
-        #print(result_dict)
+        # print(result_dict)
         return result_dict
 
-    def plot(self, ax, result, y_max, cutoff_frequencies=False,
+    def plot(self, ax, result: dict, y_max: float, cutoff_frequencies=False,
              arrow_dir=None, material_velocities=False, plt_kwargs={}):
         """Generate a dispersion plot for a family of modes (symmetric
         or antisymmetric).
@@ -264,7 +265,7 @@ class Lamb:
 
         for mode, arr in result.items():
 
-            # Generate an fd array for each mode and add the
+            # Generate a fd array for each mode and add the
             # corresponding mode plot.
 
             fd = np.arange(np.amin(arr.x), np.amax(arr.x), 0.1)
@@ -285,7 +286,7 @@ class Lamb:
     def plot_phase_velocity(self, modes='both', cutoff_frequencies=True,
                             material_velocities=True, save_img=False,
                             sym_style={'color': 'blue'},
-                            antisym_style={'color': 'red', 'linestyle': '--'}):
+                            antisym_style={'color': 'red', 'linestyle': '--'}) -> tuple[plt.Figure, plt.Axes]:
         """Generate a plot of phase velocity as a function of frequency
         × thickness.
 
@@ -492,6 +493,7 @@ class Lamb:
         write_txt(self.k_sym, self.k_antisym, 'Wavenumber',
                   filename, header)
 
+
 def main() -> None:
 
     # You can obtain the values of c_L and c_S and an approximate value for
@@ -499,9 +501,9 @@ def main() -> None:
     # the following equations:
 
     new_material = IsotropicMaterial(material="Ice")
-    E = new_material._E  # E = Young's modulus, in Pa.
-    p = new_material._density  # p = Density (rho), in kg/m3.
-    v = new_material._v  # v = Poisson's ratio (nu).
+    E = new_material.e  # E = Young's modulus, in Pa.
+    p = new_material.density  # p = Density (rho), in kg/m3.
+    v = new_material.v  # v = Poisson's ratio (nu).
 
     c_L = np.sqrt(E * (1 - v) / (p * (1 + v) * (1 - 2 * v)))
     c_S = np.sqrt(E / (2 * p * (1 + v)))
@@ -514,9 +516,9 @@ def main() -> None:
                 nmodes_antisym=5,
                 fd_max=10000,
                 vp_max=15000,
-                c_L=c_L,
-                c_S=c_S,
-                c_R=c_R,
+                c_l=c_L,
+                c_s=c_S,
+                c_r=c_R,
                 material='Ice')
 
     # Plot phase velocity, group velocity and wavenumber.

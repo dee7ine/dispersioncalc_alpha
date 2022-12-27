@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 import os
 from dataclasses import dataclass
 from Exceptions import NoMaterialFound, ErrorParsingMaterial
@@ -86,6 +87,9 @@ class IsotropicMaterial:
             print(new_material_data)
 
             material_data.writelines("\n")
+
+            # conversion of Young's modulus to GPa
+
             if '.' in e:
                 material_data.writelines(f"{name} {density} {e.replace('.', '', 1)}00000000 {v} {c11} {c66}")
             else:
