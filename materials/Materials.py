@@ -113,10 +113,11 @@ class IsotropicMaterial:
 
         valid: bool = True
 
-        #for index, line in enumerate(self._parsed_material_data):
-            #if len(line) == 6 and
+        for index, line in enumerate(self._parsed_material_data):
+            if len(line) == 6:
+                ...
 
-        #return valid
+        return valid
 
     @property
     def name(self) -> str:
