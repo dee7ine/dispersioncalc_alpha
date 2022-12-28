@@ -116,7 +116,7 @@ def add_cutoff_freqs(ax, mode, arrow_dir, y_max, c_L, c_S,
                 clip_on=True)   
 
 
-def add_velocities(ax, c_L, c_S, c_R, x_max, 
+def add_velocities(ax, c_l, c_s, c_r, x_max,
                    plt_kwargs={'color': 'k', 'ls': ':', 'lw': 0.5}):
     """Add horizontal lines indicating material velocities to a 
     matplotlib axes object.
@@ -139,13 +139,13 @@ def add_velocities(ax, c_L, c_S, c_R, x_max,
         
     """
     
-    ax.axhline(y=c_L, **plt_kwargs)
-    ax.text(x=x_max, y=c_L, s=r'$\mathregular{c_L}$', va='center', ha='left')
+    ax.axhline(y=c_l, **plt_kwargs)
+    ax.text(x=x_max, y=c_l, s=r'$\mathregular{c_L}$', va='center', ha='left')
     
-    ax.axhline(y=c_S, **plt_kwargs)
-    ax.text(x=x_max, y=c_S, s=r'$\mathregular{c_S}$', va='center', ha='left')           
+    ax.axhline(y=c_l, **plt_kwargs)
+    ax.text(x=x_max, y=c_l, s=r'$\mathregular{c_S}$', va='center', ha='left')
     
-    if c_R:
-        ax.axhline(y=c_R, **plt_kwargs)
-        ax.text(x=0, y=c_R, s=r'$\mathregular{c_R}$', va='center', 
+    if c_r:
+        ax.axhline(y=c_r, **plt_kwargs)
+        ax.text(x=0, y=c_r, s=r'$\mathregular{c_R}$', va='center',
                 ha='right')

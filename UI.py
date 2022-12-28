@@ -78,7 +78,7 @@ class UI:
     def _main_frame_layout(self) -> list:
 
         return [[sg.Menu(self._menu_layout, tearoff=False)],
-                [sg.Frame('Lamb waves', layout=[[sg.Frame('Parameters', layout=[[sg.Text('Material'),
+                [sg.Frame('Simulation', layout=[[sg.Frame('Parameters', layout=[[sg.Text('Material'),
                 sg.InputCombo(values=self._choices, default_value="AluminumDisperse", key="material_name", enable_events=True, readonly=True,
                 background_color='white', size=(33, 20)), sg.Stretch()], [sg.Text('Symmetry modes'),
                 sg.InputCombo(values=self._modes, default_value='Symmetric', key='mode', enable_events=True, readonly=True, background_color='white', size=(25, 20))],

@@ -1,9 +1,10 @@
 import itertools
-
 import numpy as np
+import numpy.typing as npt
 import scipy.interpolate
 
-def interpolate(result: dict, d, kind: str = 'cubic') -> tuple[dict, dict, dict]:
+
+def interpolate(result: dict, d: int, kind: str = 'cubic') -> tuple[dict, dict, dict]:
 
     """Interpolate the results for phase velocity, group velocity and
     wave number.
@@ -14,6 +15,9 @@ def interpolate(result: dict, d, kind: str = 'cubic') -> tuple[dict, dict, dict]
         Dictionary with the phase velocity values obtained by solving
         the dispersion equations.
     :type result: dict
+    :param d:
+        thickness of the material in mm
+    :type d:      int
     :param kind:
         Specifies the kind of interpolation as a string. Can be
         ‘linear’, ‘nearest’, ‘zero’, ‘slinear’, ‘quadratic’, ‘cubic’, 
@@ -24,13 +28,10 @@ def interpolate(result: dict, d, kind: str = 'cubic') -> tuple[dict, dict, dict]
 
     :return interp_vp:
         Dictionary with phase velocity interpolator at each mode.
-    :type interp_vp: dict
     :return interp_vg:
         Dictionary with group velocity interpolator at each mode.
-    :type interp_vg: dict
     :return interp_k:
         Dictionary with wave number interpolator at each mode.
-    :type interp_k: dict
         
     """
     
@@ -40,31 +41,31 @@ def interpolate(result: dict, d, kind: str = 'cubic') -> tuple[dict, dict, dict]
     
     for mode, arr in result.items():
             
-            if arr[1].size > 3:
-                
-                fd = arr[0]
-                vp = arr[1]             
+        if arr[1].size > 3:
 
-                interp_vp[mode] = scipy.interpolate.interp1d(fd, vp, kind=kind)
-                
-                k = (fd*2*np.pi/d)/vp
-                
-                interp_k[mode] = scipy.interpolate.interp1d(fd, k, kind=kind)
-                
-                # Find the derivative of phase velocity using a 
-                # interpolating spline.
-                
-                univ_s = scipy.interpolate.InterpolatedUnivariateSpline(fd, vp)
-                vp_prime = univ_s.derivative()
-                
-                vg = np.square(vp) * (1/(vp - vp_prime(fd)*fd))
+            fd = arr[0]
+            vp = arr[1]
 
-                interp_vg[mode] = scipy.interpolate.interp1d(fd, vg, kind=kind)
+            interp_vp[mode] = scipy.interpolate.interp1d(fd, vp, kind=kind)
+
+            k = (fd*2*np.pi/d)/vp
+
+            interp_k[mode] = scipy.interpolate.interp1d(fd, k, kind=kind)
+
+            # Find the derivative of phase velocity using an
+            # interpolating spline.
+
+            univ_s = scipy.interpolate.InterpolatedUnivariateSpline(fd, vp)
+            vp_prime = univ_s.derivative()
+
+            vg = np.square(vp) * (1/(vp - vp_prime(fd)*fd))
+
+            interp_vg[mode] = scipy.interpolate.interp1d(fd, vg, kind=kind)
     
     return interp_vp, interp_vg, interp_k
 
 
-def correct_instability(result, function: str):
+def correct_instability(result: npt.NDArray, function: str):
 
     """A function to correct the instability produced when two roots are 
     in close proximity, making the function change sign twice or more in 
@@ -123,7 +124,7 @@ def correct_instability(result, function: str):
                     if col[i] < col[j] or col[j] == 0:
                         while (col[i] < col[j] or col[j] == 0) and j < len(col)-1:
                             if col[j] == 0:
-                                    j += 1
+                                j += 1
                             else:
                                 for idx2 in range(nmodes):
                                     if idx == idx2:
@@ -137,25 +138,28 @@ def correct_instability(result, function: str):
     return corr
 
 
-def write_txt(data_sym: dict, data_antisym: dict, kind, filename, header):
+def write_txt(data_sym: dict, data_antisym: dict, kind: str, filename: str, header: str):
     """Function to write the results to a txt file.
     
     Parameters
     ----------
-    paramdata_sym: dict
+    :param data_sym: dict
         A dictionary consisting of interpolators for the specified 
         symmetric modes.
-    data_antisym: dict
+    :type data_antisym: dict
         A dictionary consisting of interpolators for the specified 
         antisymmetric modes.
-    kind: {'Phase Velocity', 'Group Velocity', 'Wavenumber'}
+    :param kind: {'Phase Velocity', 'Group Velocity', 'Wavenumber'}
         The type of results to write. Can be 'Phase Velocity', 'Group
         Velocity' or 'Wavenumber'.
-    filename: str
+    :type kind:
+    :param filename:
         The filename of the txt file.
-    header: str
+    :type filename: str
+    :param header:
         The header of the txt file (to include material information for 
         example)
+    :type header: str
 
     """
     
