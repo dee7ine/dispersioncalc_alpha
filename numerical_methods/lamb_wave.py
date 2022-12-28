@@ -167,7 +167,7 @@ class Lamb:
 
         return np.real(antisymmetric)
 
-    def _solve_disp_eqn(self, function, nmodes, c, label):
+    def _solve_disp_eqn(self, function, nmodes, c, label) -> dict:
 
         fd_arr = np.linspace(0, self.fd_max, self.fd_points)
         result = np.zeros((len(fd_arr), nmodes + 1))
@@ -235,8 +235,8 @@ class Lamb:
         # print(result_dict)
         return result_dict
 
-    def plot(self, ax, result: dict, y_max: float, cutoff_frequencies=False,
-             arrow_dir=None, material_velocities=False, plt_kwargs={}):
+    def plot(self, ax, result: dict, y_max: float, cutoff_frequencies=True,
+             arrow_dir: str = 'down', material_velocities: bool = True, plt_kwargs={}):
         """Generate a dispersion plot for a family of modes (symmetric
         or antisymmetric).
 
@@ -341,6 +341,7 @@ class Lamb:
                             'or "both".')
 
         ax.legend(loc='lower right')
+        ax.set_title(f'Phase Velocity for {self.d * 10**3} mm thick {self.material}')
         ax.set_ylabel('Phase Velocity [m/s] ')
 
         if save_img:
@@ -404,6 +405,7 @@ class Lamb:
                             'or "both".')
 
         ax.legend(loc='lower right')
+        ax.set_title(f'Group Velocity for {self.d * 10**3} mm thick {self.material}')
         ax.set_ylabel('Group Velocity [m/s]')
 
         if save_img:
@@ -464,6 +466,7 @@ class Lamb:
                             'or "both".')
 
         ax.legend(loc='upper left')
+        ax.set_title(f'Wave Number for {self.d * 10 ** 3} mm thick {self.material}')
         ax.set_ylabel('Wave Number [1/m]')
 
         if save_img:

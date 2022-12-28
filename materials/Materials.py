@@ -39,6 +39,7 @@ class IsotropicMaterial:
         parsed_list, material_names_list = self.parse_materials()
 
         self._material_names_list = material_names_list
+        self._parsed_material_data = parsed_list
         self._index = self._find_material(material=self._name)
 
         self._name: str = parsed_list[self._index][0]
@@ -98,6 +99,7 @@ class IsotropicMaterial:
             material_data.close()
 
     def _find_material(self, material: str) -> int:
+
         parsed_list, material_names_list = self.parse_materials()
 
         for index, name in enumerate(material_names_list):
@@ -108,7 +110,13 @@ class IsotropicMaterial:
         raise NoMaterialFound("No material found. You can create your own material in material editor!")
 
     def _validate_data_file(self) -> bool:
-        ...
+
+        valid: bool = True
+
+        #for index, line in enumerate(self._parsed_material_data):
+            #if len(line) == 6 and
+
+        #return valid
 
     @property
     def name(self) -> str:
@@ -145,7 +153,7 @@ def main() -> None:
 
     Lead = IsotropicMaterial(material='Platinum')
     # print(getattr(material._name))
-    print(Lead.__getattribute__(Lead.name))
+    print(Lead.name)
 
 
 if __name__ == "__main__":

@@ -2,6 +2,7 @@ import time
 from datetime import datetime
 from functools import wraps
 
+
 def timeit(func):
     @wraps(func)
     def timeit_wrapper(*args, **kwargs):
@@ -13,7 +14,8 @@ def timeit(func):
         return results
     return timeit_wrapper
 
-def log_to_console(func):
+
+def log(func):
     @wraps(func)
     def logger_wrapper(*args, **kwargs):
         called_time = datetime.now()
@@ -21,4 +23,3 @@ def log_to_console(func):
         print(f"Function {func.__name__} called at {called_time.time()}")
         return results
     return logger_wrapper
-
