@@ -79,7 +79,7 @@ class IsotropicMaterial:
                 raise ErrorParsingMaterial
 
     @classmethod
-    def new_material(cls, name: str, density: str, e: str, v: str, c11: str, c66: str):
+    def new_material(cls, name: str, density: str, e: str, v: str, c11: str, c66: str) -> None:
         with open(cls._filename, 'a+') as material_data:
 
             new_material_data = []
