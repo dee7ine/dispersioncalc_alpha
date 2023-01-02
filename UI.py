@@ -10,6 +10,9 @@ import PySimpleGUI as sg  # use('qt5agg')
 from materials.Materials import IsotropicMaterial
 from numerical_methods.lamb_wave import Lamb
 
+WINDOW_SIZE = (1250, 650)
+CONSOLE_SIZE = (100, 100)
+
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -35,32 +38,32 @@ class UI:
         IsotropicMaterial.fix_file_path(filepath=self._default_data_path)
         self._data, self._choices = IsotropicMaterial.parse_materials()
 
-        self._menu_layout = self._menu_layout()
-        self._console_frame_layout = self._console_frame_layout()
-        self._material_frame_layout = self._material_frame_layout()
-        self._main_frame_layout = self._main_frame_layout()
+        self._menu_layout = self.__menu_layout()
+        self._console_frame_layout = self.__console_frame_layout()
+        self._material_frame_layout = self.__material_frame_layout()
+        self._main_frame_layout = self.__main_frame_layout()
 
         self.main_window = sg.Window(title='Counter Strike: Global Offensive',
                                      layout=self._main_frame_layout,
-                                     size=(1250, 650))
+                                     size=WINDOW_SIZE)
 
-    def _menu_layout(self) -> list:
+    def __menu_layout(self) -> list:
 
         return [['File', ['Open', 'Save']],
                 ['Edit', ['Paste', ['Special', 'Normal'], 'Undo']],
                 ['Help', 'About...'], ]
 
-    def _console_frame_layout(self) -> list:
+    def __console_frame_layout(self) -> list:
 
         return [[sg.Multiline(f"Beginning session {datetime.now().isoformat(' ', 'seconds')}\n",
-                              size=(100, 10),
+                              size=CONSOLE_SIZE,
                               autoscroll=True,
                               reroute_stdout=True,
                               reroute_stderr=True,
                               key='-OUTPUT-',
                               background_color='white')]]
 
-    def _material_frame_layout(self) -> list:
+    def __material_frame_layout(self) -> list:
 
         return [[sg.Frame('', layout=[[sg.Text("E [MPa]"), sg.Input('68.9', enable_events=True, key='young_modulus', size=(6, 5))],
                 [sg.Text(text="v [no unit]"), sg.Input('0.33', enable_events=True, key='poisson_ratio', size=(6, 5))],
@@ -75,7 +78,7 @@ class UI:
                 target='-data_path-', tooltip="Choose file containing material data"),
                 sg.Button('Load', tooltip="Load data file"), sg.Button('Help', key='Material_Help', tooltip='Helpful tips')]], size=(500, 60))]]
 
-    def _main_frame_layout(self) -> list:
+    def __main_frame_layout(self) -> list:
 
         return [[sg.Menu(self._menu_layout, tearoff=False)],
                 [sg.Frame('Simulation', layout=[[sg.Frame('Parameters', layout=[[sg.Text('Material'),
@@ -97,23 +100,21 @@ class UI:
                 sg.Frame('Material editor', layout=self._material_frame_layout, tooltip="Material editing module"), sg.Frame('Geometry', layout=[[sg.Canvas(size=(300, 300), key='-canvas-')]])],
                 [sg.Frame("Output", layout=self._console_frame_layout)]]
 
-    def __draw_figure(self, canvas, figure):
+    def __draw_figure(self, canvas: FigureCanvasTkAgg, figure: plt.figure) -> FigureCanvasTkAgg:
 
         figure_canvas_agg = FigureCanvasTkAgg(figure, canvas)
         figure_canvas_agg.draw()
         figure_canvas_agg.get_tk_widget().pack(side='top', fill='both', expand=1)
         return figure_canvas_agg
 
-    def __delete_figure_agg(self, figure):
+    def __delete_figure_agg(self, figure: plt.figure) -> None:
         figure.get_tk_widget().forget()
         plt.close('all')
 
     def __model(self) -> Tuple[plt.figure, plt.axes]:
 
         axes = [2, 2, 5]
-
         data = np.ones(axes, dtype=np.bool_)
-
         alpha = 0.9
 
         colors = np.empty(axes + [4], dtype=np.float32)
@@ -164,7 +165,7 @@ class UI:
 
                     print(datetime.now())
 
-                    new_material = IsotropicMaterial(values['material_name'])
+                    new_material: IsotropicMaterial = IsotropicMaterial(values['material_name'])
                     fd_max: float = float(values['thickness']) * float(
                         values['frequency'])  # maximum frequency-thickness product
 
@@ -197,7 +198,7 @@ class UI:
                                 material=values['material_name'])
 
                     """
-                    Plot phase velocity, group velocity and wavenumber.
+                    Plot phase velocity, group velocity and wave number.
                     """
 
                     print(f"{datetime.now().isoformat(' ', 'seconds')}: Calculating phase velocity for modes: {values['mode'].lower()}")
@@ -229,7 +230,7 @@ class UI:
             self.main_window.close()
 
         except Exception as e:
-            sg.popup_error_with_traceback('An error occured', e)
+            sg.popup_error_with_traceback('An error occurred', e)
 
 
 if __name__ == "__main__":
