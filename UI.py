@@ -1,3 +1,29 @@
+"""
+=========================================================================
+Tool for dispersion calculation
+
+Created by Bartlomiej Jargut
+https://github.com/dee7ine
+
+Lamb wave class implemented by Francisco Rotea
+https://github.com/franciscorotea
+-------------------------------------------------------------------------
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program. If not, see <https://www.gnu.org/licenses/>.
+
+=========================================================================
+"""
+
+
 import os
 import logging
 from datetime import datetime
@@ -9,6 +35,7 @@ import PySimpleGUI as sg  # use('qt5agg')
 
 from materials.Materials import IsotropicMaterial
 from numerical_methods.lamb_wave import Lamb
+
 
 WINDOW_SIZE = (1250, 650)
 CONSOLE_SIZE = (100, 100)
@@ -94,7 +121,7 @@ class UI:
                 [sg.Frame('', layout=[[sg.Text('Number of modes')], [sg.Text('Symmetric     '), sg.Input('10', enable_events=True, key='symmetric', size=(5, 5))],
                 [sg.Text('Antisymmetric'), sg.Input('10', enable_events=True, key='antisymmetric', size=(5, 5))],
                 [sg.Text('Trace SH modes'), sg.Checkbox('', size=(5, 5))]])]])],
-                [sg.Button('Calculate and plot', tooltip="Calculate and plot dispersion curves \n for given material data"),
+                [sg.Button('Run', tooltip="Calculate and plot dispersion curves \n for given material data", enable_events=True, key='RUN'),
                 sg.Button('Close', tooltip='Close all already open plots'),
                 sg.Cancel(), sg.Button('Help', key="Lamb_Help", tooltip="Helpful tips")]]),
                 sg.Frame('Material editor', layout=self._material_frame_layout, tooltip="Material editing module"), sg.Frame('Geometry', layout=[[sg.Canvas(size=(300, 300), key='-canvas-')]])],
@@ -161,7 +188,7 @@ class UI:
                     # self.__draw_figure(self.main_window['-canvas-'].TKCanvas, self.__model()[0])
                     print(f"{datetime.now().isoformat(' ', 'seconds')}: Data file updated")
 
-                elif event == 'Calculate and plot':
+                elif event == 'RUN':
 
                     print(datetime.now())
 
