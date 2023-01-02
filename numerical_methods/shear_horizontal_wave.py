@@ -3,7 +3,7 @@ from math import sqrt, tan
 from numba import jit
 import matplotlib.pyplot as plt
 from scipy import optimize
-from decorators import timeit
+from Decorators import timeit
 from numerical_methods.wave_class import Wave
 
 @dataclass

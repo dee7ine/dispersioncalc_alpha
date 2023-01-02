@@ -1,3 +1,29 @@
+"""
+=========================================================================
+Tool for dispersion calculation
+
+Created by Bartlomiej Jargut
+https://github.com/dee7ine
+
+Lamb wave class implemented by Francisco Rotea
+https://github.com/franciscorotea
+-------------------------------------------------------------------------
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program. If not, see <https://www.gnu.org/licenses/>.
+
+=========================================================================
+"""
+
+
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -19,8 +45,6 @@ def add_plot(ax: plt.Axes, result: dict, mode: str, fd: np.array, **plt_kwargs):
         mode.
     fd : array
         An array of frequency thickness values to plot.
-    cutoff_freq : bool
-        Set to True to show cutoff frequencies in the plot.
     plt_kwargs : dict, optional
         Matplotlib kwargs (to change color, linewidth, linestyle, etc.).
         
@@ -57,7 +81,7 @@ def add_plot(ax: plt.Axes, result: dict, mode: str, fd: np.array, **plt_kwargs):
                 va='top', ha='right')
 
 
-def add_cutoff_freqs(ax, mode, arrow_dir, y_max, c_L, c_S,
+def add_cutoff_freqs(ax, mode, arrow_dir, y_max, c_l, c_s,
                      plt_kwargs={'color': 'k', 'ls': '--', 'lw': 0.5}) -> None:
     """
     Add vertical lines indicating cutoff frequencies to a matplotlib
@@ -78,10 +102,10 @@ def add_cutoff_freqs(ax, mode, arrow_dir, y_max, c_L, c_S,
     :param y_max: Maximum y value in the plot. Used to position arrows in phase
         velocity plots.
     :type y_max:        float
-    :param c_L: Longitudinal wave velocity of the material, in m/s.
-    :type c_L:          float
-    :param c_S: Shear wave velocity of the material, in m/s.
-    :type c_S:          float
+    :param c_l: Longitudinal wave velocity of the material, in m/s.
+    :type c_l:          float
+    :param c_s: Shear wave velocity of the material, in m/s.
+    :type c_s:          float
     :param plt_kwargs: (optional argument) Matplotlib kwargs (to change color, linewidth, linestyle, etc.).
 
     :type plt_kwargs:   dict
@@ -100,18 +124,18 @@ def add_cutoff_freqs(ax, mode, arrow_dir, y_max, c_L, c_S,
         
     n = int(mode[1:]) + 1
 
-    ax.axvline(x=n*c_S if mode[0] == 'S' else n*c_L,
+    ax.axvline(x=n*c_s if mode[0] == 'S' else n*c_l,
                **plt_kwargs)
     
-    ax.text(x=n*c_S if mode[0] == 'S' else n*c_L,
+    ax.text(x=n*c_s if mode[0] == 'S' else n*c_l,
             y=arrow_y_pos, s=arrow_str, va=arrow_va, ha='center', 
             clip_on=True)
 
     if n % 2 != 0:
-        ax.axvline(x=n*c_L/2 if mode[0] == 'S' else n*c_S/2,
+        ax.axvline(x=n*c_l/2 if mode[0] == 'S' else n*c_s/2,
                    **plt_kwargs)
         
-        ax.text(x=n*c_L/2 if mode[0] == 'S' else n*c_S/2,
+        ax.text(x=n*c_l/2 if mode[0] == 'S' else n*c_s/2,
                 y=arrow_y_pos, s=arrow_str, va=arrow_va, ha='center', 
                 clip_on=True)   
 
@@ -128,11 +152,11 @@ def add_velocities(ax, c_l, c_s, c_r, x_max,
     x_max : float or int
         Maximum x value in the plot. Used to position the velocity 
         labels.
-    c_L : float or int
+    c_l : float or int
         Longitudinal wave velocity of the material, in m/s.
-    c_S: float or int
+    c_s: float or int
         Shear wave velocity of the material, in m/s.
-    c_R: float or int, optional
+    c_r: float or int, optional
         Rayleigh wave velocity of the material, in m/s.
     plt_kwargs : dict, optional
         Matplotlib kwargs (to change color, linewidth, linestyle, etc.).

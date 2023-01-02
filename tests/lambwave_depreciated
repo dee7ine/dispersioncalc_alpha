@@ -4,7 +4,7 @@ from math import tan
 import matplotlib.pyplot as plt
 import scipy
 from scipy import optimize
-from decorators import timeit
+from Decorators import timeit
 #from numerical_methods.wave_class import Wave
 import numpy as np
 from numerical_methods.Plot_utilities import add_plot, add_cutoff_freqs, add_velocities

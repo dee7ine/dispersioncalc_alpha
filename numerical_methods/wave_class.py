@@ -1,6 +1,6 @@
 from math import sqrt
 from numba import jit
-from decorators import timeit
+from Decorators import timeit
 from abc import ABC, abstractmethod
 import numpy as np
 

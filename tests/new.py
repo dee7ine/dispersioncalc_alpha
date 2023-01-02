@@ -4,7 +4,7 @@ window splitter version
 
 import wx
 from isotropic_main import show_image
-from decorators import timeit
+from Decorators import timeit
 
 
 class IsotropicMaterials(wx.Panel):

@@ -1,7 +1,34 @@
+"""
+=========================================================================
+Tool for dispersion calculation
+
+Created by Bartlomiej Jargut
+https://github.com/dee7ine
+
+Lamb wave class implemented by Francisco Rotea
+https://github.com/franciscorotea
+-------------------------------------------------------------------------
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program. If not, see <https://www.gnu.org/licenses/>.
+
+=========================================================================
+"""
+
+
 import numpy as np
 import matplotlib.pyplot as plt
 import scipy.optimize
-from typing import Any, Callable
+from typing import Any
+from functools import cache
 
 from numerical_methods.Plot_utilities import add_plot, add_cutoff_freqs, add_velocities
 from numerical_methods.Utilities import interpolate, correct_instability, write_txt, find_max
@@ -82,6 +109,7 @@ class Lamb:
         self.vp_antisym, self.vg_antisym, self.k_antisym = interpolate(antisym,
                                                                        self.d)
 
+    @cache
     def _calc_constants(self, vp: float, fd: float) -> tuple[float | Any, Any, Any]:
         """Calculate the constants p and q (defined to simplify the
         dispersion equations) and wavenumber from a pair of phase
@@ -112,6 +140,7 @@ class Lamb:
         q = np.sqrt((omega / self.c_S) ** 2 - k ** 2, dtype=np.complex128)
 
         return k, p, q
+
 
     def _symmetric(self, vp: float, fd: float) -> float:
         """Rayleigh-Lamb frequency relation for symmetric modes, used to

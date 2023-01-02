@@ -1,5 +1,5 @@
 import unittest
-from decorators import timeit, log
+from Decorators import timeit, log
 
 @timeit
 @log
