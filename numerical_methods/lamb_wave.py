@@ -27,7 +27,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 import numpy as np
 import matplotlib.pyplot as plt
 import scipy.optimize
-from typing import Any
+from typing import Any, Callable
 from functools import cache
 
 from numerical_methods.Plot_utilities import add_plot, add_cutoff_freqs, add_velocities
@@ -45,31 +45,19 @@ class Lamb:
         Parameters
         ----------
         :param thickness:               thickness of the plate, in mm.
-        :type  thickness:               float/int
         :param nmodes_sym:              number of symmetric modes to calculate.
-        :type nmodes_sym:               int
         :param nmodes_antisym:          number of antisymmetric modes to calculate.
-        :type nmodes_antisym:           int
         :param fd_max:                  maximum value of frequency × thickness to calculate.
-        :type fd_max:                   float/int
         :param vp_max:                  maximum value of phase velocity to calculate, in m/s.
-        :type vp_max:                   float/int
         :param c_l:                     Longitudinal wave velocity of the material, in m/s.
-        :type:                          float/int
         :param c_s:                     shear wave velocity of the material, in m/s.
-        :type c_s:                      float/int
         :param c_r:                     rayleigh wave velocity of the material, in m/s.
-        :type c_r:                      float or int, optional
         :param fd_points:               number of frequency × thickness points.
-        :type fd_points:                int, optional
         :param vp_step:                 increment between phase velocity intervals.
-        :type vp_step:                  int, optional
         :param material:                name of the material being analyzed.
-        :type material:                 str, optional
 
-
+        :return:
         """
-
         self.d = thickness / 1e3
         self.h = (thickness / 2) / 1e3
         self.nmodes_sym = nmodes_sym
@@ -117,21 +105,17 @@ class Lamb:
 
         Parameters
         ----------
-        vp : float or int
+        :param: vp : float or int
             Phase velocity.
-        fd : float or int
+        :param: fd : float or int
             Frequency × thickness product.
 
-        Returns
-        -------
-        k : float
+        :return: k : float
             Wavenumber.
-        p, q : float
+            p, q : float
             A pair of constants introduced to simplify the dispersion
             relations.
-
         """
-
         omega = 2 * np.pi * (fd / self.d)
 
         k = omega / vp
@@ -141,27 +125,20 @@ class Lamb:
 
         return k, p, q
 
-
     def _symmetric(self, vp: float, fd: float) -> float:
         """Rayleigh-Lamb frequency relation for symmetric modes, used to
         determine the velocity at which a wave of a particular frequency
         will propagate within the plate. The roots of this equation are
         used to generate the dispersion curves.
 
-        Parameters
-        ----------
-        vp : float or int
+        :param vp : float or int
             Phase velocity.
-        fd : float or int
+        :param fd : float or int
             Frequency × thickness product.
 
-        Returns
-        -------
-        symmetric : float
+        :return symmetric : float
             Dispersion relation for symmetric modes.
-
         """
-
         k, p, q = self._calc_constants(vp, fd)
 
         symmetric = (np.tan(q * self.h) / q
@@ -175,20 +152,14 @@ class Lamb:
         frequency will propagate within the plate. The roots of this
         equation are used to generate the dispersion curves.
 
-        Parameters
-        ----------
-        vp : float or int
+        :param vp : float or int
             Phase velocity.
-        fd : float or int
+        :param fd : float or int
             Frequency × thickness product.
 
-        Returns
-        -------
-        antisymmetric : float
+        :return antisymmetric : float
             Dispersion relation for antisymmetric modes.
-
         """
-
         k, p, q = self._calc_constants(vp, fd)
 
         antisymmetric = (q * np.tan(q * self.h)
@@ -196,8 +167,17 @@ class Lamb:
 
         return np.real(antisymmetric)
 
-    def _solve_disp_eqn(self, function, nmodes, c, label) -> dict:
+    def _solve_disp_eqn(self, function: Callable[[float, float], float], nmodes: int, c: float, label: str) -> dict:
+        """
+        Numerical solution of dispersion equation
 
+        :param function:
+        :param nmodes:
+        :param c:
+        :param label:
+
+        :return:
+        """
         fd_arr = np.linspace(0, self.fd_max, self.fd_points)
         result = np.zeros((len(fd_arr), nmodes + 1))
 
@@ -264,34 +244,31 @@ class Lamb:
         # print(result_dict)
         return result_dict
 
-    def plot(self, ax, result: dict, y_max: float, cutoff_frequencies=True,
-             arrow_dir: str = 'down', material_velocities: bool = True, plt_kwargs={}):
+    def plot(self, ax: plt.axes, result: dict, y_max: float, cutoff_frequencies: bool = True,
+             arrow_dir: str = 'down', material_velocities: bool = True, plt_kwargs: dict = {}) -> None:
         """Generate a dispersion plot for a family of modes (symmetric
         or antisymmetric).
-
-        Parameters
-        ----------
-        ax : axes
+        :param ax : axes
             Matplotlib axes in which the plot will be added.
-        result : dict
+        :param result : dict
             A dictionary with a result (vp, vg or k) interpolator at
             each mode.
-        y_max : float or int
+        :param y_max : float or int
             Maximum y value in the plot.
-        cutoff_frequencies : bool, optional
+        :param cutoff_frequencies : bool, optional
             Set to True to add cutoff frequencies to the plot.
-        arrow_dir : {'up', 'down'}, optional
+        :param arrow_dir : {'up', 'down'}, optional
             Set arrows direction of cutoff frequencies. Can be 'up' (for
             group velocity plots) or 'down' (for phase velocity plots).
-        material_velocities : bool, optional
+        :param material_velocities : bool, optional
             Add material velocities (longitudinal, shear and Rayleigh)
             to the plot. Defaults to True.
-        plt_kwargs : dict, optional
+        :param plt_kwargs : dict, optional
             Matplotlib kwargs (to change color, linewidth, linestyle,
             etc.).
 
+        :return:
         """
-
         for mode, arr in result.items():
 
             # Generate a fd array for each mode and add the
@@ -302,7 +279,7 @@ class Lamb:
 
             if cutoff_frequencies:
                 add_cutoff_freqs(ax, mode, arrow_dir, y_max,
-                                 self.c_L, self.c_S)
+                                 c_l=self.c_L, c_s=self.c_S)
 
         if material_velocities:
             add_velocities(ax, self.c_L, self.c_S, self.c_R, self.fd_max)
@@ -312,40 +289,34 @@ class Lamb:
 
         ax.set_xlabel('Frequency × thickness [KHz × mm]')
 
-    def plot_phase_velocity(self, modes='both', cutoff_frequencies=True,
-                            material_velocities=True, save_img=False,
-                            sym_style={'color': 'blue'},
-                            antisym_style={'color': 'red', 'linestyle': '--'}) -> tuple[plt.Figure, plt.Axes]:
+    def plot_phase_velocity(self, modes: str = 'both', cutoff_frequencies: bool = True,
+                            material_velocities: bool = True, save_img: bool = False,
+                            sym_style: dict = {'color': 'blue'},
+                            antisym_style: dict = {'color': 'red', 'linestyle': '--'}) -> tuple[plt.Figure, plt.Axes]:
         """Generate a plot of phase velocity as a function of frequency
         × thickness.
 
-        Parameters
-        ----------
-        modes : {'both', 'symmetric', 'antisymmetric'}, optional
+        :param modes : {'both', 'symmetric', 'antisymmetric'}, optional
             Which family of modes to plot. Can be 'symmetric',
             'antisymmetric' or 'both'. Defaults to 'both'.
-        cutoff_frequencies : bool, optional
+        :param cutoff_frequencies : bool, optional
             Add cutoff frequencies to the plot. Defaults to True.
-        material_velocities : bool, optional
+        :param material_velocities : bool, optional
             Add material velocities (longitudinal, shear and Rayleigh)
             to the plot. Defaults to True.
-        save_img : bool, optional
+        :param save_img : bool, optional
             Save the result image as png. Defaults to False.
-        sym_style : dict, optional
+        :param sym_style : dict, optional
             A dictionary with matplotlib kwargs to modify the symmetric
             curves (to change color, linewidth, linestyle, etc.).
-        antisym_style : dict, optional
+        :param antisym_style : dict, optional
             A dictionary with matplotlib kwargs to modify the
             antisymmetric curves (to change color, linewidth, linestyle,
             etc.).
 
-        Returns
-        -------
-        fig, ax : matplotlib objects
+        :return fig, ax : matplotlib objects
             The figure and the axes of the generated plot.
-
         """
-
         fig, ax = plt.subplots(figsize=(7, 4))
         fig.canvas.setWindowTitle(f'Phase Velocity for {self.d * 10**3} mm thick {self.material}')
 
@@ -366,7 +337,7 @@ class Lamb:
             self.plot(ax, self.vp_antisym, max_, cutoff_frequencies,
                       'down', material_velocities, plt_kwargs=antisym_style)
         else:
-            raise Exception('modes must be "symmetric", "antisymmetric"'
+            raise IncorrectMode('modes must be "symmetric", "antisymmetric"'
                             'or "both".')
 
         ax.legend(loc='lower right')
@@ -380,9 +351,9 @@ class Lamb:
 
         return fig, ax
 
-    def plot_group_velocity(self, modes='both', cutoff_frequencies=True,
-                            save_img=False, sym_style={'color': 'blue'},
-                            antisym_style={'color': 'red', 'linestyle': '--'}):
+    def plot_group_velocity(self, modes: str = 'both', cutoff_frequencies: bool = True,
+                            save_img: bool = False, sym_style: dict = {'color': 'blue'},
+                            antisym_style: dict = {'color': 'red', 'linestyle': '--'}) -> tuple[plt.figure, plt.axes]:
         """Generate a plot of group velocity as a function of frequency
         × thickness.
 
@@ -444,10 +415,10 @@ class Lamb:
 
         return fig, ax
 
-    def plot_wave_number(self, modes='both', save_img=False,
-                         sym_style={'color': 'blue'},
-                         antisym_style={'color': 'red', 'linestyle': '--'},
-                         size=(7, 4)):
+    def plot_wave_number(self, modes='both', save_img: bool = False,
+                         sym_style: dict = {'color': 'blue'},
+                         antisym_style: dict = {'color': 'red', 'linestyle': '--'},
+                         size: tuple = (7, 4)) -> tuple[plt.figure, plt.axes]:
 
         """Generate a plot of wavenumber as a function of frequency ×
         thickness.

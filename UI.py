@@ -27,7 +27,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 import os
 import logging
 from datetime import datetime
-from typing import Tuple
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import matplotlib.pyplot as plt
 import numpy as np
@@ -70,7 +69,7 @@ class UI:
         self._material_frame_layout = self.__material_frame_layout()
         self._main_frame_layout = self.__main_frame_layout()
 
-        self.main_window = sg.Window(title='Counter Strike: Global Offensive',
+        self.main_window = sg.Window(title='main',
                                      layout=self._main_frame_layout,
                                      size=WINDOW_SIZE)
 
@@ -127,7 +126,7 @@ class UI:
                 sg.Frame('Material editor', layout=self._material_frame_layout, tooltip="Material editing module"), sg.Frame('Geometry', layout=[[sg.Canvas(size=(300, 300), key='-canvas-')]])],
                 [sg.Frame("Output", layout=self._console_frame_layout)]]
 
-    def __draw_figure(self, canvas: FigureCanvasTkAgg, figure: plt.figure) -> FigureCanvasTkAgg:
+    def __draw_figure(self, canvas, figure: plt.figure) -> FigureCanvasTkAgg:
 
         figure_canvas_agg = FigureCanvasTkAgg(figure, canvas)
         figure_canvas_agg.draw()
@@ -138,7 +137,7 @@ class UI:
         figure.get_tk_widget().forget()
         plt.close('all')
 
-    def __model(self) -> Tuple[plt.figure, plt.axes]:
+    def __model(self) -> tuple[plt.figure, plt.axes]:
 
         axes = [2, 2, 5]
         data = np.ones(axes, dtype=np.bool_)
@@ -180,6 +179,8 @@ class UI:
 
                     # IsotropicMaterial.fix_file_path(values['-data_path-'])
                     # data, choices = IsotropicMaterial._parse_materials()
+                    # self.__delete_figure_agg(self.main_window['-canvas-'].TKCanvas)
+                    self.__draw_figure(self.main_window['-canvas-'].TKCanvas, self.__model()[0])
                     print(f"{datetime.now().isoformat(' ', 'seconds')} : Loading material data...")
                     IsotropicMaterial.fix_file_path(filepath=values['-data_path-'])
 
