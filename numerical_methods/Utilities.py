@@ -27,6 +27,7 @@ import itertools
 import numpy as np
 import numpy.typing as npt
 import scipy.interpolate
+from typing import Callable
 
 
 def interpolate(result: dict, d: float, kind: str = 'cubic') -> tuple[dict, dict, dict]:
@@ -90,7 +91,7 @@ def interpolate(result: dict, d: float, kind: str = 'cubic') -> tuple[dict, dict
     return interp_vp, interp_vg, interp_k
 
 
-def correct_instability(result: npt.NDArray, function: str):
+def correct_instability(result: npt.NDArray, function: Callable[[float, float], float]):
 
     """A function to correct the instability produced when two roots are 
     in close proximity, making the function change sign twice or more in 

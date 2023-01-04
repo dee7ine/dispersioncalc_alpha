@@ -83,11 +83,21 @@ class IsotropicMaterial:
               f" C66: {self._C66}")
 
     @classmethod
-    def fix_file_path(cls, filepath: str) -> None:
+    def fix_file_path(cls: IsotropicMaterial, filepath: str) -> None:
+        """
+        Method setting data file path
+        :param filepath:
+        :return:
+        """
         cls._filename = filepath
 
     @classmethod
-    def parse_materials(cls) -> tuple[list[list[str]], list[str]]:
+    def parse_materials(cls: IsotropicMaterial) -> tuple[list[list[str]], list[str]]:
+        """
+        File parsing method - parses file contents into
+        list of names and list of data
+        :return:
+        """
         with open(cls._filename, 'r') as material_data:
             try:
                 material_data_list = material_data.readlines()
@@ -105,7 +115,18 @@ class IsotropicMaterial:
                 raise ErrorParsingMaterial
 
     @classmethod
-    def new_material(cls, name: str, density: str, e: str, v: str, c11: str, c66: str) -> None:
+    def new_material(cls: IsotropicMaterial, name: str, density: str, e: str, v: str, c11: str, c66: str) -> None:
+        """
+        Create new material with given parameters
+
+        :param name: Name
+        :param density: Density
+        :param e: Young's Modulus
+        :param v: Poisson's ratio
+        :param c11: Engineering constant c11
+        :param c66: Engineering constant c66
+        :return:
+        """
         with open(cls._filename, 'a+') as material_data:
 
             new_material_data = []
@@ -125,7 +146,12 @@ class IsotropicMaterial:
             material_data.close()
 
     def _find_material(self, material: str) -> int:
+        """
+        Function that finds material of given name
 
+        :param material: name of the material
+        :return:
+        """
         parsed_list, material_names_list = self.parse_materials()
 
         for index, name in enumerate(material_names_list):
@@ -136,6 +162,10 @@ class IsotropicMaterial:
         raise NoMaterialFound("No material found. You can create your own material in material editor!")
 
     def _validate_data_file(self) -> bool:
+        """
+        Method validating data file
+        :return:
+        """
 
         valid: bool = True
 

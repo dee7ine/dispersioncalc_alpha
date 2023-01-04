@@ -31,25 +31,23 @@ import numpy as np
 def add_plot(ax: plt.Axes, result: dict, mode: str, fd: np.array, **plt_kwargs):
     """Add a dispersion plot for a specific mode to a matplotlib axes
     object.
-    
-    Parameters
-    ----------
-    ax : axes
+
+    :param ax : axes
         Matplotlib axes in which the plot will be added.
-    result : dict
+    :param result : dict
         A dictionary with a result (vp, vg or k) interpolator at each 
         mode.
-    mode : str
+    :param mode : str
         Mode to plot. Can be "A0", "A1", "A2", ..., "An" or "S0", "S1", 
         "S2", ..., "Sn", with 'n' being the order of the corresponding 
         mode.
-    fd : array
+    :param fd : array
         An array of frequency thickness values to plot.
-    plt_kwargs : dict, optional
+    :param plt_kwargs : dict, optional
         Matplotlib kwargs (to change color, linewidth, linestyle, etc.).
-        
+
+    :return:
     """
-    
     var = result[mode](fd)
     n = int(mode[1:]) + 1
     
@@ -81,8 +79,8 @@ def add_plot(ax: plt.Axes, result: dict, mode: str, fd: np.array, **plt_kwargs):
                 va='top', ha='right')
 
 
-def add_cutoff_freqs(ax, mode, arrow_dir, y_max, c_l, c_s,
-                     plt_kwargs={'color': 'k', 'ls': '--', 'lw': 0.5}) -> None:
+def add_cutoff_freqs(ax: plt.axes, mode: str, arrow_dir: str, y_max: float, c_l: float, c_s: float,
+                     plt_kwargs: dict = {'color': 'k', 'ls': '--', 'lw': 0.5}) -> None:
     """
     Add vertical lines indicating cutoff frequencies to a matplotlib
     axes object.
@@ -112,7 +110,6 @@ def add_cutoff_freqs(ax, mode, arrow_dir, y_max, c_l, c_s,
 
     :return
     """
-    
     if arrow_dir == 'down':
         arrow_y_pos = y_max
         arrow_str = r'$\downarrow$'
@@ -140,29 +137,26 @@ def add_cutoff_freqs(ax, mode, arrow_dir, y_max, c_l, c_s,
                 clip_on=True)   
 
 
-def add_velocities(ax, c_l, c_s, c_r, x_max,
-                   plt_kwargs={'color': 'k', 'ls': ':', 'lw': 0.5}):
+def add_velocities(ax: plt.axes, c_l: float, c_s: float, c_r: float, x_max: float,
+                   plt_kwargs: dict = {'color': 'k', 'ls': ':', 'lw': 0.5}) -> None:
     """Add horizontal lines indicating material velocities to a 
     matplotlib axes object.
     
     Parameters
     ----------
-    ax : axes
-        Matplotlib axes in which the plot will be added.
-    x_max : float or int
-        Maximum x value in the plot. Used to position the velocity 
-        labels.
-    c_l : float or int
-        Longitudinal wave velocity of the material, in m/s.
-    c_s: float or int
+    :param ax: Matplotlib axes in which the plot will be added.
+    :param  x_max: Maximum x value in the plot.
+                 Used to position the velocity labels.
+    :param c_l: Longitudinal wave velocity of the material, in m/s.
+    :param c_s: float or int
         Shear wave velocity of the material, in m/s.
-    c_r: float or int, optional
+    :param c_r: float or int, optional
         Rayleigh wave velocity of the material, in m/s.
-    plt_kwargs : dict, optional
+    :param plt_kwargs : dict, optional
         Matplotlib kwargs (to change color, linewidth, linestyle, etc.).
-        
+
+    :return:
     """
-    
     ax.axhline(y=c_l, **plt_kwargs)
     ax.text(x=x_max, y=c_l, s=r'$\mathregular{c_L}$', va='center', ha='left')
     
@@ -172,4 +166,9 @@ def add_velocities(ax, c_l, c_s, c_r, x_max,
     if c_r:
         ax.axhline(y=c_r, **plt_kwargs)
         ax.text(x=0, y=c_r, s=r'$\mathregular{c_R}$', va='center',
+                ha='right')
+
+    if c_s:
+        ax.axhline(y=c_s, **plt_kwargs)
+        ax.text(x=0, y=c_s, s=r'$\mathregular{c_R}$', va='center',
                 ha='right')
