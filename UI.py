@@ -23,22 +23,24 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 =========================================================================
 """
 
+from __future__ import annotations
 
 import os
 import logging
-from datetime import datetime
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import matplotlib.pyplot as plt
 import numpy as np
 import PySimpleGUI as sg  # use('qt5agg')
+from datetime import datetime
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 from materials.Materials import IsotropicMaterial
-from numerical_methods.lamb_wave import Lamb
+from numerical_methods.Lamb import Lamb
 
 
+UI_THEME = 'SystemDefaultForReal'
+DEFAULT_DATA_PATH = f'{os.getcwd()}\\materials\\material_data.txt'
 WINDOW_SIZE = (1250, 650)
 CONSOLE_SIZE = (100, 100)
-
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -53,14 +55,14 @@ class UI:
     _console_frame_layout: list
     _material_frame_layout: list
     _main_frame_layout: list
-    _default_data_path: str = f'{os.getcwd()}\\materials\\material_data.txt'
+    _default_data_path: str = DEFAULT_DATA_PATH
     _modes = ['Symmetric', 'Antisymmetric', 'Both']
     _data: list
     _choices: list
 
     def __init__(self) -> None:
 
-        sg.theme('SystemDefaultForReal')
+        sg.theme(UI_THEME)
         IsotropicMaterial.fix_file_path(filepath=self._default_data_path)
         self._data, self._choices = IsotropicMaterial.parse_materials()
 
@@ -74,12 +76,20 @@ class UI:
                                      size=WINDOW_SIZE)
 
     def __menu_layout(self) -> list:
+        """
+        Menu layout definition
+        :return:
+        """
 
         return [['File', ['Open', 'Save']],
                 ['Edit', ['Paste', ['Special', 'Normal'], 'Undo']],
                 ['Help', 'About...'], ]
 
     def __console_frame_layout(self) -> list:
+        """
+        Console frame layout definition
+        :return:
+        """
 
         return [[sg.Multiline(f"Beginning session {datetime.now().isoformat(' ', 'seconds')}\n",
                               size=CONSOLE_SIZE,
@@ -90,6 +100,10 @@ class UI:
                               background_color='white')]]
 
     def __material_frame_layout(self) -> list:
+        """
+        Material frame layout definition
+        :return:
+        """
 
         return [[sg.Frame('', layout=[[sg.Text("E [MPa]"), sg.Input('68.9', enable_events=True, key='young_modulus', size=(6, 5))],
                 [sg.Text(text="v [no unit]"), sg.Input('0.33', enable_events=True, key='poisson_ratio', size=(6, 5))],
@@ -105,6 +119,10 @@ class UI:
                 sg.Button('Load', tooltip="Load data file"), sg.Button('Help', key='Material_Help', tooltip='Helpful tips')]], size=(500, 60))]]
 
     def __main_frame_layout(self) -> list:
+        """
+        Main frame layout definition
+        :return:
+        """
 
         return [[sg.Menu(self._menu_layout, tearoff=False)],
                 [sg.Frame('Simulation', layout=[[sg.Frame('Parameters', layout=[[sg.Text('Material'),
@@ -127,6 +145,12 @@ class UI:
                 [sg.Frame("Output", layout=self._console_frame_layout)]]
 
     def __draw_figure(self, canvas, figure: plt.figure) -> FigureCanvasTkAgg:
+        """
+        Draws simple 3D shape on a canvas widget
+        :param canvas: Canvas widget
+        :param figure: Matplotlib figure
+        :return:
+        """
 
         figure_canvas_agg = FigureCanvasTkAgg(figure, canvas)
         figure_canvas_agg.draw()
@@ -134,10 +158,20 @@ class UI:
         return figure_canvas_agg
 
     def __delete_figure_agg(self, figure: plt.figure) -> None:
+        """
+        Deletes 3D shape from canvas widget
+        :param figure:
+        :return:
+        """
+
         figure.get_tk_widget().forget()
         plt.close('all')
 
     def __model(self) -> tuple[plt.figure, plt.axes]:
+        """
+        3D plot definition
+        :return:
+        """
 
         axes = [2, 2, 5]
         data = np.ones(axes, dtype=np.bool_)
@@ -153,6 +187,11 @@ class UI:
         return fig, ax
 
     def app_main_loop(self) -> None:
+        """
+        Main loop of the application
+
+        :return:
+        """
 
         try:
 

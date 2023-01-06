@@ -23,12 +23,13 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 =========================================================================
 """
 
-
+from __future__ import annotations
 import numpy as np
 import matplotlib.pyplot as plt
 import scipy.optimize
 from typing import Any, Callable
 from functools import cache
+from dataclasses import dataclass
 
 from numerical_methods.Plot_utilities import add_plot, add_cutoff_freqs, add_velocities
 from numerical_methods.Utilities import interpolate, correct_instability, write_txt, find_max
@@ -36,14 +37,37 @@ from materials.Materials import IsotropicMaterial
 from Exceptions import IncorrectMode
 
 
+@dataclass(eq=False, frozen=False, slots=True)
 class Lamb:
+
+    d: float
+    h: float
+
+    nmodes_sym: float
+    nmodes_antisym: float
+
+    fd_max: float
+    vp_max: float
+    c_L: float
+    c_S: float
+    c_R: float
+
+    fd_points: int
+    vp_step: int
+    material: str
+
+    vp_sym: dict
+    vg_sym: dict
+    k_sym: dict
+
+    vp_antisym: dict
+    vg_antisym: dict
+    k_antisym: dict
 
     def __init__(self, thickness: float, nmodes_sym: int, nmodes_antisym: int, fd_max: float, vp_max: float,
                  c_l: float, c_s: float, c_r: float = None, fd_points: int = 100, vp_step: int = 100,
                  material: str = '') -> None:
         """"
-        Parameters
-        ----------
         :param thickness:               thickness of the plate, in mm.
         :param nmodes_sym:              number of symmetric modes to calculate.
         :param nmodes_antisym:          number of antisymmetric modes to calculate.
@@ -94,8 +118,7 @@ class Lamb:
         # print(self.vg_sym)
         # print(self.k_sym)
 
-        self.vp_antisym, self.vg_antisym, self.k_antisym = interpolate(antisym,
-                                                                       self.d)
+        self.vp_antisym, self.vg_antisym, self.k_antisym = interpolate(antisym, self.d)
 
     @cache
     def _calc_constants(self, vp: float, fd: float) -> tuple[float | Any, Any, Any]:
@@ -103,8 +126,6 @@ class Lamb:
         dispersion equations) and wavenumber from a pair of phase
         velocity and frequency × thickness product.
 
-        Parameters
-        ----------
         :param: vp : float or int
             Phase velocity.
         :param: fd : float or int
@@ -116,6 +137,7 @@ class Lamb:
             A pair of constants introduced to simplify the dispersion
             relations.
         """
+
         omega = 2 * np.pi * (fd / self.d)
 
         k = omega / vp
@@ -139,6 +161,7 @@ class Lamb:
         :return symmetric : float
             Dispersion relation for symmetric modes.
         """
+
         k, p, q = self._calc_constants(vp, fd)
 
         symmetric = (np.tan(q * self.h) / q
@@ -160,6 +183,7 @@ class Lamb:
         :return antisymmetric : float
             Dispersion relation for antisymmetric modes.
         """
+
         k, p, q = self._calc_constants(vp, fd)
 
         antisymmetric = (q * np.tan(q * self.h)
@@ -178,6 +202,7 @@ class Lamb:
 
         :return:
         """
+
         fd_arr = np.linspace(0, self.fd_max, self.fd_points)
         result = np.zeros((len(fd_arr), nmodes + 1))
 
@@ -269,6 +294,7 @@ class Lamb:
 
         :return:
         """
+
         for mode, arr in result.items():
 
             # Generate a fd array for each mode and add the
@@ -317,6 +343,7 @@ class Lamb:
         :return fig, ax : matplotlib objects
             The figure and the axes of the generated plot.
         """
+
         fig, ax = plt.subplots(figsize=(7, 4))
         fig.canvas.setWindowTitle(f'Phase Velocity for {self.d * 10**3} mm thick {self.material}')
 
@@ -357,28 +384,23 @@ class Lamb:
         """Generate a plot of group velocity as a function of frequency
         × thickness.
 
-        Parameters
-        ----------
-        modes : {'both', 'symmetric', 'antisymmetric'}, optional
+        :param modes : {'both', 'symmetric', 'antisymmetric'}, optional
             Which family of modes to plot. Can be 'symmetric',
             'antisymmetric' or 'both'. Defaults to 'both'.
-        cutoff_frequencies : bool, optional
+        :param cutoff_frequencies : bool, optional
             Add cutoff frequencies to the plot. Defaults to True.
-        save_img : bool, optional
+        :param save_img : bool, optional
             Save the result image as png. Defaults to False.
-        sym_style : dict, optional
+        :param sym_style : dict, optional
             A dictionary with matplotlib kwargs to modify the symmetric
             curves (to change color, linewidth, linestyle, etc.).
-        antisym_style : dict, optional
+        :param antisym_style : dict, optional
             A dictionary with matplotlib kwargs to modify the
             antisymmetric curves (to change color, linewidth, linestyle,
             etc.).
 
-        Returns
-        -------
-        fig, ax : matplotlib objects
+        :return fig, ax : matplotlib objects
             The figure and the axes of the generated plot.
-
         """
 
         fig, ax = plt.subplots(figsize=(7, 4))
@@ -419,31 +441,27 @@ class Lamb:
                          sym_style: dict = {'color': 'blue'},
                          antisym_style: dict = {'color': 'red', 'linestyle': '--'},
                          size: tuple = (7, 4)) -> tuple[plt.figure, plt.axes]:
-
         """Generate a plot of wavenumber as a function of frequency ×
         thickness.
 
         Parameters
         ----------
-        modes : {'both', 'symmetric', 'antisymmetric'}, optional
+        :param modes : {'both', 'symmetric', 'antisymmetric'}, optional
             Which family of modes to plot. Can be 'symmetric',
             'antisymmetric' or 'both'. Defaults to 'both'.
-        save_img : bool, optional
+        :param save_img : bool, optional
             Save the result image as png. Defaults to False.
-        sym_style : dict, optional
+        :param sym_style : dict, optional
             A dictionary with matplotlib kwargs to modify the symmetric
             curves (to change color, linewidth, linestyle, etc.).
-        antisym_style : dict, optional
+        :param antisym_style : dict, optional
             A dictionary with matplotlib kwargs to modify the
             antisymmetric curves (to change color, linewidth, linestyle,
             etc.).
-        size: list
+        :param size: list
 
-        Returns
-        -------
-        fig, ax : matplotlib objects
+        :return fig, ax : matplotlib objects
             The figure and the axes of the generated plot.
-
         """
 
         fig, ax = plt.subplots(figsize=size)
@@ -477,7 +495,10 @@ class Lamb:
         return fig, ax
 
     def save_results(self) -> None:
-        """Save all results to a txt file."""
+        """Save all results to a txt file.
+
+        :return
+        """
 
         if self.material:
             filename = f'{self.material} plate - {self.d * 1e3} mm.txt'

@@ -1,6 +1,6 @@
 import unittest
 import dis
-from numerical_methods.lamb_wave import LambWave
+from numerical_methods.Lamb import LambWave
 
 def add(a):
     for _ in range(0, 100):
