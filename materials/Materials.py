@@ -28,7 +28,7 @@ from __future__ import annotations
 
 import os
 from dataclasses import dataclass
-from Exceptions import NoMaterialFound, ErrorParsingMaterial
+from Exceptions import NoMaterialFound, ErrorParsingMaterial, ErrorCreatingMaterial
 
 
 @dataclass
@@ -62,18 +62,17 @@ class IsotropicMaterial:
 
         self._name = material
 
-        parsed_list, material_names_list = self.parse_materials()
+        # parsed_list, material_names_list = self.parse_materials()
 
-        self._material_names_list = material_names_list
-        self._parsed_material_data = parsed_list
+        self._parsed_material_data, self._material_names_list = self.parse_materials()
         self._index = self._find_material(material=self._name)
 
-        self._name: str = parsed_list[self._index][0]
-        self._density = float(parsed_list[self._index][1])
-        self._E = float(parsed_list[self._index][2])
-        self._v = float(parsed_list[self._index][3])
-        self._C11 = float(parsed_list[self._index][4])
-        self._C66 = float(parsed_list[self._index][5])
+        self._name: str = self._parsed_material_data[self._index][0]
+        self._density = float(self._parsed_material_data[self._index][1])
+        self._E = float(self._parsed_material_data[self._index][2])
+        self._v = float(self._parsed_material_data[self._index][3])
+        self._C11 = float(self._parsed_material_data[self._index][4])
+        self._C66 = float(self._parsed_material_data[self._index][5])
 
         print(f"Name: {self._name},"
               f" mass-density: {self._density},"
@@ -87,6 +86,7 @@ class IsotropicMaterial:
         """
         Method setting data file path
         :param filepath:
+
         :return:
         """
         cls._filename = filepath
@@ -96,6 +96,7 @@ class IsotropicMaterial:
         """
         File parsing method - parses file contents into
         list of names and list of data
+
         :return:
         """
         with open(cls._filename, 'r') as material_data:
@@ -125,33 +126,38 @@ class IsotropicMaterial:
         :param v: Poisson's ratio
         :param c11: Engineering constant c11
         :param c66: Engineering constant c66
+
         :return:
         """
         with open(cls._filename, 'a+') as material_data:
+            try:
+                new_material_data = []
+                new_material_data.extend([name, density, e, v, c11, c66])
 
-            new_material_data = []
-            new_material_data.extend([name, density, e, v, c11, c66])
+                print(new_material_data)
 
-            print(new_material_data)
+                material_data.writelines("\n")
 
-            material_data.writelines("\n")
+                # conversion of Young's modulus to GPa
 
-            # conversion of Young's modulus to GPa
+                if '.' in e:
+                    material_data.writelines(f"{name} {density} {e.replace('.', '', 1)}00000000 {v} {c11} {c66}")
+                else:
+                    material_data.writelines(f"{name} {density} {e}000000000 {v} {c11} {c66}")
 
-            if '.' in e:
-                material_data.writelines(f"{name} {density} {e.replace('.', '', 1)}00000000 {v} {c11} {c66}")
-            else:
-                material_data.writelines(f"{name} {density} {e}000000000 {v} {c11} {c66}")
-
-            material_data.close()
+                material_data.close()
+            except Exception:
+                raise ErrorCreatingMaterial
 
     def _find_material(self, material: str) -> int:
         """
         Function that finds material of given name
 
         :param material: name of the material
+
         :return:
         """
+
         parsed_list, material_names_list = self.parse_materials()
 
         for index, name in enumerate(material_names_list):
@@ -164,6 +170,7 @@ class IsotropicMaterial:
     def _validate_data_file(self) -> bool:
         """
         Method validating data file
+
         :return:
         """
 

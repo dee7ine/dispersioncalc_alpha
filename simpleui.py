@@ -7,7 +7,7 @@ from datetime import datetime
 import PySimpleGUI as sg #use('qt5agg')
 
 from materials.Materials import IsotropicMaterial
-from numerical_methods.lamb_wave import Lamb
+from numerical_methods.Lamb import Lamb
 
 import logging
 

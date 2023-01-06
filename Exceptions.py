@@ -42,3 +42,6 @@ class IncorrectFilePath(Exception):
 
 class IncorrectFileFormat(Exception):
     ...
+
+class ErrorCreatingMaterial(Exception):
+    ...
