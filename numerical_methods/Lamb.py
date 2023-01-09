@@ -345,7 +345,7 @@ class Lamb:
         """
 
         fig, ax = plt.subplots(figsize=(7, 4))
-        fig.canvas.setWindowTitle(f'Phase Velocity for {self.d * 10**3} mm thick {self.material}')
+        #fig.canvas.setWindowTitle(f'Phase Velocity for {self.d * 10**3} mm thick {self.material}')
 
         # Calculate the maximum value to scale the ylim of the axes.
 
@@ -404,7 +404,7 @@ class Lamb:
         """
 
         fig, ax = plt.subplots(figsize=(7, 4))
-        fig.canvas.setWindowTitle(f'Group Velocity for {self.d * 10**3} mm thick {self.material}')
+        #fig.canvas.setWindowTitle(f'Group Velocity for {self.d * 10**3} mm thick {self.material}')
 
         # Calculate the maximum value to scale the ylim of the axes.
 
@@ -465,7 +465,7 @@ class Lamb:
         """
 
         fig, ax = plt.subplots(figsize=size)
-        fig.canvas.setWindowTitle(f'Wave Number for {self.d * 10**3} mm thick {self.material}')
+        #fig.canvas.setWindowTitle(f'Wave Number for {self.d * 10**3} mm thick {self.material}')
 
         # Calculate the maximum value to scale the ylim of the axes.
 
@@ -525,6 +525,7 @@ def main() -> None:
     # the following equations:
 
     new_material = IsotropicMaterial(material="Ice")
+    new_material.fix_file_path('C://Users//deefi//PycharmProjects//dispersioncalc_alpha//materials//material_data.txt')
     E = new_material.e  # E = Young's modulus, in Pa.
     p = new_material.density  # p = Density (rho), in kg/m3.
     v = new_material.v  # v = Poisson's ratio (nu).

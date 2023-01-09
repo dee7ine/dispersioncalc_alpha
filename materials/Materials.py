@@ -30,13 +30,15 @@ import os
 from dataclasses import dataclass
 from Exceptions import NoMaterialFound, ErrorParsingMaterial, ErrorCreatingMaterial
 
+DEFAULT_FILE_PATH = r'C://Users//deefi//PycharmProjects//dispersioncalc_alpha//materials//material_data.txt'
+
 
 @dataclass
 class IsotropicMaterial:
 
     # _frequency = 1000.00
 
-    _filename: str = f'{os.getcwd()}\\material_data.txt'
+    _filename: str = DEFAULT_FILE_PATH
 
     def __init__(self, material: str) -> None:
 
@@ -89,6 +91,7 @@ class IsotropicMaterial:
 
         :return:
         """
+
         cls._filename = filepath
 
     @classmethod
@@ -99,6 +102,7 @@ class IsotropicMaterial:
 
         :return:
         """
+
         with open(cls._filename, 'r') as material_data:
             try:
                 material_data_list = material_data.readlines()
@@ -129,6 +133,7 @@ class IsotropicMaterial:
 
         :return:
         """
+
         with open(cls._filename, 'a+') as material_data:
             try:
                 new_material_data = []
@@ -158,9 +163,7 @@ class IsotropicMaterial:
         :return:
         """
 
-        parsed_list, material_names_list = self.parse_materials()
-
-        for index, name in enumerate(material_names_list):
+        for index, name in enumerate(self._material_names_list):
             # print(name)
             if material in name:
                 return index
