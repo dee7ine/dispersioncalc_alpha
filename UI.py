@@ -39,8 +39,10 @@ from numerical_methods.Lamb import Lamb
 
 UI_THEME = 'SystemDefaultForReal'
 DEFAULT_DATA_PATH = f'{os.getcwd()}\\materials\\material_data.txt'
-WINDOW_SIZE = (1250, 650)
-CONSOLE_SIZE = (100, 100)
+WINDOW_SIZE = (1500, 1000)   # default (1250, 650)
+CONSOLE_SIZE = (100, 25)
+SYMMETRY_MODES = ['Symmetric', 'Antisymmetric', 'Both']
+DISPLAY_PLOTS = ['Wave Number', 'Phase Velocity', 'Group Velocity', 'All']
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -56,9 +58,10 @@ class UI:
     _material_frame_layout: list
     _main_frame_layout: list
     _default_data_path: str = DEFAULT_DATA_PATH
-    _modes = ['Symmetric', 'Antisymmetric', 'Both']
+    _modes = SYMMETRY_MODES
     _data: list
-    _choices: list
+    _choices: list = SYMMETRY_MODES
+    _plots_choices: list = DISPLAY_PLOTS
 
     def __init__(self) -> None:
 
@@ -111,12 +114,12 @@ class UI:
                 [sg.Text("C11"), sg.Input('0', enable_events=True, key='C11', size=(6, 5))],
                 [sg.Text("C66"), sg.Input('0', enable_events=True, key='C66', size=(6, 5))],
                 [sg.Text("Material name"), sg.Input('default', enable_events=True, key='new_material_name', size=(6, 5))],
-                [sg.Button('Create', key='Create', tooltip='Add material to data file')]], size=(250, 200))],
+                [sg.Button('Create', key='-CREATE_MATERIAL-', tooltip='Add material to data file')]], size=(250, 200))],
                 [sg.Frame('', layout=[[sg.Text('Material data path'),
                 sg.InputText(default_text=self._default_data_path, key='-data_path-', size=(75, 22))],
                 [sg.FileBrowse(file_types=(("TXT Files", "*.txt"), ("ALL Files", "*.*")), enable_events=True,
                 target='-data_path-', tooltip="Choose file containing material data"),
-                sg.Button('Load', tooltip="Load data file"), sg.Button('Help', key='Material_Help', tooltip='Helpful tips')]], size=(500, 60))]]
+                sg.Button('Load', tooltip="Load data file", key='-LOAD_FILE-'), sg.Button('Help', key='-MATERIAL_HELP-', tooltip='Helpful tips')]], size=(500, 60))]]
 
     def __main_frame_layout(self) -> list:
         """
@@ -125,7 +128,7 @@ class UI:
         """
 
         return [[sg.Menu(self._menu_layout, tearoff=False)],
-                [sg.Frame('Simulation', layout=[[sg.Frame('Parameters', layout=[[sg.Text('Material'),
+                [sg.Frame('Simulation', layout=[[sg.Frame('Configuration', layout=[[sg.Text('Material'),
                 sg.InputCombo(values=self._choices, default_value="AluminumDisperse", key="material_name", enable_events=True, readonly=True,
                 background_color='white', size=(33, 20)), sg.Stretch()], [sg.Text('Symmetry modes'),
                 sg.InputCombo(values=self._modes, default_value='Symmetric', key='mode', enable_events=True, readonly=True, background_color='white', size=(25, 20))],
@@ -135,13 +138,15 @@ class UI:
                 sg.Input('1000', enable_events=True, key='frequency', size=(6, 5), justification='left')],
                 [sg.Text('Maximum velocity [m/s]  '),
                 sg.Input('15000', enable_events=True, key='velocity', size=(6, 5), justification='left')],
-                [sg.Frame('', layout=[[sg.Text('Number of modes')], [sg.Text('Symmetric     '), sg.Input('10', enable_events=True, key='symmetric', size=(5, 5))],
-                [sg.Text('Antisymmetric'), sg.Input('10', enable_events=True, key='antisymmetric', size=(5, 5))],
-                [sg.Text('Trace SH modes'), sg.Checkbox('', size=(5, 5))]])]])],
-                [sg.Button('Run', tooltip="Calculate and plot dispersion curves \n for given material data", enable_events=True, key='RUN'),
-                sg.Button('Close', tooltip='Close all already open plots'),
-                sg.Cancel(), sg.Button('Help', key="Lamb_Help", tooltip="Helpful tips")]]),
-                sg.Frame('Material editor', layout=self._material_frame_layout, tooltip="Material editing module"), sg.Frame('Geometry', layout=[[sg.Canvas(size=(300, 300), key='-canvas-')]])],
+                [sg.Text('Calculate'), sg.InputCombo(values=self._plots_choices, default_value='All', key='mode', enable_events=True, readonly=True, background_color='white', size=(25, 20))],
+                [sg.Frame('Lamb wave', layout=[[],
+                [sg.Text('Symmetric     '), sg.Input('10', enable_events=True, key='symmetric', size=(5, 5))],
+                [sg.Text('Antisymmetric'), sg.Input('10', enable_events=True, key='antisymmetric', size=(5, 5))]])],
+                [sg.Button('Calculate Lamb', tooltip="Calculate and plot dispersion curves \n for given material data", enable_events=True, key='-LAMB-'),
+                sg.Button('Calculate SH', tooltip="Calculate and plot dispersion curves \n for given material data", enable_events=True, key='-SH-'),
+                sg.Button('Close plots', tooltip='Close all already open plots', key='-CLOSE-'), sg.Button('Help', key="-WAVE-HELP-", tooltip="Helpful tips")]])]]),
+                sg.Frame('Material editor', layout=self._material_frame_layout, tooltip="Material editing module", size=(500, 300)),
+                sg.Frame('Geometry', layout=[[sg.Canvas(size=(300, 300), key='-CANVAS-')]])],
                 [sg.Frame("Output", layout=self._console_frame_layout)]]
 
     def __draw_figure(self, canvas, figure: plt.figure) -> FigureCanvasTkAgg:
@@ -198,27 +203,27 @@ class UI:
             while True:
 
                 event, values = self.main_window.read()
-                # self.__draw_figure(self.main_window['-canvas-'].TKCanvas, self.__model()[0])
+                # self.__draw_figure(self.main_window['-CANVAS-'].TKCanvas, self.__model()[0])
 
                 if event in (None, 'Cancel'):
 
                     break
 
-                elif event == 'Lamb_Help':
+                elif event == '-WAVE_HELP-':
 
                     sg.popup('Click plot in order to calculate and plot dispersion curves for the chosen material',
                              title="Help")
 
-                elif event == 'Material_Help':
+                elif event == '-MATERIAL_HELP-':
 
                     sg.popup('Create a custom material.\nUse browse button to find material data file',
                              title="Help")
 
-                elif event == 'Load':
+                elif event == '-LOAD_FILE-':
 
                     # IsotropicMaterial.fix_file_path(values['-data_path-'])
                     # data, choices = IsotropicMaterial._parse_materials()
-                    # self.__delete_figure_agg(self.main_window['-canvas-'].TKCanvas)
+                    # self.__delete_figure_agg(self.main_window['-CANVAS-'].TKCanvas)
                     self.__draw_figure(self.main_window['-canvas-'].TKCanvas, self.__model()[0])
                     print(f"{datetime.now().isoformat(' ', 'seconds')} : Loading material data...")
                     IsotropicMaterial.fix_file_path(filepath=values['-data_path-'])
@@ -228,7 +233,7 @@ class UI:
                     # self.__draw_figure(self.main_window['-canvas-'].TKCanvas, self.__model()[0])
                     print(f"{datetime.now().isoformat(' ', 'seconds')}: Data file updated")
 
-                elif event == 'RUN':
+                elif event == '-LAMB-':
 
                     print(datetime.now())
 
@@ -278,7 +283,7 @@ class UI:
 
                     plt.show(block=False)
 
-                elif event == 'Create':
+                elif event == '-CREATE_MATERIAL-':
 
                     IsotropicMaterial.new_material(name=values['new_material_name'],
                                                    density=values['density'],
@@ -290,7 +295,7 @@ class UI:
                     data, choices = IsotropicMaterial.parse_materials()
                     self.main_window.find_element('material_name').Update(values=choices)
 
-                elif event == 'Close':
+                elif event == '-CLOSE-':
 
                     plt.close(fig='all')
 
