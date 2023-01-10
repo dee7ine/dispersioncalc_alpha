@@ -619,7 +619,7 @@ def main() -> None:
 
     #plt.show()
     """
-    result_to_df(result=values_list, filename='Results_ice')
+    result_to_df(result=values_list)
 
 
 def result_to_df(result: list) -> pd.DataFrame:
