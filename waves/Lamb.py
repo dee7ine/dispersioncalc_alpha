@@ -581,8 +581,8 @@ def main() -> None:
 
     #print('parsing x values for S0')
     #print(list(lamb.sym.values())[0][0])
-    #print('parsing y values for S0')
-    #print(list(lamb.sym.values())[0][1])
+    # print('parsing y values for S0')
+    # print(list(lamb.sym.values())[0][1])
 
     values_list_sym = list(lamb.sym.values())
     values_list_antisym = list(lamb.antisym.values())
