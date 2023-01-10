@@ -24,6 +24,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 """
 
 import itertools
+import os
+
 import numpy as np
 import numpy.typing as npt
 import scipy.interpolate
@@ -34,9 +36,7 @@ def interpolate(result: dict, d: float, kind: str = 'cubic') -> tuple[dict, dict
 
     """Interpolate the results for phase velocity, group velocity and
     wave number.
-    
-    Parameters
-    ----------
+
     :param result:
         Dictionary with the phase velocity values obtained by solving
         the dispersion equations.
@@ -49,8 +49,6 @@ def interpolate(result: dict, d: float, kind: str = 'cubic') -> tuple[dict, dict
         ‘linear’, ‘nearest’, ‘zero’, ‘slinear’, ‘quadratic’, ‘cubic’, 
         ‘previous’, ‘next’. Defaults to 'cubic'.
     :type kind: str, optional
-        
-    --------------------
 
     :return interp_vp:
         Dictionary with phase velocity interpolator at each mode.
@@ -58,7 +56,6 @@ def interpolate(result: dict, d: float, kind: str = 'cubic') -> tuple[dict, dict
         Dictionary with group velocity interpolator at each mode.
     :return interp_k:
         Dictionary with wave number interpolator at each mode.
-        
     """
     
     interp_vp = {}
@@ -165,68 +162,65 @@ def correct_instability(result: npt.NDArray, function: Callable[[float, float], 
 
 
 def write_txt(data_sym: dict, data_antisym: dict, kind: str, filename: str, header: str):
-    """Function to write the results to a txt file.
-    
-    Parameters
-    ----------
+    """
+    Function to write the results to a txt file.
+
     :param data_sym: dict
-        A dictionary consisting of interpolators for the specified 
+        A dictionary consisting of interpolators
         symmetric modes.
-    :type data_antisym: dict
-        A dictionary consisting of interpolators for the specified 
+    :param data_antisym: dict
+        A dictionary consisting of interpolators
         antisymmetric modes.
     :param kind: {'Phase Velocity', 'Group Velocity', 'Wavenumber'}
         The type of results to write. Can be 'Phase Velocity', 'Group
         Velocity' or 'Wavenumber'.
-    :type kind:
     :param filename:
         The filename of the txt file.
-    :type filename: str
     :param header:
         The header of the txt file (to include material information for 
         example)
-    :type header: str
 
     """
+    with open(f'{os.getcwd()}_{filename}', "x").close():
     
-    if kind == 'Phase Velocity':
-        label = 'vp [m/s]'
-    elif kind == 'Group Velocity':
-        label = 'vg [m/s]'
-    else:
-        label = 'k  [1/m]'
-        
-    # Get the calculated (non-interpolated) data.
-    
-    results = []
-    
-    for n in range(len(data_sym)):
-        x_vals = data_sym[f'S{n}'].x
-        y_vals = data_sym[f'S{n}'](x_vals)
-        results.append(np.around(x_vals, 1))
-        results.append(np.around(y_vals, 1))
-        
-    for n in range(len(data_antisym)):
-        x_vals = data_antisym[f'A{n}'].x
-        y_vals = data_antisym[f'A{n}'](x_vals)
-        results.append(np.around(x_vals, 1))
-        results.append(np.around(y_vals, 1))
-    
-    # Write the results in a txt file.
-    
-    with open('results/' + kind + ' - ' + filename, 'w') as f:
-        f.write(header)
-        
-        f.write('\t\t\t\t'.join(data_sym.keys()) + '\t\t\t\t')
-        f.write('\t\t\t\t'.join(data_antisym.keys()) + '\n')
-        
-        for _ in range(len(data_sym) + len(data_antisym)):
-            f.write('fd [kHz mm]\t' + label + '\t')
-            
-        f.write('\n')
-        
-        for k in itertools.zip_longest(*results, fillvalue=''):
-            f.write('\t\t'.join(map(str, k)) + '\n')
+        if kind == 'Phase Velocity':
+            label = 'vp [m/s]'
+        elif kind == 'Group Velocity':
+            label = 'vg [m/s]'
+        else:
+            label = 'k  [1/m]'
+
+        # Get the calculated (non-interpolated) data.
+
+        results = []
+
+        for n in range(len(data_sym)):
+            x_vals = data_sym[f'S{n}'].x
+            y_vals = data_sym[f'S{n}'](x_vals)
+            results.append(np.around(x_vals, 1))
+            results.append(np.around(y_vals, 1))
+
+        for n in range(len(data_antisym)):
+            x_vals = data_antisym[f'A{n}'].x
+            y_vals = data_antisym[f'A{n}'](x_vals)
+            results.append(np.around(x_vals, 1))
+            results.append(np.around(y_vals, 1))
+
+        # Write the results in a txt file.
+
+        with open('results/' + kind + ' - ' + filename, 'w') as f:
+            f.write(header)
+
+            f.write('\t\t\t\t'.join(data_sym.keys()) + '\t\t\t\t')
+            f.write('\t\t\t\t'.join(data_antisym.keys()) + '\n')
+
+            for _ in range(len(data_sym) + len(data_antisym)):
+                f.write('fd [kHz mm]\t' + label + '\t')
+
+            f.write('\n')
+
+            for k in itertools.zip_longest(*results, fillvalue=''):
+                f.write('\t\t'.join(map(str, k)) + '\n')
 
 
 def find_max(result: dict):

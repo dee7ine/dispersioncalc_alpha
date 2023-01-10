@@ -39,7 +39,7 @@ from numerical_methods.Lamb import Lamb
 
 UI_THEME = 'SystemDefaultForReal'
 DEFAULT_DATA_PATH = f'{os.getcwd()}\\materials\\material_data.txt'
-WINDOW_SIZE = (1500, 1000)   # default (1250, 650)
+WINDOW_SIZE = (1250, 700)   # default (1250, 650)
 CONSOLE_SIZE = (100, 25)
 SYMMETRY_MODES = ['Symmetric', 'Antisymmetric', 'Both']
 DISPLAY_PLOTS = ['Wave Number', 'Phase Velocity', 'Group Velocity', 'All']
@@ -128,24 +128,25 @@ class UI:
         """
 
         return [[sg.Menu(self._menu_layout, tearoff=False)],
-                [sg.Frame('Simulation', layout=[[sg.Frame('Configuration', layout=[[sg.Text('Material'),
+                [sg.Frame('Simulation', layout=[[sg.Frame('General configuration', layout=[[sg.Text('Material'),
                 sg.InputCombo(values=self._choices, default_value="AluminumDisperse", key="material_name", enable_events=True, readonly=True,
-                background_color='white', size=(33, 20)), sg.Stretch()], [sg.Text('Symmetry modes'),
-                sg.InputCombo(values=self._modes, default_value='Symmetric', key='mode', enable_events=True, readonly=True, background_color='white', size=(25, 20))],
+                background_color='white', size=(33, 20)), sg.Stretch()],
                 [sg.Text('Thickness [mm]             '),
                 sg.Input('10', enable_events=True, key='thickness', size=(6, 5), justification='left')],
                 [sg.Text('Frequency [Hz]              '),
                 sg.Input('1000', enable_events=True, key='frequency', size=(6, 5), justification='left')],
                 [sg.Text('Maximum velocity [m/s]  '),
                 sg.Input('15000', enable_events=True, key='velocity', size=(6, 5), justification='left')],
-                [sg.Text('Calculate'), sg.InputCombo(values=self._plots_choices, default_value='All', key='mode', enable_events=True, readonly=True, background_color='white', size=(25, 20))],
-                [sg.Frame('Lamb wave', layout=[[],
+                [sg.Text('Calculate'), sg.InputCombo(values=self._plots_choices, default_value='All', key='-plot-modes-', enable_events=True, readonly=True, background_color='white', size=(25, 20))],
+                [sg.Frame('Lamb wave', layout=[[sg.Text('Symmetry modes'),
+                sg.InputCombo(values=self._modes, default_value='Symmetric', key='mode', enable_events=True, readonly=True, background_color='white', size=(25, 20))],
                 [sg.Text('Symmetric     '), sg.Input('10', enable_events=True, key='symmetric', size=(5, 5))],
                 [sg.Text('Antisymmetric'), sg.Input('10', enable_events=True, key='antisymmetric', size=(5, 5))]])],
                 [sg.Button('Calculate Lamb', tooltip="Calculate and plot dispersion curves \n for given material data", enable_events=True, key='-LAMB-'),
                 sg.Button('Calculate SH', tooltip="Calculate and plot dispersion curves \n for given material data", enable_events=True, key='-SH-'),
-                sg.Button('Close plots', tooltip='Close all already open plots', key='-CLOSE-'), sg.Button('Help', key="-WAVE-HELP-", tooltip="Helpful tips")]])]]),
-                sg.Frame('Material editor', layout=self._material_frame_layout, tooltip="Material editing module", size=(500, 300)),
+                sg.Button('Close plots', tooltip='Close all already open plots', key='-CLOSE-'), sg.Button('Help', key="-WAVE-HELP-", tooltip="Helpful tips"),
+                sg.Button('', key='-GEOMETRY-', tooltip='Click once to display geometry')]])]]),
+                sg.Frame('Material editor', layout=self._material_frame_layout, tooltip="Material editing module", size=(500, 315)),
                 sg.Frame('Geometry', layout=[[sg.Canvas(size=(300, 300), key='-CANVAS-')]])],
                 [sg.Frame("Output", layout=self._console_frame_layout)]]
 
@@ -187,6 +188,7 @@ class UI:
 
         fig = plt.figure(figsize=(3, 3))
         ax = fig.add_subplot(111, projection='3d')
+        # ax.set_title('Plate geometry')
 
         ax.voxels(data, facecolors=colors)
         return fig, ax
@@ -209,7 +211,10 @@ class UI:
 
                     break
 
-                elif event == '-WAVE_HELP-':
+                elif event == '-GEOMETRY-':
+                    self.__draw_figure(self.main_window['-CANVAS-'].TKCanvas, self.__model()[0])
+
+                elif event == '-WAVE-HELP-':
 
                     sg.popup('Click plot in order to calculate and plot dispersion curves for the chosen material',
                              title="Help")
@@ -259,7 +264,7 @@ class UI:
                     c_S = np.sqrt(E / (2 * p * (1 + v)))
                     c_R = c_S * ((0.862 + 1.14 * v) / (1 + v))
 
-                    alum = Lamb(thickness=float(values['thickness']),
+                    lamb = Lamb(thickness=float(values['thickness']),
                                 nmodes_sym=int(values['symmetric']),
                                 nmodes_antisym=int(values['antisymmetric']),
                                 fd_max=fd_max,
@@ -273,13 +278,26 @@ class UI:
                     Plot phase velocity, group velocity and wave number.
                     """
 
-                    print(f"{datetime.now().isoformat(' ', 'seconds')}: Calculating phase velocity for modes: {values['mode'].lower()}")
-                    logging.debug('Calculating phase velocity')
-                    alum.plot_phase_velocity(modes=values['mode'].lower())
-                    print(f"{datetime.now().isoformat(' ', 'seconds')}: Calculating group velocity for modes: {values['mode'].lower()}")
-                    alum.plot_group_velocity(modes=values['mode'].lower())
-                    print(f"{datetime.now().isoformat(' ', 'seconds')}: Calculating wave number for modes: {values['mode'].lower()}")
-                    alum.plot_wave_number(modes=values['mode'].lower())
+                    if values['-plot-modes-'] == 'All':
+                        print(f"{datetime.now().isoformat(' ', 'seconds')}: Calculating phase velocity for modes: {values['mode'].lower()}")
+                        lamb.plot_phase_velocity(modes=values['mode'].lower())
+                        print(f"{datetime.now().isoformat(' ', 'seconds')}: Calculating group velocity for modes: {values['mode'].lower()}")
+                        lamb.plot_group_velocity(modes=values['mode'].lower())
+                        print(f"{datetime.now().isoformat(' ', 'seconds')}: Calculating wave number for modes: {values['mode'].lower()}")
+                        lamb.plot_wave_number(modes=values['mode'].lower())
+
+                    elif values['-plot-modes-'] == 'Wave Number':
+                        print(f"{datetime.now().isoformat(' ', 'seconds')}: Calculating wave number for modes: {values['mode'].lower()}")
+                        lamb.plot_wave_number(modes=values['mode'].lower())
+                        # lamb.save_results()
+
+                    elif values['-plot-modes-'] == 'Phase Velocity':
+                        print(f"{datetime.now().isoformat(' ', 'seconds')}: Calculating phase velocity for modes: {values['mode'].lower()}")
+                        lamb.plot_phase_velocity(modes=values['mode'].lower())
+
+                    elif values['-plot-modes-'] == 'Group Velocity':
+                        print(f"{datetime.now().isoformat(' ', 'seconds')}: Calculating group velocity for modes: {values['mode'].lower()}")
+                        lamb.plot_group_velocity(modes=values['mode'].lower())
 
                     plt.show(block=False)
 
@@ -303,9 +321,3 @@ class UI:
 
         except Exception as e:
             sg.popup_error_with_traceback('An error occurred', e)
-
-
-if __name__ == "__main__":
-
-    ui = UI()
-    ui.app_main_loop()

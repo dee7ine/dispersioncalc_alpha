@@ -25,12 +25,15 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 from __future__ import annotations
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
 import scipy.optimize
+import openpyxl
 from typing import Any, Callable
 from functools import cache
 from dataclasses import dataclass
 
+from numerical_methods.DataProcessor import DataProcessor
 from numerical_methods.Plot_utilities import add_plot, add_cutoff_freqs, add_velocities
 from numerical_methods.Utilities import interpolate, correct_instability, write_txt, find_max
 from materials.Materials import IsotropicMaterial
@@ -55,6 +58,9 @@ class Lamb:
     fd_points: int
     vp_step: int
     material: str
+
+    sym: dict
+    antisym: dict
 
     vp_sym: dict
     vg_sym: dict
@@ -99,12 +105,12 @@ class Lamb:
 
         # Solve the dispersion equations.
 
-        sym = self._solve_disp_eqn(function=self._symmetric,
+        self.sym = self._solve_disp_eqn(function=self._symmetric,
                                    nmodes=nmodes_sym,
                                    c=c_s,
                                    label='S')
 
-        antisym = self._solve_disp_eqn(function=self._antisymmetric,
+        self.antisym = self._solve_disp_eqn(function=self._antisymmetric,
                                        nmodes=nmodes_antisym,
                                        c=c_l,
                                        label='A')
@@ -112,13 +118,13 @@ class Lamb:
         # Calculate group velocity (vg) and wavenumber (k) from phase
         # velocity (vp) and interpolate all results.
 
-        self.vp_sym, self.vg_sym, self.k_sym = interpolate(sym, self.d)
+        self.vp_sym, self.vg_sym, self.k_sym = interpolate(self.sym, self.d)
 
         # print(self.vp_sym)
         # print(self.vg_sym)
         # print(self.k_sym)
 
-        self.vp_antisym, self.vg_antisym, self.k_antisym = interpolate(antisym, self.d)
+        self.vp_antisym, self.vg_antisym, self.k_antisym = interpolate(self.antisym, self.d)
 
     @cache
     def _calc_constants(self, vp: float, fd: float) -> tuple[float | Any, Any, Any]:
@@ -345,7 +351,7 @@ class Lamb:
         """
 
         fig, ax = plt.subplots(figsize=(7, 4))
-        #fig.canvas.setWindowTitle(f'Phase Velocity for {self.d * 10**3} mm thick {self.material}')
+        # fig.canvas.setWindowTitle(f'Phase Velocity for {self.d * 10**3} mm thick {self.material}')
 
         # Calculate the maximum value to scale the ylim of the axes.
 
@@ -404,7 +410,7 @@ class Lamb:
         """
 
         fig, ax = plt.subplots(figsize=(7, 4))
-        #fig.canvas.setWindowTitle(f'Group Velocity for {self.d * 10**3} mm thick {self.material}')
+        # fig.canvas.setWindowTitle(f'Group Velocity for {self.d * 10**3} mm thick {self.material}')
 
         # Calculate the maximum value to scale the ylim of the axes.
 
@@ -443,9 +449,6 @@ class Lamb:
                          size: tuple = (7, 4)) -> tuple[plt.figure, plt.axes]:
         """Generate a plot of wavenumber as a function of frequency ×
         thickness.
-
-        Parameters
-        ----------
         :param modes : {'both', 'symmetric', 'antisymmetric'}, optional
             Which family of modes to plot. Can be 'symmetric',
             'antisymmetric' or 'both'. Defaults to 'both'.
@@ -465,7 +468,7 @@ class Lamb:
         """
 
         fig, ax = plt.subplots(figsize=size)
-        #fig.canvas.setWindowTitle(f'Wave Number for {self.d * 10**3} mm thick {self.material}')
+        # fig.canvas.setWindowTitle(f'Wave Number for {self.d * 10**3} mm thick {self.material}')
 
         # Calculate the maximum value to scale the ylim of the axes.
 
@@ -494,8 +497,11 @@ class Lamb:
 
         return fig, ax
 
-    def save_results(self) -> None:
-        """Save all results to a txt file.
+    def save_results(self, result: str = 'All') -> None:
+        """
+        Save all results to a txt file.
+
+        :param result: result to save to .txt file, default value is 'All'
 
         :return
         """
@@ -510,12 +516,25 @@ class Lamb:
                   f'Longitudinal wave velocity: {str(self.c_L)} m/s\n'
                   f'Shear wave velocity: {str(self.c_S)} m/s\n\n')
 
-        write_txt(self.vp_sym, self.vp_antisym, 'Phase Velocity',
-                  filename, header)
-        write_txt(self.vg_sym, self.vg_antisym, 'Group Velocity',
-                  filename, header)
-        write_txt(self.k_sym, self.k_antisym, 'Wavenumber',
-                  filename, header)
+        if result == 'All':
+            write_txt(self.vp_sym, self.vp_antisym, kind='Phase Velocity',
+                      filename=filename, header=header)
+            write_txt(self.vg_sym, self.vg_antisym, kind='Group Velocity',
+                      filename=filename, header=header)
+            write_txt(self.k_sym, self.k_antisym, kind='Wavenumber',
+                      filename=filename, header=header)
+
+        elif result == 'Wavenumber':
+            write_txt(self.k_sym, self.k_antisym, 'Wavenumber',
+                      filename, header)
+
+        elif result == 'Phase velocity':
+            write_txt(self.vp_sym, self.vp_antisym, 'Phase Velocity',
+                      filename, header)
+
+        elif result == 'Group velocity':
+            write_txt(self.vg_sym, self.vg_antisym, 'Group Velocity',
+                      filename, header)
 
 
 def main() -> None:
@@ -536,7 +555,7 @@ def main() -> None:
 
     # Example: A 10 mm aluminum plate.
 
-    alum = Lamb(thickness=10,
+    lamb = Lamb(thickness=10,
                 nmodes_sym=5,
                 nmodes_antisym=5,
                 fd_max=10000,
@@ -548,9 +567,9 @@ def main() -> None:
 
     # Plot phase velocity, group velocity and wavenumber.
 
-    alum.plot_phase_velocity()
-    alum.plot_group_velocity()
-    alum.plot_wave_number()
+    lamb.plot_phase_velocity()
+    lamb.plot_group_velocity()
+    lamb.plot_wave_number()
 
     # Plot wave structure (displacement profiles across thickness) for A0
     # and S0 modes at different fd values.
@@ -568,9 +587,60 @@ def main() -> None:
 
     # Save all results to a txt file.
 
-    # alum.save_results()
+    #print(lamb.sym.keys())
+    #print('not parsing')
+    #print(lamb.sym.values())
 
-    plt.show()
+    #print('parsing x values for S0')
+    #print(list(lamb.sym.values())[0][0])
+    #print('parsing y values for S0')
+    #print(list(lamb.sym.values())[0][1])
+
+    values_list = list(lamb.sym.values())
+
+    s0_x = pd.DataFrame(list(lamb.sym.values())[0][0], columns=['x'])
+    s0_y = pd.DataFrame(list(lamb.sym.values())[0][1], columns=['y'])
+    #print(s0_x)
+    #print(s0_y)
+
+    #main_df = pd.DataFrame()
+    """
+    for index, _ in enumerate(values_list):
+        temp_df_x = pd.DataFrame(values_list[index][0], columns=['x'])
+        temp_df_y = pd.DataFrame(values_list[index][1], columns=['y'])
+        temp_df = pd.concat([temp_df_x, temp_df_y], axis=1)
+        main_df = pd.concat([main_df, temp_df], axis=1)
+        #print(pd.DataFrame(values_list[index][0]))
+        #x_list.append(pd.DataFrame(values_list[index][0], columns=['x']))
+        #y_list.append(pd.DataFrame(values_list[index][1], columns=['y']))
+
+    #print(main_df)
+
+    #main_df.to_excel('output.xlsx')
+
+    #plt.show()
+    """
+    result_to_df(result=values_list, filename='Results_ice')
+
+
+def result_to_df(result: dict, filename: str) -> pd.DataFrame:
+
+    main_df = pd.DataFrame()
+
+    for index, _ in enumerate(result):
+            temp_df_x = pd.DataFrame(result[index][0], columns=['x'])
+            temp_df_y = pd.DataFrame(result[index][1], columns=['y'])
+            temp_df = pd.concat([temp_df_x, temp_df_y], axis = 1)
+            main_df = pd.concat([main_df, temp_df], axis=1)
+            #print(pd.DataFrame(values_list[index][0]))
+            #x_list.append(pd.DataFrame(values_list[index][0], columns=['x']))
+            #y_list.append(pd.DataFrame(values_list[index][1], columns=['y']))
+
+    main_df.to_excel(f'{filename}.xlsx', sheet_name='Phase velocity')
+    return main_df
+
+def r
+
 
 
 if __name__ == "__main__":
