@@ -34,8 +34,8 @@ from typing import Any, Callable
 from functools import cache
 from dataclasses import dataclass
 
-from utilities.Plot_utilities import add_plot, add_cutoff_freqs, add_velocities
-from utilities.Utilities import interpolate, correct_instability, write_txt, find_max
+from utility_functions.Plot_utilities import add_plot, add_cutoff_freqs, add_velocities
+from utility_functions.Utilities import interpolate, correct_instability, write_txt, find_max
 from materials.Materials import IsotropicMaterial
 from Exceptions import IncorrectMode
 
