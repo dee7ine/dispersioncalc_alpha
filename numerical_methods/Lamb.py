@@ -24,6 +24,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 """
 
 from __future__ import annotations
+
+from pathlib import Path
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -32,11 +34,15 @@ from typing import Any, Callable
 from functools import cache
 from dataclasses import dataclass
 
-from numerical_methods.DataProcessor import DataProcessor
-from numerical_methods.Plot_utilities import add_plot, add_cutoff_freqs, add_velocities
-from numerical_methods.Utilities import interpolate, correct_instability, write_txt, find_max
+from Utilities.Plot_utilities import add_plot, add_cutoff_freqs, add_velocities
+from Utilities.Utilities import interpolate, correct_instability, write_txt, find_max
 from materials.Materials import IsotropicMaterial
 from Exceptions import IncorrectMode
+
+
+PROJECT_NAME = 'dispersioncalc_alpha'
+CURRENT_DIR = Path(__file__)
+SOURCE_ROOT = [p for p in CURRENT_DIR.parents if p.parts[-1]==PROJECT_NAME][0]
 
 
 @dataclass(eq=False, frozen=False, slots=True)
@@ -496,44 +502,26 @@ class Lamb:
 
         return fig, ax
 
-    def save_results(self, result: str = 'All') -> None:
-        """
-        Save all results to a txt file.
+    def result_to_df(self, result: list, result_type: str, mode: str) -> pd.DataFrame:
 
-        :param result: result to save to .txt file, default value is 'All'
+        main_df = pd.DataFrame()
 
-        :return
-        """
+        filename = f'{result_type.capitalize()}_{self.material}_{self.d*1e3}mm_{mode}'
 
-        if self.material:
-            filename = f'{self.material} plate - {self.d * 1e3} mm.txt'
-        else:
-            filename = f'{self.d * 1e3} mm plate.txt'
+        for index, _ in enumerate(result):
 
-        header = (f'Material: {self.material}\n'
-                  f'Thickness: {str(self.d * 1e3)} mm\n'
-                  f'Longitudinal wave velocity: {str(self.c_L)} m/s\n'
-                  f'Shear wave velocity: {str(self.c_S)} m/s\n\n')
+                temp_df_x = pd.DataFrame(result[index][0], columns=['x'])
+                temp_df_y = pd.DataFrame(result[index][1], columns=['y'])
+                temp_df = pd.concat([temp_df_x, temp_df_y], axis=1)
 
-        if result == 'All':
-            write_txt(self.vp_sym, self.vp_antisym, kind='Phase Velocity',
-                      filename=filename, header=header)
-            write_txt(self.vg_sym, self.vg_antisym, kind='Group Velocity',
-                      filename=filename, header=header)
-            write_txt(self.k_sym, self.k_antisym, kind='Wavenumber',
-                      filename=filename, header=header)
+                main_df = pd.concat([main_df, temp_df], axis=1)
+                #print(pd.DataFrame(values_list[index][0]))
+                #x_list.append(pd.DataFrame(values_list[index][0], columns=['x']))
+                #y_list.append(pd.DataFrame(values_list[index][1], columns=['y']))
 
-        elif result == 'Wavenumber':
-            write_txt(self.k_sym, self.k_antisym, 'Wavenumber',
-                      filename, header)
+        main_df.to_excel(f'{filename}.xlsx')
 
-        elif result == 'Phase velocity':
-            write_txt(self.vp_sym, self.vp_antisym, 'Phase Velocity',
-                      filename, header)
-
-        elif result == 'Group velocity':
-            write_txt(self.vg_sym, self.vg_antisym, 'Group Velocity',
-                      filename, header)
+        return main_df
 
 
 def main() -> None:
@@ -543,7 +531,8 @@ def main() -> None:
     # the following equations:
 
     new_material = IsotropicMaterial(material="Ice")
-    new_material.fix_file_path('C://Users//deefi//PycharmProjects//dispersioncalc_alpha//materials//material_data.txt')
+    #new_material.fix_file_path('C://Users//deefi//PycharmProjects//dispersioncalc_alpha//materials//material_data.txt')
+    new_material.fix_file_path('//materials//material_data.txt')
     E = new_material.e  # E = Young's modulus, in Pa.
     p = new_material.density  # p = Density (rho), in kg/m3.
     v = new_material.v  # v = Poisson's ratio (nu).
@@ -595,7 +584,8 @@ def main() -> None:
     #print('parsing y values for S0')
     #print(list(lamb.sym.values())[0][1])
 
-    values_list = list(lamb.sym.values())
+    values_list_sym = list(lamb.sym.values())
+    values_list_antisym = list(lamb.antisym.values())
 
     s0_x = pd.DataFrame(list(lamb.sym.values())[0][0], columns=['x'])
     s0_y = pd.DataFrame(list(lamb.sym.values())[0][1], columns=['y'])
@@ -619,39 +609,14 @@ def main() -> None:
 
     #plt.show()
     """
-    result_to_df(result=values_list)
+    lamb.result_to_df(result=values_list_sym, result_type='Phase_velocity', mode='symmetric')
+    lamb.result_to_df(result=values_list_antisym, result_type='Phase_velocity', mode='antisymmetric')
+
+    print(SOURCE_ROOT)
 
 
-def result_to_df(result: list) -> pd.DataFrame:
-
-    main_df = pd.DataFrame()
-
-    for index, _ in enumerate(result):
-            temp_df_x = pd.DataFrame(result[index][0], columns=['x'])
-            temp_df_y = pd.DataFrame(result[index][1], columns=['y'])
-            temp_df = pd.concat([temp_df_x, temp_df_y], axis=1)
-            main_df = pd.concat([main_df, temp_df], axis=1)
-            #print(pd.DataFrame(values_list[index][0]))
-            #x_list.append(pd.DataFrame(values_list[index][0], columns=['x']))
-            #y_list.append(pd.DataFrame(values_list[index][1], columns=['y']))
-
-    return main_df
-
-def result_to_excel(lamb: Lamb, modes: str,  filename: str) -> None:
-
-    if modes == 'Both':
-        main_df_sym = result_to_df(result=list(lamb.sym.values()))
-        main_df_anti_sym = result_to_df(result=list(lamb.antisym.values()))
-
-        main_df = pd.concat([main_df_sym, main_df_anti_sym], axis=1)
-
-    elif modes == 'Symmetric':
-        main_df = result_to_df(result=list(lamb.sym_values()))
-
-    elif modes == 'Antisymmetric':
-        main_df = result_to_df(result=list(lamb.antisym_values()))
-
-    main_df.to_excel(f'{filename}.xlsx', sheet_name='Phase velocity')
+#def result_to_excel(lamb: Lamb, modes: str,  filename: str) -> None:
+    #...
 
 
 if __name__ == "__main__":

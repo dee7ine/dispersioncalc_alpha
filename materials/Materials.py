@@ -25,12 +25,15 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 
 from __future__ import annotations
-
-import os
+from pathlib import Path
 from dataclasses import dataclass
 from Exceptions import NoMaterialFound, ErrorParsingMaterial, ErrorCreatingMaterial
 
-DEFAULT_FILE_PATH = r'C://Users//deefi//PycharmProjects//dispersioncalc_alpha//materials//material_data.txt'
+
+PROJECT_NAME = 'dispersioncalc_alpha'
+CURRENT_DIR = Path(__file__)
+SOURCE_ROOT = [p for p in CURRENT_DIR.parents if p.parts[-1]==PROJECT_NAME][0]
+DEFAULT_FILE_PATH = rf'{SOURCE_ROOT}//materials//material_data.txt'
 
 
 @dataclass
