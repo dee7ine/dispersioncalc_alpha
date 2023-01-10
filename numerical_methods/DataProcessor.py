@@ -37,5 +37,5 @@ class DataProcessor:
             # x_list.append(pd.DataFrame(values_list[index][0], columns=['x']))
             # y_list.append(pd.DataFrame(values_list[index][1], columns=['y']))
 
-        main_df.to_excel((f'{self._filepath}{filename}.xlsx'), sheet_name='Phase velocity')
+        main_df.to_excel(f'{self._filepath}{filename}.xlsx', sheet_name='Phase velocity')
         return main_df

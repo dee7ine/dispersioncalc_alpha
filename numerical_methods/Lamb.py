@@ -28,7 +28,6 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import scipy.optimize
-import openpyxl
 from typing import Any, Callable
 from functools import cache
 from dataclasses import dataclass
@@ -620,27 +619,39 @@ def main() -> None:
 
     #plt.show()
     """
-    result_to_df(result=values_list, filename='Results_ice')
+    result_to_df(result=values_list)
 
 
-def result_to_df(result: dict, filename: str) -> pd.DataFrame:
+def result_to_df(result: list) -> pd.DataFrame:
 
     main_df = pd.DataFrame()
 
     for index, _ in enumerate(result):
             temp_df_x = pd.DataFrame(result[index][0], columns=['x'])
             temp_df_y = pd.DataFrame(result[index][1], columns=['y'])
-            temp_df = pd.concat([temp_df_x, temp_df_y], axis = 1)
+            temp_df = pd.concat([temp_df_x, temp_df_y], axis=1)
             main_df = pd.concat([main_df, temp_df], axis=1)
             #print(pd.DataFrame(values_list[index][0]))
             #x_list.append(pd.DataFrame(values_list[index][0], columns=['x']))
             #y_list.append(pd.DataFrame(values_list[index][1], columns=['y']))
 
-    main_df.to_excel(f'{filename}.xlsx', sheet_name='Phase velocity')
     return main_df
 
-def r
+def result_to_excel(lamb: Lamb, modes: str,  filename: str) -> None:
 
+    if modes == 'Both':
+        main_df_sym = result_to_df(result=list(lamb.sym.values()))
+        main_df_anti_sym = result_to_df(result=list(lamb.antisym.values()))
+
+        main_df = pd.concat([main_df_sym, main_df_anti_sym], axis=1)
+
+    elif modes == 'Symmetric':
+        main_df = result_to_df(result=list(lamb.sym_values()))
+
+    elif modes == 'Antisymmetric':
+        main_df = result_to_df(result=list(lamb.antisym_values()))
+
+    main_df.to_excel(f'{filename}.xlsx', sheet_name='Phase velocity')
 
 
 if __name__ == "__main__":
