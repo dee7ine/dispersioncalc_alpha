@@ -1,5 +1,4 @@
 import os
-import sys
 import matplotlib.pyplot as plt
 import numpy as np
 from datetime import datetime
@@ -7,7 +6,7 @@ from datetime import datetime
 import PySimpleGUI as sg #use('qt5agg')
 
 from materials.Materials import IsotropicMaterial
-from numerical_methods.Lamb import Lamb
+from waves import Lamb
 
 import logging
 

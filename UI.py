@@ -34,7 +34,7 @@ from datetime import datetime
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 from materials.Materials import IsotropicMaterial
-from numerical_methods.Lamb import Lamb
+from waves import Lamb
 
 
 UI_THEME = 'SystemDefaultForReal'
