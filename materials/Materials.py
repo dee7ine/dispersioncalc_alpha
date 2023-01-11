@@ -32,7 +32,7 @@ from Exceptions import NoMaterialFound, ErrorParsingMaterial, ErrorCreatingMater
 
 PROJECT_NAME = 'dispersioncalc_alpha'
 CURRENT_DIR = Path(__file__)
-SOURCE_ROOT = [p for p in CURRENT_DIR.parents if p.parts[-1]==PROJECT_NAME][0]
+SOURCE_ROOT = [p for p in CURRENT_DIR.parents if p.parts[-1] == PROJECT_NAME][0]
 DEFAULT_FILE_PATH = rf'{SOURCE_ROOT}//materials//material_data.txt'
 
 

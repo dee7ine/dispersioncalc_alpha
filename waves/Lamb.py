@@ -35,14 +35,14 @@ from functools import cache
 from dataclasses import dataclass
 
 from utility_functions.Plot_utilities import add_plot, add_cutoff_freqs, add_velocities
-from utility_functions.Utilities import interpolate, correct_instability, write_txt, find_max
+from utility_functions.Utilities import interpolate, correct_instability, find_max
 from materials.Materials import IsotropicMaterial
 from Exceptions import IncorrectMode
 
 
 PROJECT_NAME = 'dispersioncalc_alpha'
 CURRENT_DIR = Path(__file__)
-SOURCE_ROOT = [p for p in CURRENT_DIR.parents if p.parts[-1]==PROJECT_NAME][0]
+SOURCE_ROOT = [p for p in CURRENT_DIR.parents if p.parts[-1] == PROJECT_NAME][0]
 
 
 @dataclass(eq=False, frozen=False, slots=True)
@@ -502,7 +502,7 @@ class Lamb:
 
         return fig, ax
 
-    def result_to_df(self, result: list, result_type: str, mode: str) -> pd.DataFrame:
+    def result_to_excel(self, result: list, result_type: str, mode: str) -> pd.DataFrame:
 
         main_df = pd.DataFrame()
 
@@ -510,14 +510,14 @@ class Lamb:
 
         for index, _ in enumerate(result):
 
-                temp_df_x = pd.DataFrame(result[index][0], columns=['x'])
-                temp_df_y = pd.DataFrame(result[index][1], columns=['y'])
-                temp_df = pd.concat([temp_df_x, temp_df_y], axis=1)
+            temp_df_x = pd.DataFrame(result[index][0], columns=['x'])
+            temp_df_y = pd.DataFrame(result[index][1], columns=['y'])
+            temp_df = pd.concat([temp_df_x, temp_df_y], axis=1)
 
-                main_df = pd.concat([main_df, temp_df], axis=1)
-                #print(pd.DataFrame(values_list[index][0]))
-                #x_list.append(pd.DataFrame(values_list[index][0], columns=['x']))
-                #y_list.append(pd.DataFrame(values_list[index][1], columns=['y']))
+            main_df = pd.concat([main_df, temp_df], axis=1)
+            # print(pd.DataFrame(values_list[index][0]))
+            # x_list.append(pd.DataFrame(values_list[index][0], columns=['x']))
+            # y_list.append(pd.DataFrame(values_list[index][1], columns=['y']))
 
         main_df.to_excel(f'{filename}.xlsx')
 
@@ -531,8 +531,8 @@ def main() -> None:
     # the following equations:
 
     new_material = IsotropicMaterial(material="Ice")
-    #new_material.fix_file_path('C://Users//deefi//PycharmProjects//dispersioncalc_alpha//materials//material_data.txt')
     new_material.fix_file_path('//materials//material_data.txt')
+
     E = new_material.e  # E = Young's modulus, in Pa.
     p = new_material.density  # p = Density (rho), in kg/m3.
     v = new_material.v  # v = Poisson's ratio (nu).
@@ -575,24 +575,24 @@ def main() -> None:
 
     # Save all results to a txt file.
 
-    #print(lamb.sym.keys())
-    #print('not parsing')
-    #print(lamb.sym.values())
+    # print(lamb.sym.keys())
+    # print('not parsing')
+    # print(lamb.sym.values())
 
-    #print('parsing x values for S0')
-    #print(list(lamb.sym.values())[0][0])
+    # print('parsing x values for S0')
+    # print(list(lamb.sym.values())[0][0])
     # print('parsing y values for S0')
     # print(list(lamb.sym.values())[0][1])
 
     values_list_sym = list(lamb.sym.values())
     values_list_antisym = list(lamb.antisym.values())
 
-    s0_x = pd.DataFrame(list(lamb.sym.values())[0][0], columns=['x'])
-    s0_y = pd.DataFrame(list(lamb.sym.values())[0][1], columns=['y'])
-    #print(s0_x)
-    #print(s0_y)
+    # s0_x = pd.DataFrame(list(lamb.sym.values())[0][0], columns=['x'])
+    # s0_y = pd.DataFrame(list(lamb.sym.values())[0][1], columns=['y'])
+    # print(s0_x)
+    # print(s0_y)
 
-    #main_df = pd.DataFrame()
+    # main_df = pd.DataFrame()
     """
     for index, _ in enumerate(values_list):
         temp_df_x = pd.DataFrame(values_list[index][0], columns=['x'])
@@ -609,14 +609,8 @@ def main() -> None:
 
     #plt.show()
     """
-    lamb.result_to_df(result=values_list_sym, result_type='Phase_velocity', mode='symmetric')
-    lamb.result_to_df(result=values_list_antisym, result_type='Phase_velocity', mode='antisymmetric')
-
-    print(SOURCE_ROOT)
-
-
-#def result_to_excel(lamb: Lamb, modes: str,  filename: str) -> None:
-    #...
+    lamb.result_to_excel(result=values_list_sym, result_type='Phase_velocity', mode='symmetric')
+    lamb.result_to_excel(result=values_list_antisym, result_type='Phase_velocity', mode='antisymmetric')
 
 
 if __name__ == "__main__":
