@@ -37,18 +37,16 @@ def interpolate(result: dict, d: float, kind: str = 'cubic') -> tuple[dict, dict
     """Interpolate the results for phase velocity, group velocity and
     wave number.
 
-    :param result:
+    :param result: dict
         Dictionary with the phase velocity values obtained by solving
         the dispersion equations.
     :type result: dict
-    :param d:
+    :param d: int
         thickness of the material in mm
-    :type d:      int
-    :param kind:
+    :param kind: str, optional
         Specifies the kind of interpolation as a string. Can be
         ‘linear’, ‘nearest’, ‘zero’, ‘slinear’, ‘quadratic’, ‘cubic’, 
         ‘previous’, ‘next’. Defaults to 'cubic'.
-    :type kind: str, optional
 
     :return interp_vp:
         Dictionary with phase velocity interpolator at each mode.

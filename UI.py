@@ -25,7 +25,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 from __future__ import annotations
 
-import os
+from pathlib import Path
 import logging
 import matplotlib.pyplot as plt
 import numpy as np
@@ -34,15 +34,18 @@ from datetime import datetime
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 from materials.Materials import IsotropicMaterial
-from waves import Lamb
+from waves.Lamb import Lamb
 
+PROJECT_NAME = 'dispersioncalc_alpha'
+CURRENT_DIR = Path(__file__)
+SOURCE_ROOT = [p for p in CURRENT_DIR.parents if p.parts[-1] == PROJECT_NAME][0]
 
 UI_THEME = 'SystemDefaultForReal'
-DEFAULT_DATA_PATH = f'{os.getcwd()}\\materials\\material_data.txt'
+DEFAULT_DATA_PATH = f'{SOURCE_ROOT}\\materials\\material_data.txt'
 WINDOW_SIZE = (1250, 700)   # default (1250, 650)
 CONSOLE_SIZE = (100, 25)
 SYMMETRY_MODES = ['Symmetric', 'Antisymmetric', 'Both']
-DISPLAY_PLOTS = ['Wave Number', 'Phase Velocity', 'Group Velocity', 'All']
+PLOTS_TO_DISPLAY = ['Wave Number', 'Phase Velocity', 'Group Velocity', 'All']
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -61,7 +64,7 @@ class UI:
     _modes = SYMMETRY_MODES
     _data: list
     _choices: list = SYMMETRY_MODES
-    _plots_choices: list = DISPLAY_PLOTS
+    _plots_choices: list = PLOTS_TO_DISPLAY
 
     def __init__(self) -> None:
 
@@ -131,13 +134,13 @@ class UI:
                 [sg.Frame('Simulation', layout=[[sg.Frame('General configuration', layout=[[sg.Text('Material'),
                 sg.InputCombo(values=self._choices, default_value="AluminumDisperse", key="material_name", enable_events=True, readonly=True,
                 background_color='white', size=(33, 20)), sg.Stretch()],
-                [sg.Text('Thickness [mm]             '),
+                [sg.Text('Thickness [mm]                '),
                 sg.Input('10', enable_events=True, key='thickness', size=(6, 5), justification='left')],
-                [sg.Text('Frequency [Hz]              '),
+                [sg.Text('Frequency [Hz]                 '),
                 sg.Input('1000', enable_events=True, key='frequency', size=(6, 5), justification='left')],
-                [sg.Text('Maximum velocity [m/s]  '),
+                [sg.Text('Phase velocity limit  [m/s]  '),
                 sg.Input('15000', enable_events=True, key='velocity', size=(6, 5), justification='left')],
-                [sg.Text('Calculate'), sg.InputCombo(values=self._plots_choices, default_value='All', key='-plot-modes-', enable_events=True, readonly=True, background_color='white', size=(25, 20))],
+                [sg.Text('Plots'), sg.InputCombo(values=self._plots_choices, default_value='All', key='-plot-modes-', enable_events=True, readonly=True, background_color='white', size=(25, 20))],
                 [sg.Frame('Lamb wave', layout=[[sg.Text('Symmetry modes'),
                 sg.InputCombo(values=self._modes, default_value='Symmetric', key='mode', enable_events=True, readonly=True, background_color='white', size=(25, 20))],
                 [sg.Text('Symmetric     '), sg.Input('10', enable_events=True, key='symmetric', size=(5, 5))],
