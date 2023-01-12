@@ -271,7 +271,13 @@ class Lamb:
             # Filter all NaN values.
 
             mode_result = np.vstack((result[:, 0], result[:, nmode + 1]))
+            print('mode result before filtering')
+            print(mode_result)
+            print(mode_result.shape)
             mode_result = mode_result[:, ~np.isnan(mode_result).any(axis=0)]
+            print('mode result after filtering')
+            print(mode_result)
+            print(mode_result.shape)
 
             # Append to a dictionary with keys 'An' or 'Sn'.
 
@@ -280,8 +286,8 @@ class Lamb:
         # print(result_dict)
         return result_dict
 
-    def plot(self, ax: plt.axes, result: dict, y_max: float, cutoff_frequencies: bool = True,
-             arrow_dir: str = 'down', material_velocities: bool = True, plt_kwargs: dict = {}) -> None:
+    def plot(self, ax: plt.axes, result: dict, y_max: float, cutoff_frequencies: bool = False,
+             arrow_dir: str = 'down', material_velocities: bool = False, plt_kwargs: dict = {}) -> None:
         """Generate a dispersion plot for a family of modes (symmetric
         or antisymmetric).
         :param ax : axes
@@ -502,7 +508,22 @@ class Lamb:
 
         return fig, ax
 
-    def result_to_excel(self, result: list, result_type: str, mode: str) -> pd.DataFrame:
+    def result_to_excel(self, result: list, result_type: str, mode: str,
+                        filepath: str = f'{SOURCE_ROOT}//results') -> pd.DataFrame:
+        """
+        Saves simulation results to xlsx file
+
+        :param result: list
+            Simulation results
+        :param result_type: str
+            Result type
+        :param mode: str
+            Symmetry mode
+        :param filepath: str
+            Results directory
+
+        :return:
+        """
 
         main_df = pd.DataFrame()
 
@@ -519,7 +540,7 @@ class Lamb:
             # x_list.append(pd.DataFrame(values_list[index][0], columns=['x']))
             # y_list.append(pd.DataFrame(values_list[index][1], columns=['y']))
 
-        main_df.to_excel(f'{filename}.xlsx')
+        main_df.to_excel(f'{filepath}//{filename}.xlsx')
 
         return main_df
 

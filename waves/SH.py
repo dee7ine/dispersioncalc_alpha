@@ -50,15 +50,13 @@ class SH:
     d: float
     h: float
 
-    nmodes_sym: float
-    nmodes_antisym: float
-
     fd_max: float
     vp_max: float
     c_L: float
     c_S: float
     c_R: float
 
+    number_of_modes: int
     fd_points: int
     vp_step: int
     material: str
@@ -74,13 +72,12 @@ class SH:
     vg_antisym: dict
     k_antisym: dict
 
-    def __init__(self, thickness: float, nmodes_sym: int, nmodes_antisym: int, fd_max: float, vp_max: float,
+    def __init__(self, thickness: float, number_of_modes: int, fd_max: float, vp_max: float,
                  c_l: float, c_s: float, c_r: float = None, fd_points: int = 100, vp_step: int = 100,
                  material: str = '') -> None:
         """"
         :param thickness:               thickness of the plate, in mm.
-        :param nmodes_sym:              number of symmetric modes to calculate.
-        :param nmodes_antisym:          number of antisymmetric modes to calculate.
+        :param number_of_modes:         number of modes to calculate.
         :param fd_max:                  maximum value of frequency × thickness to calculate.
         :param vp_max:                  maximum value of phase velocity to calculate, in m/s.
         :param c_l:                     Longitudinal wave velocity of the material, in m/s.
@@ -94,8 +91,7 @@ class SH:
         """
         self.d = thickness / 1e3
         self.h = (thickness / 2) / 1e3
-        self.nmodes_sym = nmodes_sym
-        self.nmodes_antisym = nmodes_antisym
+        self.number_of_modes = number_of_modes
         self.fd_max = fd_max
         self.vp_max = vp_max
         self.c_L = c_l  # *(10e-3/10e-6)
@@ -107,7 +103,7 @@ class SH:
 
         # print(f"c_L = {self.c_L}, c_S = {self.c_S}, c_r = {self.c_R}")
 
-    def _equation(self, number_of_modes: int) -> float:
+    def _equation(self) -> None:
         """Rayleigh-Lamb frequency relation for symmetric modes, used to
         determine the velocity at which a wave of a particular frequency
         will propagate within the plate. The roots of this equation are
@@ -117,21 +113,29 @@ class SH:
             Phase velocity.
         :param fd : float
             Frequency × thickness product.
-        :param number_of_modes: int
 
         :return symmetric : float
             Dispersion relation for symmetric modes.
         """
 
         # fd_max as a limit to calculation
+
         with np.printoptions(threshold=np.inf):
 
+            """
+            converting units
+            """
+            d = self.d * 10e3       # m to mm
+            c_s = self.c_S / 10e3   # m/s to mm/microsecond
+
             fd_arr = np.linspace(0, self.fd_max, self.fd_points)
-            result_arr = np.zeros((len(fd_arr), number_of_modes + 1))
+            vp_arr1 = np.zeros(len(fd_arr))
+            vp_arr2 = np.zeros(len(fd_arr))
+            result_arr = np.zeros((len(fd_arr), self.number_of_modes + 1))
+            print('shape')
+            print(result_arr.shape)
 
             print(f'\nCalculating SH modes..\n')
-
-            vp = 0
 
             """
             Constants:
@@ -147,32 +151,46 @@ class SH:
             
             """
 
-            # x results wh
-            # y results k
+            """
+            for n_mode in range(self.number_of_modes):
+            mode_result = np.vstack((result_arr[:, 0], result_arr[:, n_mode+1]))
+            mode_result = mode_result[:, ~np.isnan(mode_result).any(axis=0)]
+            """
+
+            #result_arr = [vector(mode) for mode in range(0, self.number_of_modes)]
+
+            #print('result')
+            #print(result)
 
             for i, fd in enumerate(fd_arr):
+                # k = omega / vp
 
-                omega = 2 * np.pi * (fd / self.d)
-                k = omega / vp
+                for mode in range(1, self.number_of_modes):
 
-                result_arr[i][0] = fd
-                result_arr[i][1] = vp
+                    omega = 2 * np.pi * (fd / self.d)
+                    result_arr[i][0] = fd
 
-                vp += self.vp_step
+                    test_check = (fd / c_s) ** 2 - ((mode * np.pi) ** 2)
+                    print(f'input checking {test_check}')
+                    #result_arr[i][mode] = np.sqrt(np.absolute((fd / self.c_S) ** 2 - ((mode * np.pi) ** 2)))
+                    result_arr[i][mode] = (omega * d) / (np.sqrt((fd / c_s) ** 2 - ((mode * np.pi) ** 2)))
 
-            print('fd arr')
-            print(fd_arr)
+            result_arr = np.transpose(result_arr)
+            #result_arr[result_arr == 0] = np.nan
+            #result_arr = result_arr[:, ~np.isnan(result_arr).any(axis=0)]
+            #filter(lambda v: v == v, result_arr)
 
-
-            print('result arr')
+            print('result_arr')
+            print(fd_arr[1])
+            print(fd_arr[2])
+            print(fd_arr[3])
             print(result_arr)
+            print(result_arr.shape)
 
-            for n_mode in range(number_of_modes):
-                mode_result = np.vstack((result_arr[:, 0], result_arr[:, n_mode+1]))
-                mode_result = mode_result[:, ~np.isnan(mode_result).any(axis=0)]
 
-            print('mode result')
-            print(mode_result)
+
+            #print(result_arr)
+
 
 
 
@@ -270,7 +288,7 @@ def main() -> None:
     # c_R (if v > 0.3) from the material's mechanical properties by using
     # the following equations:
 
-    new_material = IsotropicMaterial(material="Ice")
+    new_material = IsotropicMaterial(material="AluminumDisperse")
     # new_material.fix_file_path('C://Users//deefi//PycharmProjects//dispersioncalc_alpha//materials//material_data.txt')
     new_material.fix_file_path('//materials//material_data.txt')
     E = new_material.e  # E = Young's modulus, in Pa.
@@ -284,14 +302,13 @@ def main() -> None:
     # Example: A 10 mm aluminum plate.
 
     sh = SH(thickness=10,
-                nmodes_sym=5,
-                nmodes_antisym=5,
-                fd_max=10000,
-                vp_max=15000,
-                c_l=c_L,
-                c_s=c_S,
-                c_r=c_R,
-                material='Ice')
+            number_of_modes=5,
+            fd_max=10000,
+            vp_max=10000,
+            c_l=c_L,
+            c_s=c_S,
+            c_r=c_R,
+            material='test')
 
     # Plot phase velocity, group velocity and wavenumber.
 
@@ -299,8 +316,7 @@ def main() -> None:
     #sh.plot_group_velocity()
     #sh.plot_wave_number()
 
-    sh._equation(number_of_modes=10)
-
+    sh._equation()
 
 
 if __name__ == "__main__":
