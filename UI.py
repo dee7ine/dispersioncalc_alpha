@@ -35,6 +35,7 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 from materials.Materials import IsotropicMaterial
 from waves.Lamb import Lamb
+from waves.SH import SH
 
 PROJECT_NAME = 'dispersioncalc_alpha'
 CURRENT_DIR = Path(__file__)
@@ -44,6 +45,7 @@ UI_THEME = 'SystemDefaultForReal'
 DEFAULT_DATA_PATH = f'{SOURCE_ROOT}\\materials\\material_data.txt'
 WINDOW_SIZE = (1250, 700)   # default (1250, 650)
 CONSOLE_SIZE = (100, 25)
+FILE_FORMAT_CHOICES = ['xlsx']
 SYMMETRY_MODES = ['Symmetric', 'Antisymmetric', 'Both']
 PLOTS_TO_DISPLAY = ['Wave Number', 'Phase Velocity', 'Group Velocity', 'All']
 
@@ -74,7 +76,8 @@ class UI:
 
         self._menu_layout = self.__menu_layout()
         self._console_frame_layout = self.__console_frame_layout()
-        self._material_frame_layout = self.__material_frame_layout()
+        self._material_frame_layout = self.__data_configuration_frame_layout()
+        self._simulation_frame_layout = self.__simulation_frame_layout()
         self._main_frame_layout = self.__main_frame_layout()
 
         self.main_window = sg.Window(title='main',
@@ -96,6 +99,7 @@ class UI:
     def __console_frame_layout() -> list:
         """
         Console frame layout definition
+
         :return:
         """
 
@@ -107,34 +111,34 @@ class UI:
                               key='-OUTPUT-',
                               background_color='white')]]
 
-    def __material_frame_layout(self) -> list:
+    def __data_configuration_frame_layout(self) -> list:
         """
         Material frame layout definition
+
         :return:
         """
 
-        return [[sg.Frame('', layout=[[sg.Text("E [MPa]"), sg.Input('68.9', enable_events=True, key='young_modulus', size=(6, 5))],
-                [sg.Text(text="v [no unit]"), sg.Input('0.33', enable_events=True, key='poisson_ratio', size=(6, 5))],
+        return [[sg.Frame('Create material', layout=[[sg.Text("Young's modulus [MPa]"), sg.Input('68.9', enable_events=True, key='young_modulus', size=(6, 5))],
+                [sg.Text(text="Poisson's ratio [no unit]"), sg.Input('0.33', enable_events=True, key='poisson_ratio', size=(6, 5))],
                 [sg.Text(text="Density [kg/m3]"), sg.Input('2700', enable_events=True, key='density', size=(6, 5))],
-                [sg.Text("C11"), sg.Input('0', enable_events=True, key='C11', size=(6, 5))],
-                [sg.Text("C66"), sg.Input('0', enable_events=True, key='C66', size=(6, 5))],
+                [sg.Text("C11"), sg.Input('0', enable_events=True, key='C11', size=(6, 5), readonly=True)],
+                [sg.Text("C66"), sg.Input('0', enable_events=True, key='C66', size=(6, 5), readonly=True)],
                 [sg.Text("Material name"), sg.Input('Aluminum', enable_events=True, key='new_material_name', size=(10, 5))],
                 [sg.Button('Create', key='-CREATE_MATERIAL-', tooltip='Add material to data file')]], size=(250, 200))],
-                [sg.Frame('', layout=[[sg.Text('Material data path'),
-                sg.InputText(default_text=self._default_data_path, key='-data_path-', size=(75, 22))],
+                [sg.Frame('Load data file', layout=[[sg.InputText(default_text=self._default_data_path, key='-data_path-', size=(75, 22))],
                 [sg.FileBrowse(file_types=(("TXT Files", "*.txt"), ("ALL Files", "*.*")), enable_events=True,
                  target='-data_path-', tooltip="Choose file containing material data"),
-                 sg.Button('Load', tooltip="Load data file", key='-LOAD_FILE-'),
-                 sg.Button('Help', key='-MATERIAL_HELP-', tooltip='Helpful tips')]], size=(500, 60))]]
+                 sg.Button('Load', tooltip="Load data file", key='-LOAD_FILE-', enable_events=True),
+                 sg.Button('Help', key='-MATERIAL_HELP-', tooltip='Helpful tips')]], size=(500, 100))]]
 
-    def __main_frame_layout(self) -> list:
+    def __simulation_frame_layout(self):
         """
-        Main frame layout definition
+        Simulation frame layout definition
+
         :return:
         """
 
-        return [[sg.Menu(self._menu_layout, tearoff=False)],
-                [sg.Frame('Simulation', layout=[[sg.Frame('General configuration', layout=[[sg.Text('Material'),
+        return [[sg.Text('Material'),
                 sg.InputCombo(values=self._choices, default_value="AluminumDisperse", key="material_name", enable_events=True, readonly=True,
                 background_color='white', size=(33, 20)), sg.Stretch()],
                 [sg.Text('Thickness [mm]                '),
@@ -143,16 +147,29 @@ class UI:
                 sg.Input('1000', enable_events=True, key='frequency', size=(6, 5), justification='left')],
                 [sg.Text('Phase velocity limit  [m/s]  '),
                 sg.Input('15000', enable_events=True, key='velocity', size=(6, 5), justification='left')],
-                [sg.Text('Quantities'), sg.InputCombo(values=self._plots_choices, default_value='All', key='-plot-modes-', enable_events=True, readonly=True, background_color='white', size=(25, 20))],
-                [sg.Frame('Lamb wave', layout=[[sg.Text('Symmetry modes'),
+                [sg.Text('Quantities'),
+                sg.InputCombo(values=self._plots_choices, default_value='All', key='-plot-modes-', enable_events=True, readonly=True, background_color='white', size=(25, 20))],
+                [sg.Frame('Lamb waves', layout=[[sg.Text('Symmetry modes'),
                 sg.InputCombo(values=self._modes, default_value='Symmetric', key='mode', enable_events=True, readonly=True, background_color='white', size=(25, 20))],
-                [sg.Text('Symmetric     '), sg.Input('5', enable_events=True, key='symmetric', size=(5, 5))],
-                [sg.Text('Antisymmetric'), sg.Input('5', enable_events=True, key='antisymmetric', size=(5, 5))]])],
-                [sg.Button('Calculate Lamb', tooltip="Calculate and plot dispersion curves \n for given material data", enable_events=True, key='-LAMB-'),
-                sg.Button('Calculate SH', tooltip="Calculate and plot dispersion curves \n for given material data", enable_events=True, key='-SH-'),
-                sg.Button('Close plots', tooltip='Close all already open plots', key='-CLOSE-'), sg.Button('Help', key="-WAVE-HELP-", tooltip="Helpful tips"),
-                sg.Button('', key='-GEOMETRY-', tooltip='Click once to display geometry')]])]]),
-                sg.Frame('Material editor', layout=self._material_frame_layout, tooltip="Material editing module", size=(500, 315)),
+                [sg.Text('Max symmetric modes     '), sg.Input('5', enable_events=True, key='symmetric', size=(5, 5))],
+                [sg.Text('Max antisymmetric modes'), sg.Input('5', enable_events=True, key='antisymmetric', size=(5, 5))],
+                [sg.Button('Calculate', tooltip="Calculate and plot Lamb wave dispersion curves \n for given material data", enable_events=True, key='-LAMB-'),
+                sg.Button('Help', key="-LAMB-WAVE-HELP-", tooltip="Helpful tips"),
+                sg.Button('', key='-GEOMETRY-', tooltip='Click once to display geometry')]])],
+                [sg.Frame('SH waves', layout=[[sg.Text('Max number of modes'), sg.Input('5', enable_events=True, key='sh_modes', size=(5, 5))],
+                [sg.Button('Calculate', tooltip="Calculate and plot SH wave dispersion curves \n for given material data", enable_events=True, key='-SH-'),
+                sg.Button('Help', key="-SH-WAVE-HELP-", tooltip="Helpful tips")]])],
+                [sg.Button('Close plots', tooltip='Close all already open plots', key='-CLOSE-')]]
+
+    def __main_frame_layout(self) -> list:
+        """
+        Main frame layout definition
+        :return:
+        """
+
+        return [[sg.Menu(self._menu_layout, tearoff=False)],
+                [sg.Frame('Simulation', layout=[[sg.Frame('General configuration', layout=self._simulation_frame_layout)]]),
+                sg.Frame('Data configuration', layout=self._material_frame_layout, tooltip="Material editing module", size=(500, 315)),
                 sg.Frame('Geometry', layout=[[sg.Canvas(size=(300, 300), key='-CANVAS-')]])],
                 [sg.Frame("Output", layout=self._console_frame_layout)]]
 
@@ -223,7 +240,7 @@ class UI:
                 elif event == '-GEOMETRY-':
                     self.__draw_figure(self.main_window['-CANVAS-'].TKCanvas, self.__model()[0])
 
-                elif event == '-WAVE-HELP-':
+                elif event in ('-LAMB-WAVE-HELP-', '-SH-WAVE-HELP-'):
 
                     sg.popup('Click plot in order to calculate and plot dispersion curves for the chosen material',
                              title="Help")
@@ -238,7 +255,6 @@ class UI:
                     # IsotropicMaterial.fix_file_path(values['-data_path-'])
                     # data, choices = IsotropicMaterial._parse_materials()
                     # self.__delete_figure_agg(self.main_window['-CANVAS-'].TKCanvas)
-                    self.__draw_figure(self.main_window['-canvas-'].TKCanvas, self.__model()[0])
                     print(f"{datetime.now().isoformat(' ', 'seconds')} : Loading material data...")
                     IsotropicMaterial.fix_file_path(filepath=values['-data_path-'])
 
@@ -310,14 +326,76 @@ class UI:
 
                     plt.show(block=False)
 
+                elif event == '-SH-':
+
+                    print(datetime.now())
+
+                    new_material: IsotropicMaterial = IsotropicMaterial(values['material_name'])
+                    fd_max: float = float(values['thickness']) * float(
+                        values['frequency'])  # maximum frequency-thickness product
+
+                    """
+                    Engineering constants and material object instance
+
+                    -------------------------------------------------------
+                    E = Young's modulus, in Pa.
+                    p = Density (rho), in kg/m3.
+                    v = Poisson's ratio (nu).
+
+                    """
+
+                    E: float = new_material.e
+                    p: float = new_material.density
+                    v: float = new_material.v
+
+                    c_L = np.sqrt(E * (1 - v) / (p * (1 + v) * (1 - 2 * v)))
+                    c_S = np.sqrt(E / (2 * p * (1 + v)))
+                    c_R = c_S * ((0.862 + 1.14 * v) / (1 + v))
+
+                    sh = SH(thickness=float(values['thickness']),
+                            number_of_modes=int(values['sh_modes']),
+                            fd_max=fd_max,
+                            vp_max=15000,
+                            c_l=c_L,
+                            c_s=c_S,
+                            c_r=c_R,
+                            material=values['material_name'])
+
+                    """
+                    Plot phase velocity, group velocity and wave number.
+                    """
+
+                    if values['-plot-modes-'] == 'All':
+                        print(f"{datetime.now().isoformat(' ', 'seconds')}: Calculating phase velocity for SH modes")
+                        sh.plot_phase_velocity()
+                        print(f"{datetime.now().isoformat(' ', 'seconds')}: Calculating group velocity for SH modes")
+                        sh.plot_group_velocity()
+                        print(f"{datetime.now().isoformat(' ', 'seconds')}: Calculating wave number for SH modes")
+                        sh.plot_wave_number()
+
+                    elif values['-plot-modes-'] == 'Wave Number':
+                        print(f"{datetime.now().isoformat(' ', 'seconds')}: Calculating wave number for SH modes")
+                        sh.plot_wave_number()
+                        # lamb.save_results()
+
+                    elif values['-plot-modes-'] == 'Phase Velocity':
+                        print(f"{datetime.now().isoformat(' ', 'seconds')}: Calculating phase velocity for SH modes")
+                        sh.plot_phase_velocity()
+
+                    elif values['-plot-modes-'] == 'Group Velocity':
+                        print(f"{datetime.now().isoformat(' ', 'seconds')}: Calculating group velocity for SH modes")
+                        sh.plot_group_velocity()
+
+                    plt.show(block=False)
+
                 elif event == '-CREATE_MATERIAL-':
 
                     IsotropicMaterial.new_material(name=values['new_material_name'],
                                                    density=values['density'],
                                                    e=values['young_modulus'],
                                                    v=values['poisson_ratio'],
-                                                   c11=values['C11'],
-                                                   c66=values['C66'])
+                                                   c11=values['C11'],   # delete
+                                                   c66=values['C66'])   # delete
 
                     data, choices = IsotropicMaterial.parse_materials()
                     self.main_window.find_element('material_name').Update(values=choices)
