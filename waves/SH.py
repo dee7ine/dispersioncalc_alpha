@@ -29,14 +29,10 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-import scipy.optimize
-from typing import Callable
+import scipy.interpolate
 from dataclasses import dataclass
 
-from utility_functions.Plot_utilities import add_plot, add_cutoff_freqs, add_velocities
-from utility_functions.Utilities import interpolate, correct_instability, find_max
 from materials.Materials import IsotropicMaterial
-from Exceptions import IncorrectMode
 
 
 PROJECT_NAME = 'dispersioncalc_alpha'
@@ -103,16 +99,11 @@ class SH:
 
         # print(f"c_L = {self.c_L}, c_S = {self.c_S}, c_r = {self.c_R}")
 
-    def _equation(self) -> None:
+    def __equation(self) -> None:
         """Rayleigh-Lamb frequency relation for symmetric modes, used to
         determine the velocity at which a wave of a particular frequency
         will propagate within the plate. The roots of this equation are
         used to generate the dispersion curves.
-
-        :param vp : float
-            Phase velocity.
-        :param fd : float
-            Frequency × thickness product.
 
         :return symmetric : float
             Dispersion relation for symmetric modes.
@@ -125,12 +116,12 @@ class SH:
             """
             converting units
             """
-            d = self.d * 10e3       # m to mm
-            c_s = self.c_S / 10e3   # m/s to mm/microsecond
+            d = self.d  # * 10e3       # m to mm
+            c_s = self.c_S  # / 10e3   # m/s to mm/microsecond
 
             fd_arr = np.linspace(0, self.fd_max, self.fd_points)
-            vp_arr1 = np.zeros(len(fd_arr))
-            vp_arr2 = np.zeros(len(fd_arr))
+            # vp_arr1 = np.zeros(len(fd_arr))
+            # vp_arr2 = np.zeros(len(fd_arr))
             result_arr = np.zeros((len(fd_arr), self.number_of_modes + 1))
             print('shape')
             print(result_arr.shape)
@@ -157,10 +148,10 @@ class SH:
             mode_result = mode_result[:, ~np.isnan(mode_result).any(axis=0)]
             """
 
-            #result_arr = [vector(mode) for mode in range(0, self.number_of_modes)]
+            # result_arr = [vector(mode) for mode in range(0, self.number_of_modes)]
 
-            #print('result')
-            #print(result)
+            # print('result')
+            # print(result)
 
             for i, fd in enumerate(fd_arr):
                 # k = omega / vp
@@ -172,7 +163,7 @@ class SH:
 
                     test_check = (fd / c_s) ** 2 - ((mode * np.pi) ** 2)
                     print(f'input checking {test_check}')
-                    #result_arr[i][mode] = np.sqrt(np.absolute((fd / self.c_S) ** 2 - ((mode * np.pi) ** 2)))
+                    # result_arr[i][mode] = np.sqrt(np.absolute((fd / self.c_S) ** 2 - ((mode * np.pi) ** 2)))
                     result_arr[i][mode] = (omega * d) / (np.sqrt((fd / c_s) ** 2 - ((mode * np.pi) ** 2)))
 
             result_arr = np.transpose(result_arr)
@@ -187,78 +178,106 @@ class SH:
             print(result_arr)
             print(result_arr.shape)
 
-
-
-            #print(result_arr)
-
-
-
-
+    def plot_phase_velocity(self) -> None:
         """
-        LAMB IMPLEMENTATION DON"T DELETE
+        Calculates SH wave number from equation
+
+        :return:
         """
+        with np.printoptions(threshold=np.inf):
 
+            omega = np.arange(0.1, 2*np.pi*5e6, 1e3)  # generating omega vector
+            # result_arr = np.zeros([self.number_of_modes, len(omega)])
+
+            ct = self.c_S
+            d = self.d
+
+            fig, ax = plt.subplots(figsize=(7, 4))
+            # plt.tight_layout()
+            plt.xlabel('Frequency [Hz]')
+            plt.ylabel('Phase Velocity [m/s]')
+            plt.title(f'Phase velocity for {self.d*1e3}mm thick {self.material} ')
+
+            for mode in range(1, 5):
+                
+                # kh = np.real(np.emath.sqrt(np.square(omega*d/ct) - np.square(mode*np.pi)))
+                kh = np.emath.sqrt(np.square(omega * d / ct) - np.square(mode * np.pi))
+                k = np.real(kh/d)
+
+                k[k == 0] = np.nan  # filter 0 values
+
+                vp = omega/k
+                vp[vp == 0] = np.nan
+
+                ax.plot(omega, vp, label=f'SH{mode}')
+
+            ax.legend()
+
+    def plot_wave_number(self) -> None:
         """
-        for i, fd in enumerate(fd_arr):
+        Calculates SH wave number from equation
 
-            # print(f'{i}/{self.fd_points} - {np.around(fd, 1)} kHz × mm')
-
-            result[i][0] = fd
-
-            j = 1
-
-            vp_1 = 0
-            vp_2 = self.vp_step
-
-            while vp_2 < self.vp_max:
-                x_1 = function(vp_1, fd)
-                x_2 = function(vp_2, fd)
-
-                if j < nmodes + 1:
-                    if not np.isnan(x_1) and not np.isnan(x_2):
-                        if np.sign(x_1) != np.sign(x_2):
-                            bisection = scipy.optimize.bisect(f=function,
-                                                              a=vp_1,
-                                                              b=vp_2,
-                                                              args=(fd,))
-
-                            # TO FIX: I don't know why at some points
-                            # the function changes sign, but the roots
-                            # found by the bisect method don't evaluate
-                            # to zero.
-
-                            # For now, these values are ignored (only
-                            # take into account those values that
-                            # evaluate to 0.01 or less).
-
-                            if np.abs(function(bisection, fd)) < 1e-2 and not np.isclose(bisection, c):
-                                result[i][j] = bisection
-                                j += 1
-
-                vp_1 = vp_2
-                vp_2 = vp_2 + self.vp_step
-
-        # Correct some instabilities and replace zeros with NaN, so it
-        # is easier to filter.
-
-        result = correct_instability(result, function)
-        result[result == 0] = np.nan
-
-        result_dict = {}
-
-        for nmode in range(nmodes):
-            # Filter all NaN values.
-
-            mode_result = np.vstack((result[:, 0], result[:, nmode + 1]))
-            mode_result = mode_result[:, ~np.isnan(mode_result).any(axis=0)]
-
-            # Append to a dictionary with keys 'An' or 'Sn'.
-
-            result_dict[label + str(nmode)] = mode_result
-
-        # print(result_dict)
-        return result_dict
+        :return:
         """
+        with np.printoptions(threshold=np.inf):
+            omega = np.arange(0.1, 2 * np.pi * 5e6, 1e3)  # generating omega vector
+            # result_arr = np.zeros([self.number_of_modes, len(omega)])
+
+            ct = self.c_S
+            d = self.d
+
+            fig, ax = plt.subplots(figsize=(7, 4))
+            # plt.tight_layout()
+            plt.xlabel('Frequency [Hz]')
+            plt.ylabel('Wave number')
+            plt.title(f'Wave Number for {self.d * 1e3}mm thick {self.material} ')
+
+            for mode in range(1, 5):
+                kh = np.real(np.emath.sqrt(np.square(omega * d / ct) - np.square(mode * np.pi)))
+                k = kh / d
+                k[k == 0] = np.nan
+
+                ax.plot(omega, k, label=f'SH{mode}')
+
+            ax.legend()
+
+    def plot_group_velocity(self) -> None:
+        """
+        Calculates SH wave number from equation
+
+        :return:
+        """
+        with np.printoptions(threshold=np.inf):
+            omega = np.arange(0.1, 2 * np.pi * 5e6, 1e3)  # generating omega vector
+            # result_arr = np.zeros([self.number_of_modes, len(omega)])
+
+            ct = self.c_S
+            d = self.d
+
+            fig, ax = plt.subplots(figsize=(7, 4))
+            # plt.tight_layout()
+            plt.xlabel('Frequency [Hz]')
+            plt.ylabel('Group Velocity')
+            plt.title(f'Group velocity for {self.d * 1e3}mm thick {self.material} ')
+
+            for mode in range(1, 5):
+                # kh = np.real(np.emath.sqrt(np.square(omega*d/ct) - np.square(mode*np.pi)))
+                kh = np.emath.sqrt(np.square(omega * d / ct) - np.square(mode * np.pi))
+                k = np.real(kh / d)
+
+                k[k == 0] = np.nan  # filter 0 values
+
+                vp = omega / k
+                vp[vp == 0] = np.nan
+
+                univ_s = scipy.interpolate.InterpolatedUnivariateSpline(omega, vp)
+                vp_prime = univ_s.derivative()
+
+                vg = np.square(vp) * (1 / (vp - vp_prime(omega) * omega))
+
+                ax.plot(omega, vg, label=f'SH{mode}')
+
+            ax.legend()
 
     def result_to_excel(self, result: list, result_type: str, mode: str) -> pd.DataFrame:
 
@@ -288,7 +307,7 @@ def main() -> None:
     # c_R (if v > 0.3) from the material's mechanical properties by using
     # the following equations:
 
-    new_material = IsotropicMaterial(material="AluminumDisperse")
+    new_material = IsotropicMaterial(material="Ice")
     # new_material.fix_file_path('C://Users//deefi//PycharmProjects//dispersioncalc_alpha//materials//material_data.txt')
     new_material.fix_file_path('//materials//material_data.txt')
     E = new_material.e  # E = Young's modulus, in Pa.
@@ -301,22 +320,22 @@ def main() -> None:
 
     # Example: A 10 mm aluminum plate.
 
-    sh = SH(thickness=10,
+    sh = SH(thickness=1,
             number_of_modes=5,
             fd_max=10000,
             vp_max=10000,
             c_l=c_L,
             c_s=c_S,
             c_r=c_R,
-            material='test')
+            material=new_material.name)
 
     # Plot phase velocity, group velocity and wavenumber.
 
-    #sh.plot_phase_velocity()
-    #sh.plot_group_velocity()
-    #sh.plot_wave_number()
+    sh.plot_wave_number()
+    sh.plot_phase_velocity()
+    sh.plot_group_velocity()
 
-    sh._equation()
+    plt.show()
 
 
 if __name__ == "__main__":
