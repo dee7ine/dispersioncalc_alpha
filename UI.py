@@ -81,7 +81,8 @@ class UI:
                                      layout=self._main_frame_layout,
                                      size=WINDOW_SIZE)
 
-    def __menu_layout(self) -> list:
+    @staticmethod
+    def __menu_layout() -> list:
         """
         Menu layout definition
         :return:
@@ -91,7 +92,8 @@ class UI:
                 ['Edit', ['Paste', ['Special', 'Normal'], 'Undo']],
                 ['Help', 'About...'], ]
 
-    def __console_frame_layout(self) -> list:
+    @staticmethod
+    def __console_frame_layout() -> list:
         """
         Console frame layout definition
         :return:
@@ -116,13 +118,14 @@ class UI:
                 [sg.Text(text="Density [kg/m3]"), sg.Input('2700', enable_events=True, key='density', size=(6, 5))],
                 [sg.Text("C11"), sg.Input('0', enable_events=True, key='C11', size=(6, 5))],
                 [sg.Text("C66"), sg.Input('0', enable_events=True, key='C66', size=(6, 5))],
-                [sg.Text("Material name"), sg.Input('default', enable_events=True, key='new_material_name', size=(6, 5))],
+                [sg.Text("Material name"), sg.Input('Aluminum', enable_events=True, key='new_material_name', size=(10, 5))],
                 [sg.Button('Create', key='-CREATE_MATERIAL-', tooltip='Add material to data file')]], size=(250, 200))],
                 [sg.Frame('', layout=[[sg.Text('Material data path'),
                 sg.InputText(default_text=self._default_data_path, key='-data_path-', size=(75, 22))],
                 [sg.FileBrowse(file_types=(("TXT Files", "*.txt"), ("ALL Files", "*.*")), enable_events=True,
-                target='-data_path-', tooltip="Choose file containing material data"),
-                sg.Button('Load', tooltip="Load data file", key='-LOAD_FILE-'), sg.Button('Help', key='-MATERIAL_HELP-', tooltip='Helpful tips')]], size=(500, 60))]]
+                 target='-data_path-', tooltip="Choose file containing material data"),
+                 sg.Button('Load', tooltip="Load data file", key='-LOAD_FILE-'),
+                 sg.Button('Help', key='-MATERIAL_HELP-', tooltip='Helpful tips')]], size=(500, 60))]]
 
     def __main_frame_layout(self) -> list:
         """
@@ -140,11 +143,11 @@ class UI:
                 sg.Input('1000', enable_events=True, key='frequency', size=(6, 5), justification='left')],
                 [sg.Text('Phase velocity limit  [m/s]  '),
                 sg.Input('15000', enable_events=True, key='velocity', size=(6, 5), justification='left')],
-                [sg.Text('Plots'), sg.InputCombo(values=self._plots_choices, default_value='All', key='-plot-modes-', enable_events=True, readonly=True, background_color='white', size=(25, 20))],
+                [sg.Text('Quantities'), sg.InputCombo(values=self._plots_choices, default_value='All', key='-plot-modes-', enable_events=True, readonly=True, background_color='white', size=(25, 20))],
                 [sg.Frame('Lamb wave', layout=[[sg.Text('Symmetry modes'),
                 sg.InputCombo(values=self._modes, default_value='Symmetric', key='mode', enable_events=True, readonly=True, background_color='white', size=(25, 20))],
-                [sg.Text('Symmetric     '), sg.Input('10', enable_events=True, key='symmetric', size=(5, 5))],
-                [sg.Text('Antisymmetric'), sg.Input('10', enable_events=True, key='antisymmetric', size=(5, 5))]])],
+                [sg.Text('Symmetric     '), sg.Input('5', enable_events=True, key='symmetric', size=(5, 5))],
+                [sg.Text('Antisymmetric'), sg.Input('5', enable_events=True, key='antisymmetric', size=(5, 5))]])],
                 [sg.Button('Calculate Lamb', tooltip="Calculate and plot dispersion curves \n for given material data", enable_events=True, key='-LAMB-'),
                 sg.Button('Calculate SH', tooltip="Calculate and plot dispersion curves \n for given material data", enable_events=True, key='-SH-'),
                 sg.Button('Close plots', tooltip='Close all already open plots', key='-CLOSE-'), sg.Button('Help', key="-WAVE-HELP-", tooltip="Helpful tips"),
@@ -153,7 +156,8 @@ class UI:
                 sg.Frame('Geometry', layout=[[sg.Canvas(size=(300, 300), key='-CANVAS-')]])],
                 [sg.Frame("Output", layout=self._console_frame_layout)]]
 
-    def __draw_figure(self, canvas, figure: plt.figure) -> FigureCanvasTkAgg:
+    @staticmethod
+    def __draw_figure(canvas, figure: plt.figure) -> FigureCanvasTkAgg:
         """
         Draws simple 3D shape on a canvas widget
         :param canvas: Canvas widget
@@ -166,7 +170,8 @@ class UI:
         figure_canvas_agg.get_tk_widget().pack(side='top', fill='both', expand=1)
         return figure_canvas_agg
 
-    def __delete_figure_agg(self, figure: plt.figure) -> None:
+    @staticmethod
+    def __delete_figure_agg(figure: plt.figure) -> None:
         """
         Deletes 3D shape from canvas widget
         :param figure:
@@ -176,7 +181,8 @@ class UI:
         figure.get_tk_widget().forget()
         plt.close('all')
 
-    def __model(self) -> tuple[plt.figure, plt.axes]:
+    @staticmethod
+    def __model() -> tuple[plt.figure, plt.axes]:
         """
         3D plot definition
         :return:
