@@ -271,11 +271,11 @@ class Lamb:
             # Filter all NaN values.
 
             mode_result = np.vstack((result[:, 0], result[:, nmode + 1]))
-            print('mode result before filtering')
+            #print('mode result before filtering')
             print(mode_result)
             print(mode_result.shape)
             mode_result = mode_result[:, ~np.isnan(mode_result).any(axis=0)]
-            print('mode result after filtering')
+            #print('mode result after filtering')
             print(mode_result)
             print(mode_result.shape)
 
@@ -508,7 +508,7 @@ class Lamb:
 
         return fig, ax
 
-    def result_to_excel(self, result: list, result_type: str, mode: str,
+    def result_to_excel(self, result: dict, result_type: str, mode: str,
                         filepath: str = f'{SOURCE_ROOT}//results') -> pd.DataFrame:
         """
         Saves simulation results to xlsx file
@@ -524,6 +524,8 @@ class Lamb:
 
         :return:
         """
+
+        result = list(result.values())
 
         main_df = pd.DataFrame()
 
@@ -572,7 +574,7 @@ def main() -> None:
                 c_l=c_L,
                 c_s=c_S,
                 c_r=c_R,
-                material='Ice')
+                material='AluminumDisperse')
 
     # Plot phase velocity, group velocity and wavenumber.
 
@@ -605,9 +607,6 @@ def main() -> None:
     # print('parsing y values for S0')
     # print(list(lamb.sym.values())[0][1])
 
-    values_list_sym = list(lamb.sym.values())
-    values_list_antisym = list(lamb.antisym.values())
-
     # s0_x = pd.DataFrame(list(lamb.sym.values())[0][0], columns=['x'])
     # s0_y = pd.DataFrame(list(lamb.sym.values())[0][1], columns=['y'])
     # print(s0_x)
@@ -630,8 +629,8 @@ def main() -> None:
 
     #plt.show()
     """
-    lamb.result_to_excel(result=values_list_sym, result_type='Phase_velocity', mode='symmetric')
-    lamb.result_to_excel(result=values_list_antisym, result_type='Phase_velocity', mode='antisymmetric')
+    lamb.result_to_excel(result=lamb.sym, result_type='Phase_velocity', mode='symmetric')
+    #lamb.result_to_excel(result=values_list_antisym, result_type='Phase_velocity', mode='antisymmetric')
 
 
 if __name__ == "__main__":
