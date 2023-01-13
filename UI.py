@@ -43,6 +43,7 @@ SOURCE_ROOT = [p for p in CURRENT_DIR.parents if p.parts[-1] == PROJECT_NAME][0]
 
 UI_THEME = 'SystemDefaultForReal'
 DEFAULT_DATA_PATH = f'{SOURCE_ROOT}\\materials\\material_data.txt'
+DEFAULT_EXPORT_PATH = f'{SOURCE_ROOT}\\results'
 WINDOW_SIZE = (1250, 700)   # default (1250, 650)
 CONSOLE_SIZE = (100, 25)
 FILE_FORMAT_CHOICES = ['xlsx']
@@ -63,6 +64,7 @@ class UI:
     _material_frame_layout: list
     _main_frame_layout: list
     _default_data_path: str = DEFAULT_DATA_PATH
+    _default_export_path: str = DEFAULT_EXPORT_PATH
     _modes = SYMMETRY_MODES
     _data: list
     _choices: list = SYMMETRY_MODES
@@ -124,7 +126,9 @@ class UI:
                 [sg.Text("C11"), sg.Input('0', enable_events=True, key='C11', size=(6, 5), readonly=True)],
                 [sg.Text("C66"), sg.Input('0', enable_events=True, key='C66', size=(6, 5), readonly=True)],
                 [sg.Text("Material name"), sg.Input('Aluminum', enable_events=True, key='new_material_name', size=(10, 5))],
-                [sg.Button('Create', key='-CREATE_MATERIAL-', tooltip='Add material to data file')]], size=(250, 200))],
+                [sg.Button('Create', key='-CREATE_MATERIAL-', tooltip='Add material to data file')]], size=(250, 210))],
+                [sg.Frame('Export directory', layout=[[sg.InputText(default_text=self._default_export_path, key='-export_path-', size=(75, 22))],
+                [sg.FolderBrowse(enable_events=True, target='-export_path-', tooltip="Choose the directory to export results")]])],
                 [sg.Frame('Load data file', layout=[[sg.InputText(default_text=self._default_data_path, key='-data_path-', size=(75, 22))],
                 [sg.FileBrowse(file_types=(("TXT Files", "*.txt"), ("ALL Files", "*.*")), enable_events=True,
                  target='-data_path-', tooltip="Choose file containing material data"),
@@ -169,9 +173,17 @@ class UI:
 
         return [[sg.Menu(self._menu_layout, tearoff=False)],
                 [sg.Frame('Simulation', layout=[[sg.Frame('General configuration', layout=self._simulation_frame_layout)]]),
-                sg.Frame('Data configuration', layout=self._material_frame_layout, tooltip="Material editing module", size=(500, 315)),
+                sg.Frame('Data configuration', layout=self._material_frame_layout, tooltip="Material editing module", size=(500, 410)),
                 sg.Frame('Geometry', layout=[[sg.Canvas(size=(300, 300), key='-CANVAS-')]])],
-                [sg.Frame("Output", layout=self._console_frame_layout)]]
+
+                [sg.Frame("Output", layout=self._console_frame_layout), sg.Frame('Welcome',
+                layout=[[sg.Text('Thank you for using this program. Some theoretical information to\n'
+                                 'quickly get started:\n'
+                                 'Guided Wave Testing - non-destructive testing method which uses\n'
+                                 'acoustic waves that propagate along an elongated structure while\n'
+                                 'being guided by its boundaries\n'
+                                 'Dispersion curve - relation of wave number or wave\nlength to frequency',
+                                 font=("Arial", 11))]])]]
 
     @staticmethod
     def __draw_figure(canvas, figure: plt.figure) -> FigureCanvasTkAgg:
