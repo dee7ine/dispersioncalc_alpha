@@ -211,13 +211,13 @@ class UI:
         plt.close('all')
 
     @staticmethod
-    def __model() -> tuple[plt.figure, plt.axes]:
+    def __model(thickness: str) -> tuple[plt.figure, plt.axes]:
         """
         3D plot definition
         :return:
         """
 
-        axes = [2, 2, 5]
+        axes = [2, 2, int(thickness)]
         data = np.ones(axes, dtype=np.bool_)
         alpha = 0.9
 
@@ -250,7 +250,7 @@ class UI:
                     break
 
                 elif event == '-GEOMETRY-':
-                    self.__draw_figure(self.main_window['-CANVAS-'].TKCanvas, self.__model()[0])
+                    self.__draw_figure(self.main_window['-CANVAS-'].TKCanvas, self.__model(thickness=values['thickness'])[0])
 
                 elif event in ('-LAMB-WAVE-HELP-', '-SH-WAVE-HELP-'):
 
@@ -264,15 +264,11 @@ class UI:
 
                 elif event == '-LOAD_FILE-':
 
-                    # IsotropicMaterial.fix_file_path(values['-data_path-'])
-                    # data, choices = IsotropicMaterial._parse_materials()
-                    # self.__delete_figure_agg(self.main_window['-CANVAS-'].TKCanvas)
                     print(f"{datetime.now().isoformat(' ', 'seconds')} : Loading material data...")
                     IsotropicMaterial.fix_file_path(filepath=values['-data_path-'])
 
                     data, choices = IsotropicMaterial.parse_materials()
                     self.main_window.find_element('material_name').Update(values=choices)
-                    # self.__draw_figure(self.main_window['-canvas-'].TKCanvas, self.__model()[0])
                     print(f"{datetime.now().isoformat(' ', 'seconds')}: Data file updated")
 
                 elif event == '-LAMB-':
@@ -281,7 +277,7 @@ class UI:
 
                     new_material: IsotropicMaterial = IsotropicMaterial(values['material_name'])
                     fd_max: float = float(values['thickness']) * float(
-                        values['frequency'])  # maximum frequency-thickness product
+                        values['frequency'])
 
                     """
                     Engineering constants and material object instance
@@ -347,7 +343,7 @@ class UI:
 
                     new_material: IsotropicMaterial = IsotropicMaterial(values['material_name'])
                     fd_max: float = float(values['thickness']) * float(
-                        values['frequency'])  # maximum frequency-thickness product
+                        values['frequency'])
 
                     """
                     Engineering constants and material object instance
