@@ -76,15 +76,11 @@ class IsotropicMaterial:
         self._density = float(self._parsed_material_data[self._index][1])
         self._E = float(self._parsed_material_data[self._index][2])
         self._v = float(self._parsed_material_data[self._index][3])
-        self._C11 = float(self._parsed_material_data[self._index][4])
-        self._C66 = float(self._parsed_material_data[self._index][5])
 
         print(f"Name: {self._name},"
               f" mass-density: {self._density},"
               f" E: {self._E},"
-              f" v: {self._v},"
-              f" C11: {self._C11},"
-              f" C66: {self._C66}")
+              f" v: {self._v}")
 
     @classmethod
     def fix_file_path(cls: IsotropicMaterial, filepath: str) -> None:
@@ -203,14 +199,6 @@ class IsotropicMaterial:
     @property
     def v(self) -> float:
         return self._v
-
-    @property
-    def c11(self) -> float:
-        return self._C11
-
-    @property
-    def c66(self) -> float:
-        return self._C66
 
 
 def main() -> None:

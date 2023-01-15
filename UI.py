@@ -342,8 +342,7 @@ class UI:
                     print(datetime.now())
 
                     new_material: IsotropicMaterial = IsotropicMaterial(values['material_name'])
-                    fd_max: float = float(values['thickness']) * float(
-                        values['frequency'])
+                    f_max: float = float(values['frequency'])
 
                     """
                     Engineering constants and material object instance
@@ -365,8 +364,8 @@ class UI:
 
                     sh = SH(thickness=float(values['thickness']),
                             number_of_modes=int(values['sh_modes']),
-                            fd_max=fd_max,
-                            vp_max=15000,
+                            f_max=2*np.pi*5e6,
+                            f_step=1e3,
                             c_l=c_L,
                             c_s=c_S,
                             c_r=c_R,
@@ -380,7 +379,7 @@ class UI:
                         print(f"{datetime.now().isoformat(' ', 'seconds')}: Calculating phase velocity for SH modes")
                         sh.plot_phase_velocity()
                         print(f"{datetime.now().isoformat(' ', 'seconds')}: Calculating group velocity for SH modes")
-                        sh.plot_group_velocity()
+                        #sh.plot_group_velocity()
                         print(f"{datetime.now().isoformat(' ', 'seconds')}: Calculating wave number for SH modes")
                         sh.plot_wave_number()
 
@@ -394,7 +393,7 @@ class UI:
 
                     elif values['-plot-modes-'] == 'Group Velocity':
                         print(f"{datetime.now().isoformat(' ', 'seconds')}: Calculating group velocity for SH modes")
-                        sh.plot_group_velocity()
+                        #sh.plot_group_velocity()
 
                     plt.show(block=False)
 
@@ -403,9 +402,7 @@ class UI:
                     IsotropicMaterial.new_material(name=values['new_material_name'],
                                                    density=values['density'],
                                                    e=values['young_modulus'],
-                                                   v=values['poisson_ratio'],
-                                                   c11=values['C11'],   # delete
-                                                   c66=values['C66'])   # delete
+                                                   v=values['poisson_ratio'])
 
                     data, choices = IsotropicMaterial.parse_materials()
                     self.main_window.find_element('material_name').Update(values=choices)
