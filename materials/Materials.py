@@ -119,7 +119,7 @@ class IsotropicMaterial:
                 raise ErrorParsingMaterial
 
     @classmethod
-    def new_material(cls: IsotropicMaterial, name: str, density: str, e: str, v: str, c11: str, c66: str) -> None:
+    def new_material(cls: IsotropicMaterial, name: str, density: str, e: str, v: str, c11: str = 0, c66: str = 0) -> None:
         """
         Create new material with given parameters
 
