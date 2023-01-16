@@ -73,7 +73,7 @@ class SH:
         :param number_of_modes:         number of modes to calculate.
         :param f_max:                   maximum value of frequency × thickness to calculate.
         :param f_step                   frequency step
-        :param c_l:                     Longitudinal wave velocity of the material, in m/s.
+        :param c_l:                     longitudinal wave velocity of the material, in m/s.
         :param c_s:                     shear wave velocity of the material, in m/s.
         :param c_r:                     rayleigh wave velocity of the material, in m/s.
         :param material:                name of the material being analyzed.
@@ -134,7 +134,7 @@ class SH:
         :return:
         """
         with np.printoptions(threshold=np.inf):
-            omega = np.arange(0.1, self.f_max, self.f_step)  # generating omega vector
+            omega = np.arange(0.1, self.f_max, 10000)  # generating omega vector
             # result_arr = np.zeros([self.number_of_modes, len(omega)])
 
             ct = self.c_S
@@ -142,17 +142,20 @@ class SH:
 
             fig, ax = plt.subplots(figsize=(7, 4))
             # plt.tight_layout()
-            plt.xlabel('Frequency [Hz]')
+            plt.xlabel('Frequency x thickness [Hz*mm]')
             plt.ylabel('Wave number')
             plt.title(f'Wave Number for {self.d * 1e3}mm thick {self.material} ')
 
             for mode in range(1, self.number_of_modes):
-                kh = np.real(np.emath.sqrt(np.square(omega * d / ct) - np.square(mode * np.pi)))
+
+                kh = np.emath.sqrt(np.square(omega * d / ct) - np.square(mode * np.pi))
                 k = kh / d
-                k[k == 0] = np.nan
+                #kh = np.real(kh)
+                kh[kh == 0] = np.nan
 
-                ax.plot(omega, k, label=f'SH{mode}')
+                ax.plot(kh, omega, label=f'M{mode}')
 
+            ax.text(4, 1000, f'M{mode}')
             ax.legend()
 
     def plot_group_velocity(self) -> None:
@@ -189,7 +192,7 @@ class SH:
 
                 vg = np.square(vp) * (1 / (vp - vp_prime(omega) * omega))
 
-                ax.plot(omega, vg, label=f'SH{mode}')
+                ax.plot(vg, omega, label=f'SH{mode}')
 
             ax.legend()
 
@@ -236,7 +239,7 @@ def main() -> None:
 
     sh = SH(thickness=1,
             number_of_modes=5,
-            f_max=2*np.pi*5e6,
+            f_max=2*np.pi*5e6,                 # 2*np.pi*5e6
             f_step=1e3,
             c_l=c_L,
             c_s=c_S,
