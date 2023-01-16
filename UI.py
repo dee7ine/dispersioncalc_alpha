@@ -123,8 +123,6 @@ class UI:
         return [[sg.Frame('Create material', layout=[[sg.Text("Young's modulus [MPa]"), sg.Input('68.9', enable_events=True, key='young_modulus', size=(6, 5))],
                 [sg.Text(text="Poisson's ratio [no unit]"), sg.Input('0.33', enable_events=True, key='poisson_ratio', size=(6, 5))],
                 [sg.Text(text="Density [kg/m3]"), sg.Input('2700', enable_events=True, key='density', size=(6, 5))],
-                [sg.Text("C11"), sg.Input('0', enable_events=True, key='C11', size=(6, 5), readonly=True)],
-                [sg.Text("C66"), sg.Input('0', enable_events=True, key='C66', size=(6, 5), readonly=True)],
                 [sg.Text("Material name"), sg.Input('Aluminum', enable_events=True, key='new_material_name', size=(10, 5))],
                 [sg.Button('Create', key='-CREATE_MATERIAL-', tooltip='Add material to data file')]], size=(250, 210))],
                 [sg.Frame('Export directory', layout=[[sg.InputText(default_text=self._default_export_path, key='-export_path-', size=(75, 22))],
@@ -145,12 +143,14 @@ class UI:
         return [[sg.Text('Material'),
                 sg.InputCombo(values=self._choices, default_value="AluminumDisperse", key="material_name", enable_events=True, readonly=True,
                 background_color='white', size=(33, 20)), sg.Stretch()],
-                [sg.Text('Thickness [mm]                '),
-                sg.Input('10', enable_events=True, key='thickness', size=(6, 5), justification='left')],
-                [sg.Text('Frequency [Hz]                 '),
-                sg.Input('1000', enable_events=True, key='frequency', size=(6, 5), justification='left')],
-                [sg.Text('Phase velocity limit  [m/s]  '),
-                sg.Input('15000', enable_events=True, key='velocity', size=(6, 5), justification='left')],
+                [sg.Text('Thickness [mm]               '),
+                sg.Input('10', enable_events=True, key='thickness', size=(7, 5), justification='left')],
+                [sg.Text('Frequency limit [KHz]       '),
+                sg.Input('1000', enable_events=True, key='frequency', size=(7, 5), justification='left')],
+                [sg.Text('Frequency step [Khz]       '),
+                sg.Input('1', enable_events=True, key='frequency_step', size=(7, 5), justification='left')],
+                [sg.Text('Phase velocity limit [m/s]  '),
+                 sg.Input('15000', enable_events=True, key='velocity', size=(7, 5), justification='left')],
                 [sg.Text('Quantities'),
                 sg.InputCombo(values=self._plots_choices, default_value='All', key='-plot-modes-', enable_events=True, readonly=True, background_color='white', size=(25, 20))],
                 [sg.Frame('Lamb waves', layout=[[sg.Text('Symmetry modes'),
@@ -342,7 +342,8 @@ class UI:
                     print(datetime.now())
 
                     new_material: IsotropicMaterial = IsotropicMaterial(values['material_name'])
-                    f_max: float = float(values['frequency'])
+                    f_max: float = float(values['frequency'])*1e3
+                    f_step: float = float(values['frequency_step'])*1e3
 
                     """
                     Engineering constants and material object instance
@@ -364,8 +365,8 @@ class UI:
 
                     sh = SH(thickness=float(values['thickness']),
                             number_of_modes=int(values['sh_modes']),
-                            f_max=2*np.pi*5e6,
-                            f_step=1e3,
+                            f_max=f_max,
+                            f_step=f_step,
                             c_l=c_L,
                             c_s=c_S,
                             c_r=c_R,

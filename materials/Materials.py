@@ -136,7 +136,7 @@ class IsotropicMaterial:
         with open(cls._filename, 'a+') as material_data:
             try:
                 new_material_data = []
-                new_material_data.extend([name, density, e, v, c11, c66])
+                new_material_data.extend([name, density, e, v, 0, 0])
 
                 print(new_material_data)
 
