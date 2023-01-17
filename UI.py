@@ -144,17 +144,16 @@ class UI:
                 sg.InputCombo(values=self._choices, default_value="AluminumDisperse", key="material_name", enable_events=True, readonly=True,
                 background_color='white', size=(33, 20)), sg.Stretch()],
                 [sg.Text('Thickness [mm]               '),
-                sg.Input('10', enable_events=True, key='thickness', size=(7, 5), justification='left')],
+                sg.Input('1', enable_events=True, key='thickness', size=(7, 5), justification='left')],
                 [sg.Text('Frequency limit [KHz]       '),
-                sg.Input('1000', enable_events=True, key='frequency', size=(7, 5), justification='left')],
-                [sg.Text('Frequency step [Khz]       '),
+                sg.Input('10000', enable_events=True, key='frequency', size=(7, 5), justification='left')],
+                [sg.Text('Frequency step [KHz]       '),
                 sg.Input('1', enable_events=True, key='frequency_step', size=(7, 5), justification='left')],
-                [sg.Text('Phase velocity limit [m/s]  '),
-                 sg.Input('15000', enable_events=True, key='velocity', size=(7, 5), justification='left')],
                 [sg.Text('Quantities'),
                 sg.InputCombo(values=self._plots_choices, default_value='All', key='-plot-modes-', enable_events=True, readonly=True, background_color='white', size=(25, 20))],
                 [sg.Frame('Lamb waves', layout=[[sg.Text('Symmetry modes'),
                 sg.InputCombo(values=self._modes, default_value='Symmetric', key='mode', enable_events=True, readonly=True, background_color='white', size=(25, 20))],
+                [sg.Text('Phase velocity limit [m/s]  '), sg.Input('15000', enable_events=True, key='velocity', size=(7, 5), justification='left')],
                 [sg.Text('Max symmetric modes     '), sg.Input('5', enable_events=True, key='symmetric', size=(5, 5))],
                 [sg.Text('Max antisymmetric modes'), sg.Input('5', enable_events=True, key='antisymmetric', size=(5, 5))],
                 [sg.Button('Calculate', tooltip="Calculate and plot Lamb wave dispersion curves \n for given material data", enable_events=True, key='-LAMB-'),
@@ -277,7 +276,8 @@ class UI:
 
                     new_material: IsotropicMaterial = IsotropicMaterial(values['material_name'])
                     fd_max: float = float(values['thickness']) * float(
-                        values['frequency'])
+                        values['frequency']) / 1e3
+                    fd_step: int = int(values['frequency_step']) * int(values['thickness'])
 
                     """
                     Engineering constants and material object instance
@@ -297,15 +297,31 @@ class UI:
                     c_S = np.sqrt(E / (2 * p * (1 + v)))
                     c_R = c_S * ((0.862 + 1.14 * v) / (1 + v))
 
-                    lamb = Lamb(thickness=float(values['thickness']),
-                                nmodes_sym=int(values['symmetric']),
-                                nmodes_antisym=int(values['antisymmetric']),
-                                fd_max=fd_max,
+                    print(float(values['thickness']))
+
+                    lamb = Lamb(thickness=10,
+                            nmodes_sym=int(values['symmetric']),
+                            nmodes_antisym=int(values['antisymmetric']),
+                            fd_max=10000,
+                            vp_max=15000,
+                            fd_step=fd_step/1e1,
+                            c_l=c_L,
+                            c_s=c_S,
+                            c_r=c_R,
+                            material=values['material_name'])
+
+                    """
+                    lamb = Lamb(thickness=1,
+                                nmodes_sym=5,
+                                nmodes_antisym=5,
+                                fd_max=10000,
                                 vp_max=15000,
+                                fd_step=1,
                                 c_l=c_L,
                                 c_s=c_S,
                                 c_r=c_R,
-                                material=values['material_name'])
+                                material='AluminumDisperse')
+                    """
 
                     """
                     Plot phase velocity, group velocity and wave number.
@@ -342,8 +358,8 @@ class UI:
                     print(datetime.now())
 
                     new_material: IsotropicMaterial = IsotropicMaterial(values['material_name'])
-                    f_max: float = float(values['frequency'])*1e3
-                    f_step: float = float(values['frequency_step'])*1e3
+                    f_max = float(values['frequency']) * 1e3
+                    f_step = float(values['frequency_step'])
 
                     """
                     Engineering constants and material object instance
@@ -378,23 +394,23 @@ class UI:
 
                     if values['-plot-modes-'] == 'All':
                         print(f"{datetime.now().isoformat(' ', 'seconds')}: Calculating phase velocity for SH modes")
-                        sh.plot_phase_velocity()
+                        sh.plot_phase_velocity(save_result=False)
                         print(f"{datetime.now().isoformat(' ', 'seconds')}: Calculating group velocity for SH modes")
-                        #sh.plot_group_velocity()
+                        sh.plot_group_velocity()
                         print(f"{datetime.now().isoformat(' ', 'seconds')}: Calculating wave number for SH modes")
-                        sh.plot_wave_number()
+                        sh.plot_wave_number(save_result=False)
 
                     elif values['-plot-modes-'] == 'Wave Number':
                         print(f"{datetime.now().isoformat(' ', 'seconds')}: Calculating wave number for SH modes")
-                        sh.plot_wave_number()
+                        sh.plot_wave_number(save_result=False)
 
                     elif values['-plot-modes-'] == 'Phase Velocity':
                         print(f"{datetime.now().isoformat(' ', 'seconds')}: Calculating phase velocity for SH modes")
-                        sh.plot_phase_velocity()
+                        sh.plot_phase_velocity(save_result=False)
 
                     elif values['-plot-modes-'] == 'Group Velocity':
                         print(f"{datetime.now().isoformat(' ', 'seconds')}: Calculating group velocity for SH modes")
-                        #sh.plot_group_velocity()
+                        sh.plot_group_velocity()
 
                     plt.show(block=False)
 
