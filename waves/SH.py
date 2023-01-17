@@ -99,9 +99,8 @@ class SH:
         """
         with np.printoptions(threshold=np.inf):
 
-            omega = np.arange(0.1, self.f_max*2*np.pi, self.f_step)  # generating omega vector
+            omega = np.arange(0.1, self.f_max*2*np.pi, self.f_step*2*np.pi)  # generating omega vector
             result_arr = np.zeros([len(omega), 2 * self.number_of_modes])
-            mode_columns = []
             columns = []
 
             ct = self.c_S
@@ -148,7 +147,7 @@ class SH:
         :return:
         """
         with np.printoptions(threshold=np.inf):
-            omega = np.arange(0.1, self.f_max*2*np.pi, 1000)  # generating omega vector
+            omega = np.arange(0.1, self.f_max*2*np.pi, self.f_step*2*np.pi)  # generating omega vector
             result_arr = np.zeros([len(omega), 2*self.number_of_modes])
             columns = []
 
@@ -189,7 +188,7 @@ class SH:
 
             ax.legend()
 
-    def plot_group_velocity(self) -> None:
+    def plot_group_velocity(self, save_result=True) -> None:
         """
         Calculates SH wave number from equation
 
@@ -197,7 +196,8 @@ class SH:
         """
         with np.printoptions(threshold=np.inf):
             omega = np.arange(0.1, self.f_max*2*np.pi, self.f_step)  # generating omega vector
-            # result_arr = np.zeros([self.number_of_modes, len(omega)])
+            result_arr = np.zeros([len(omega), 2 * self.number_of_modes])
+            columns = []
 
             ct = self.c_S
             d = self.d
@@ -209,11 +209,10 @@ class SH:
             plt.autoscale(True, 'both')
             plt.title(f'Group velocity for {self.d * 1e3}mm thick {self.material} ')
 
-            main_df = pd.DataFrame()
             filename: str = f'SH_Group_velocity_{self.material}_{self.d * 1e3}mm'
             filepath: str = f'{SOURCE_ROOT}//results'
 
-            for mode in range(0, self.number_of_modes):
+            for mode, mode_index in zip(range(0, self.number_of_modes), range(0, 2 * self.number_of_modes, 2)):
                 # kh = np.real(np.emath.sqrt(np.square(omega*d/ct) - np.square(mode*np.pi)))
                 kh = np.emath.sqrt(np.square(omega * d / ct) - np.square(mode * np.pi))
                 k = np.real(kh / d)
@@ -225,14 +224,21 @@ class SH:
 
                 vg = np.diff(omega)/np.diff(k)
 
-                #temp_df_x = pd.DataFrame(omega[:-1]/(2*np.pi), columns=['Frequency [Hz]'])
-                #temp_df_y = pd.DataFrame(vg, columns=['Group velocity [m/s]'])
-                #temp_df = pd.concat([temp_df_x, temp_df_y], axis=1)
+                freq_arr = omega/(2*np.pi)
 
-                #main_df = pd.concat([main_df, temp_df], axis=1)
                 ax.plot(omega[:-1]/(2*np.pi), vg, label=f'SH{mode}')
 
-            #main_df.to_excel(f'{filepath}//{filename}.xlsx')
+                #result_arr[:, mode_index] = freq_arr
+                #result_arr[:, mode_index + 1] = vg
+                columns.append(f'SH{mode} f [Hz]')
+                columns.append(f'SH{mode} vg [1/m]')
+
+            """
+            if save_result:
+                main_df = pd.DataFrame(result_arr, columns=columns)
+                main_df.to_excel(f'{filepath}//{filename}.xlsx')
+            """
+
             ax.legend()
 
     def result_to_excel(self, result: list, result_type: str, mode: str) -> pd.DataFrame:
@@ -287,7 +293,7 @@ def main() -> None:
 
     # Plot phase velocity, group velocity and wavenumber.
 
-    sh.plot_wave_number(save_result=False)
+    sh.plot_wave_number(save_result=True)
     sh.plot_phase_velocity(save_result=False)
     sh.plot_group_velocity()
 

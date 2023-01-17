@@ -396,7 +396,7 @@ class UI:
                         print(f"{datetime.now().isoformat(' ', 'seconds')}: Calculating phase velocity for SH modes")
                         sh.plot_phase_velocity(save_result=False)
                         print(f"{datetime.now().isoformat(' ', 'seconds')}: Calculating group velocity for SH modes")
-                        sh.plot_group_velocity()
+                        sh.plot_group_velocity(save_result=False)
                         print(f"{datetime.now().isoformat(' ', 'seconds')}: Calculating wave number for SH modes")
                         sh.plot_wave_number(save_result=False)
 
@@ -410,7 +410,7 @@ class UI:
 
                     elif values['-plot-modes-'] == 'Group Velocity':
                         print(f"{datetime.now().isoformat(' ', 'seconds')}: Calculating group velocity for SH modes")
-                        sh.plot_group_velocity()
+                        sh.plot_group_velocity(save_result=False)
 
                     plt.show(block=False)
 
