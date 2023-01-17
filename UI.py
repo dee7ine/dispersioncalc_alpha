@@ -299,7 +299,7 @@ class UI:
 
                     print(float(values['thickness']))
 
-                    lamb = Lamb(thickness=10,
+                    lamb = Lamb(float(values['thickness']),
                             nmodes_sym=int(values['symmetric']),
                             nmodes_antisym=int(values['antisymmetric']),
                             fd_max=10000,
