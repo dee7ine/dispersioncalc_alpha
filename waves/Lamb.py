@@ -55,6 +55,7 @@ class Lamb:
     nmodes_antisym: float
 
     fd_max: float
+    fd_step: float
     vp_max: float
     c_L: float
     c_S: float
@@ -75,8 +76,8 @@ class Lamb:
     vg_antisym: dict
     k_antisym: dict
 
-    def __init__(self, thickness: float, nmodes_sym: int, nmodes_antisym: int, fd_max: float, vp_max: float,
-                 c_l: float, c_s: float, c_r: float = None, fd_points: int = 100, vp_step: int = 100,
+    def __init__(self, thickness: float, nmodes_sym: int, nmodes_antisym: int, fd_max: float, fd_step: float,
+                 vp_max: float, c_l: float, c_s: float, c_r: float = None, fd_points: int = 100, vp_step: int = 100,
                  material: str = '') -> None:
         """"
         :param thickness:               thickness of the plate, in mm.
@@ -93,16 +94,17 @@ class Lamb:
 
         :return:
         """
-        self.d = thickness / 1e3
+        self.d = thickness / 1e3  #m
         self.h = (thickness / 2) / 1e3
         self.nmodes_sym = nmodes_sym
         self.nmodes_antisym = nmodes_antisym
         self.fd_max = fd_max
+        self.fd_step = fd_step * 1e3
         self.vp_max = vp_max
         self.c_L = c_l  # *(10e-3/10e-6)
         self.c_S = c_s  # *(10e-3/10e-6)
         self.c_R = c_r
-        self.fd_points = fd_points
+        self.fd_points = int(self.fd_max/self.fd_step)
         self.vp_step = vp_step
         self.material = material
 
@@ -529,12 +531,12 @@ class Lamb:
 
         main_df = pd.DataFrame()
 
-        filename = f'{result_type.capitalize()}_{self.material}_{self.d*1e3}mm_{mode}'
+        filename = f'Lamb_{result_type.capitalize()}_{self.material}_{self.d*1e3}mm_{mode}'
 
         for index, _ in enumerate(result):
 
-            temp_df_x = pd.DataFrame(result[index][0], columns=['x'])
-            temp_df_y = pd.DataFrame(result[index][1], columns=['y'])
+            temp_df_x = pd.DataFrame(result[index][0], columns=['Frequency'])
+            temp_df_y = pd.DataFrame(result[index][1], columns=['Phase velocity []'])
             temp_df = pd.concat([temp_df_x, temp_df_y], axis=1)
 
             main_df = pd.concat([main_df, temp_df], axis=1)
@@ -553,7 +555,7 @@ def main() -> None:
     # c_R (if v > 0.3) from the material's mechanical properties by using
     # the following equations:
 
-    new_material = IsotropicMaterial(material="Ice")
+    new_material = IsotropicMaterial(material="AluminumDisperse")
     new_material.fix_file_path('//materials//material_data.txt')
 
     E = new_material.e  # E = Young's modulus, in Pa.
@@ -566,11 +568,12 @@ def main() -> None:
 
     # Example: A 10 mm aluminum plate.
 
-    lamb = Lamb(thickness=10,
+    lamb = Lamb(thickness=1,
                 nmodes_sym=5,
                 nmodes_antisym=5,
                 fd_max=10000,
                 vp_max=15000,
+                fd_step=1,
                 c_l=c_L,
                 c_s=c_S,
                 c_r=c_R,
@@ -630,6 +633,7 @@ def main() -> None:
     #plt.show()
     """
     lamb.result_to_excel(result=lamb.sym, result_type='Phase_velocity', mode='symmetric')
+    plt.show()
     #lamb.result_to_excel(result=values_list_antisym, result_type='Phase_velocity', mode='antisymmetric')
 
 
