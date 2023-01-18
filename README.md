@@ -3,8 +3,6 @@ Interactive Tool for Dispersion Curve Analysis
 Created by Bartlomiej Jargut
 https://github.com/dee7ine
 
-Lamb wave class implemented by Francisco Rotea
-https://github.com/franciscorotea
 -------------------------------------------------------------------------
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
