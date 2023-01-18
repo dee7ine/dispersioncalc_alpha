@@ -54,17 +54,6 @@ class SH:
     number_of_modes: int
     material: str
 
-    sym: dict
-    antisym: dict
-
-    vp_sym: dict
-    vg_sym: dict
-    k_sym: dict
-
-    vp_antisym: dict
-    vg_antisym: dict
-    k_antisym: dict
-
     def __init__(self, thickness: float, number_of_modes: int, f_max: float, f_step: float,
                  c_l: float, c_s: float, c_r: float = None, material: str = '') -> None:
         """"
@@ -89,11 +78,15 @@ class SH:
         self.c_R = c_r
         self.material = material
 
-        # print(f"c_L = {self.c_L}, c_S = {self.c_S}, c_r = {self.c_R}")
-
     def plot_phase_velocity(self, save_result: bool = True, save_format: str = 'csv') -> None:
         """
-        Calculates SH wave number from equation
+        Calculates SH wave phase velocity from
+        characteristic equation
+
+        :param save_result:     set to True if the result should be exported to a file,
+                                                              default value is True
+        :param save_format: save_format:    export file format - can be 'csv' or 'xlsx'
+                                                              default value is 'csv'
 
         :return:
         """
@@ -146,7 +139,13 @@ class SH:
     def plot_wave_number(self, save_result: bool = True,
                          save_format: str = 'csv') -> None:
         """
-        Calculates SH wave number from equation
+        Calculates SH wave number from
+        characteristic equation
+
+        :param save_result:     set to True if the result should be exported to a file,
+                                                              default value is True
+        :param save_format: save_format:    export file format - can be 'csv' or 'xlsx'
+                                                              default value is 'csv'
 
         :return:
         """
@@ -180,8 +179,8 @@ class SH:
                 freq_arr = omega / (2 * np.pi)
                 ax.plot(omega/(2*np.pi), k, label=f'M{mode}')
                 #ax.set_ylim([0, k[-1]])
-                result_arr[:,mode_index] = freq_arr
-                result_arr[:,mode_index+1] = k
+                result_arr[:, mode_index] = freq_arr
+                result_arr[:, mode_index+1] = k
                 columns.append(f'SH{mode} f [Hz]')
                 columns.append(f'SH{mode} k [1/m]')
 
@@ -196,13 +195,17 @@ class SH:
 
     def plot_group_velocity(self, save_result: bool = True, save_format: str = 'csv') -> None:
         """
-        Calculates SH wave number from
+        Calculates SH wave group velocity from
         characteristic equation
 
-        :param save_result:
+        :param save_result:     set to True if the result should be exported to a file,
+                                                              default value is True
+        :param save_format: save_format:    export file format - can be 'csv' or 'xlsx'
+                                                              default value is 'csv'
 
         :return:
         """
+
         with np.printoptions(threshold=np.inf):
             omega = np.arange(0.1, self.f_max*2*np.pi, self.f_step)  # generating omega vector
             result_arr = np.zeros([len(omega), 2 * self.number_of_modes])
@@ -233,15 +236,14 @@ class SH:
 
                 vg = np.diff(omega)/np.diff(k)
 
-                freq_arr = omega/(2*np.pi)
+                # freq_arr = omega/(2*np.pi)
 
                 ax.plot(omega[:-1]/(2*np.pi), vg, label=f'SH{mode}')
 
-                #result_arr[:, mode_index] = freq_arr
-                #result_arr[:, mode_index + 1] = vg
+                # result_arr[:, mode_index] = freq_arr
+                # result_arr[:, mode_index + 1] = vg
                 columns.append(f'SH{mode} f [Hz]')
                 columns.append(f'SH{mode} vg [1/m]')
-
 
             if save_result:
                 main_df = pd.DataFrame(result_arr, columns=columns)
