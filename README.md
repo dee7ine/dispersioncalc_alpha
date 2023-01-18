@@ -20,10 +20,14 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 =========================================================================
 
+Code can be compiled using Python 3.7 or newer.
+
 Requirements:
-- Python 3.7+
-- NumPy
-- SciPy
-- Matplotlib
-- PySimpleGUI
-- Pandas
+
+| Package  | recommended version |
+| ------------- | ------------- |
+| NumPy  | 1.24.1+  |
+| SciPy  | 1.10.0+  |
+| Matplotlib | 3.6.2+  |
+| Pandas  | 1.5.2+  |
+| PySimpleGUI  | 4.60.4+  |
