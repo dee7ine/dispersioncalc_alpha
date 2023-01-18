@@ -24,7 +24,7 @@ Code can be compiled using Python 3.7 or newer.
 
 Requirements:
 
-| Package  | recommended version |
+| Package  | Recommended version |
 | ------------- | ------------- |
 | NumPy  | 1.24.1+  |
 | SciPy  | 1.10.0+  |
