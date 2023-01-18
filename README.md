@@ -1,6 +1,9 @@
 # dispersioncalc_alpha
 Interactive Tool for Dispersion Curve Analysis 
 
+Can be used to calculate dispersion relations 
+of Lamb and Shear-Horizontal wave modes
+
 Created by Bartlomiej Jargut
 https://github.com/dee7ine
 
