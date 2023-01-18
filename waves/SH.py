@@ -91,7 +91,7 @@ class SH:
 
         # print(f"c_L = {self.c_L}, c_S = {self.c_S}, c_r = {self.c_R}")
 
-    def plot_phase_velocity(self, save_result=True) -> None:
+    def plot_phase_velocity(self, save_result: bool = True, save_format: str = 'csv') -> None:
         """
         Calculates SH wave number from equation
 
@@ -136,11 +136,15 @@ class SH:
 
             if save_result:
                 main_df = pd.DataFrame(result_arr, columns=columns)
-                main_df.to_excel(f'{filepath}//{filename}.xlsx')
+                if save_format == 'csv':
+                    main_df.to_csv(f'{filepath}//{filename}.csv')
+                elif save_format == 'xlsx':
+                    main_df.to_excel(f'{filepath}//{filename}.xlsx')
 
             ax.legend()
 
-    def plot_wave_number(self, save_result=True) -> None:
+    def plot_wave_number(self, save_result: bool = True,
+                         save_format: str = 'csv') -> None:
         """
         Calculates SH wave number from equation
 
@@ -183,14 +187,19 @@ class SH:
 
             if save_result:
                 main_df = pd.DataFrame(result_arr, columns=columns)
-                #ax.text(4, 1000, f'M{mode}')
-                main_df.to_excel(f'{filepath}//{filename}.xlsx')
+                if save_format == 'csv':
+                    main_df.to_csv(f'{filepath}//{filename}.csv')
+                elif save_format == 'xlsx':
+                    main_df.to_excel(f'{filepath}//{filename}.xlsx')
 
             ax.legend()
 
-    def plot_group_velocity(self, save_result=True) -> None:
+    def plot_group_velocity(self, save_result: bool = True, save_format: str = 'csv') -> None:
         """
-        Calculates SH wave number from equation
+        Calculates SH wave number from
+        characteristic equation
+
+        :param save_result:
 
         :return:
         """
@@ -233,11 +242,13 @@ class SH:
                 columns.append(f'SH{mode} f [Hz]')
                 columns.append(f'SH{mode} vg [1/m]')
 
-            """
+
             if save_result:
                 main_df = pd.DataFrame(result_arr, columns=columns)
-                main_df.to_excel(f'{filepath}//{filename}.xlsx')
-            """
+                if save_format == 'csv':
+                    main_df.to_csv(f'{filepath}//{filename}.csv')
+                elif save_format == 'xlsx':
+                    main_df.to_excel(f'{filepath}//{filename}.xlsx')
 
             ax.legend()
 
@@ -293,8 +304,8 @@ def main() -> None:
 
     # Plot phase velocity, group velocity and wavenumber.
 
-    sh.plot_wave_number(save_result=True)
-    sh.plot_phase_velocity(save_result=False)
+    sh.plot_wave_number()
+    sh.plot_phase_velocity()
     sh.plot_group_velocity()
 
     plt.show()
