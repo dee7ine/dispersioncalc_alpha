@@ -90,6 +90,7 @@ class SH:
 
         :return:
         """
+
         with np.printoptions(threshold=np.inf):
 
             omega = np.arange(0.1, self.f_max*2*np.pi, self.f_step*2*np.pi)  # generating omega vector
@@ -149,7 +150,9 @@ class SH:
 
         :return:
         """
+
         with np.printoptions(threshold=np.inf):
+
             omega = np.arange(0.1, self.f_max*2*np.pi, self.f_step*2*np.pi)  # generating omega vector
             result_arr = np.zeros([len(omega), 2*self.number_of_modes])
             columns = []
@@ -173,7 +176,6 @@ class SH:
 
                 kh = np.real(np.emath.sqrt(np.square(omega * d / ct) - np.square(mode * np.pi)))
                 k = kh / d
-                #kh = np.real(kh)
                 k[k == 0] = np.nan
 
                 freq_arr = omega / (2 * np.pi)
@@ -207,6 +209,7 @@ class SH:
         """
 
         with np.printoptions(threshold=np.inf):
+
             omega = np.arange(0.1, self.f_max*2*np.pi, self.f_step)  # generating omega vector
             result_arr = np.zeros([len(omega), 2 * self.number_of_modes])
             columns = []
@@ -225,7 +228,7 @@ class SH:
             filepath: str = f'{SOURCE_ROOT}//results'
 
             for mode, mode_index in zip(range(0, self.number_of_modes), range(0, 2 * self.number_of_modes, 2)):
-                # kh = np.real(np.emath.sqrt(np.square(omega*d/ct) - np.square(mode*np.pi)))
+
                 kh = np.emath.sqrt(np.square(omega * d / ct) - np.square(mode * np.pi))
                 k = np.real(kh / d)
 
@@ -283,7 +286,6 @@ def main() -> None:
     # the following equations:
 
     new_material = IsotropicMaterial(material="AluminumDisperse")
-    # new_material.fix_file_path('C://Users//deefi//PycharmProjects//dispersioncalc_alpha//materials//material_data.txt')
     new_material.fix_file_path('//materials//material_data.txt')
     E = new_material.e  # E = Young's modulus, in Pa.
     p = new_material.density  # p = Density (rho), in kg/m3.
@@ -292,8 +294,6 @@ def main() -> None:
     c_L = np.sqrt(E * (1 - v) / (p * (1 + v) * (1 - 2 * v)))
     c_S = np.sqrt(E / (2 * p * (1 + v)))
     c_R = c_S * ((0.862 + 1.14 * v) / (1 + v))
-
-    # Example: A 1 mm aluminum plate.
 
     sh = SH(thickness=1,
             number_of_modes=5,

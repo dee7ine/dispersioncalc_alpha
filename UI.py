@@ -167,6 +167,7 @@ class UI:
     def __main_frame_layout(self) -> list:
         """
         Main frame layout definition
+
         :return:
         """
 
@@ -190,6 +191,7 @@ class UI:
         Draws simple 3D shape on a canvas widget
         :param canvas: Canvas widget
         :param figure: Matplotlib figure
+
         :return:
         """
 
@@ -202,7 +204,7 @@ class UI:
     def __delete_figure_agg(figure: plt.figure) -> None:
         """
         Deletes 3D shape from canvas widget
-        :param figure:
+        :param figure:      matplotlib figure to delete
         :return:
         """
 
@@ -213,6 +215,9 @@ class UI:
     def __model(thickness: str) -> tuple[plt.figure, plt.axes]:
         """
         3D plot definition
+
+        :param thickness:       thickness of the plate (in mm)
+
         :return:
         """
 
