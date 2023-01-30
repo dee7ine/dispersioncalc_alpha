@@ -1,8 +1,8 @@
 # dispersioncalc_alpha
 Interactive Tool for Dispersion Curve Analysis 
 
-Created by Bartlomiej Jargut
-https://github.com/dee7ine
+Created by [Bartlomiej Jargut](https://github.com/dee7ine)
+
 
 Can be used to calculate dispersion relations 
 of Lamb and Shear-Horizontal wave modes
@@ -20,8 +20,8 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-Lamb wave class implemented by Francisco Rotea
-https://github.com/franciscorotea
+Lamb wave class implemented by [Francisco Rotea](https://github.com/franciscorotea)
+
 
 =========================================================================
 
