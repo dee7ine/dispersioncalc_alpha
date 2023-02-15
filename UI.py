@@ -343,18 +343,18 @@ class UI:
                     elif values['-plot-modes-'] == 'Wave Number':
                         print(f"{datetime.now().isoformat(' ', 'seconds')}: Calculating wave number for modes: {values['mode'].lower()}")
                         lamb.plot_wave_number(modes=values['mode'].lower())
-                        lamb.result_to_excel(result=lamb.sym, result_type='Wave_number', mode=values['mode'])
+                        lamb.export_results(result=lamb.sym, result_type='Wave_number', mode=values['mode'])
                         # lamb.save_results()
 
                     elif values['-plot-modes-'] == 'Phase Velocity':
                         print(f"{datetime.now().isoformat(' ', 'seconds')}: Calculating phase velocity for modes: {values['mode'].lower()}")
                         lamb.plot_phase_velocity(modes=values['mode'].lower())
-                        lamb.result_to_excel(result=lamb.sym, result_type='Phase_velocity', mode=values['mode'])
+                        lamb.export_results(result=lamb.sym, result_type='Phase_velocity', mode=values['mode'])
 
                     elif values['-plot-modes-'] == 'Group Velocity':
                         print(f"{datetime.now().isoformat(' ', 'seconds')}: Calculating group velocity for modes: {values['mode'].lower()}")
                         lamb.plot_group_velocity(modes=values['mode'].lower())
-                        lamb.result_to_excel(result=lamb.sym, result_type='Group_velocity', mode=values['mode'])
+                        lamb.export_results(result=lamb.sym, result_type='Group_velocity', mode=values['mode'])
 
                     plt.show(block=False)
 
