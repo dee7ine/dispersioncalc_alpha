@@ -39,8 +39,6 @@ DEFAULT_FILE_PATH = rf'{SOURCE_ROOT}//materials//material_data.txt'
 @dataclass
 class IsotropicMaterial:
 
-    # _frequency = 1000.00
-
     _filename: str = DEFAULT_FILE_PATH
 
     def __init__(self, material: str) -> None:
@@ -50,18 +48,15 @@ class IsotropicMaterial:
 
         --------------
 
-        Fixed attributes:
+        Class attributes:
         _filename -> default filepath for material data; can be chosen in UI file dialog
 
-        Attributes:
+        Object attributes:
         _name: str -> name of the material on the list
         _index: int -> index of the material on the list
         _density: float or int -> mass density of the material
         _E: float or int -> Young's Modulus of the material
         _v: float or int -> Poisson's ratio of the material
-        _C11: float or int -> stiffness component C11
-        _C66: float or int -> stiffness component C66
-
 
         """
 
@@ -111,8 +106,6 @@ class IsotropicMaterial:
                 for i in range(0, len(parsed_material_data)):
                     material_names_list.append(parsed_material_data[i][0])
 
-                material_data.close()
-
                 return parsed_material_data, material_names_list
 
             except Exception:
@@ -149,7 +142,6 @@ class IsotropicMaterial:
                 else:
                     material_data.writelines(f"{name} {density} {e}000000000 {v} {c11} {c66}")
 
-                material_data.close()
             except Exception:
                 raise ErrorCreatingMaterial
 
@@ -200,20 +192,3 @@ class IsotropicMaterial:
     def v(self) -> float:
         return self._v
 
-
-def main() -> None:
-
-    """
-    don't run
-    only for testing purposes
-    :return:
-    """
-
-    Lead = IsotropicMaterial(material='Platinum')
-    # print(getattr(material._name))
-    print(Lead.name)
-
-
-if __name__ == "__main__":
-
-    main()
