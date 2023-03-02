@@ -511,9 +511,9 @@ class Lamb:
         return fig, ax
 
     def export_results(self, result: dict, result_type: str, mode: str,
-                       filepath: str = f'{SOURCE_ROOT}//results', save_format: str = 'csv') -> pd.DataFrame:
+                        filepath: str = f'{SOURCE_ROOT}//results', save_format: str = 'csv') -> pd.DataFrame:
         """
-        Saves simulation results to xlsx file
+        Saves simulation results to xlsx or csv file
 
         :param result: list
             Simulation results
@@ -523,8 +523,6 @@ class Lamb:
             Symmetry mode
         :param filepath: str
             Results directory
-        :param save_format: str
-            Specifies export file format. Can be csv or xlsx
 
         :return:
         """
@@ -546,10 +544,10 @@ class Lamb:
             # x_list.append(pd.DataFrame(values_list[index][0], columns=['x']))
             # y_list.append(pd.DataFrame(values_list[index][1], columns=['y']))
 
-        if save_format == 'csv':
-            main_df.to_csv(f'{filepath}//{filename}.csv')
-        elif save_format == 'xlsx':
+        if save_format == 'xlsx':
             main_df.to_excel(f'{filepath}//{filename}.xlsx')
+        elif save_format == 'csv':
+            main_df.to_csv(f'{filepath}//{filename}.csv')
 
         return main_df
 
@@ -637,7 +635,7 @@ def main() -> None:
 
     #plt.show()
     """
-    lamb.export_results(result=lamb.sym, result_type='Phase_velocity', mode='symmetric', save_format='csv')
+    #lamb.result_to_excel(result=lamb.sym, result_type='Phase_velocity', mode='symmetric')
     plt.show()
     #lamb.result_to_excel(result=values_list_antisym, result_type='Phase_velocity', mode='antisymmetric')
 

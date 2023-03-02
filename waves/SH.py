@@ -83,10 +83,10 @@ class SH:
         Calculates SH wave phase velocity from
         characteristic equation
 
-        :param save_result:     set to True if the result should be exported to a file,
-                                                              default value is True
+        :param save_result:                 set to True if the result should be exported to a file,
+                                            default value is True
         :param save_format: save_format:    export file format - can be 'csv' or 'xlsx'
-                                                              default value is 'csv'
+                                            default value is 'csv'
 
         :return:
         """
@@ -143,10 +143,10 @@ class SH:
         Calculates SH wave number from
         characteristic equation
 
-        :param save_result:     set to True if the result should be exported to a file,
-                                                              default value is True
-        :param save_format: save_format:    export file format - can be 'csv' or 'xlsx'
-                                                              default value is 'csv'
+        :param save_result:                 set to True if the result should be exported to a file,
+                                            default value is True
+        :param save_format:                 export file format - can be 'csv' or 'xlsx'
+                                            default value is 'csv'
 
         :return:
         """
@@ -155,7 +155,7 @@ class SH:
 
             omega = np.arange(0.1, self.f_max*2*np.pi, self.f_step*2*np.pi)  # generating omega vector
             result_arr = np.zeros([len(omega), 2*self.number_of_modes])
-            columns = []
+            columns: list[str] = []
 
             ct = self.c_S
             d = self.d
@@ -168,7 +168,6 @@ class SH:
 
             plt.title(f'Wave Number for {self.d * 1e3}mm thick {self.material} ')
 
-            #main_df = pd.DataFrame()
             filename: str = f'SH_Wave_number_{self.material}_{self.d * 1e3}mm'
             filepath: str = f'{SOURCE_ROOT}//results'
 
@@ -200,10 +199,10 @@ class SH:
         Calculates SH wave group velocity from
         characteristic equation
 
-        :param save_result:     set to True if the result should be exported to a file,
-                                                              default value is True
-        :param save_format: save_format:    export file format - can be 'csv' or 'xlsx'
-                                                              default value is 'csv'
+        :param save_result:                     set to True if the result should be exported to a file,
+                                                default value is True
+        :param save_format: save_format:        export file format - can be 'csv' or 'xlsx'
+                                                default value is 'csv'
 
         :return:
         """
@@ -256,7 +255,7 @@ class SH:
                     main_df.to_excel(f'{filepath}//{filename}.xlsx')
 
             ax.legend()
-
+            
     def result_to_excel(self, result: list, result_type: str, mode: str) -> pd.DataFrame:
 
         main_df = pd.DataFrame()
