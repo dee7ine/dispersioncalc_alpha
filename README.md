@@ -1,5 +1,5 @@
 # dispersioncalc_alpha
-Interactive Tool for Dispersion Curve Analysis 
+Desktop app for dispersion curve analysis of guided waves
 
 Created by [Bartlomiej Jargut](https://github.com/dee7ine)
 
