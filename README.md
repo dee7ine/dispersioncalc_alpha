@@ -1,7 +1,7 @@
 # dispersioncalc_alpha
 Desktop app for dispersion curve analysis of guided waves
 
-Created by [Bartlomiej Jargut](https://github.com/dee7ine)
+Created by [dee7ine](https://github.com/dee7ine)
 
 
 Can be used to calculate dispersion relations 
